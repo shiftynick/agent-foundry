@@ -1,0 +1,7 @@
+.agent-foundry-backups/
+.tasks/board.html
+.tasks/.write-lock
+.tasks/tasks/.*.tmp
+.tasks/tasks/.*.bak
+.tasks/archive/.*.tmp
+.tasks/archive/.*.bak

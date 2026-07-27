@@ -1,0 +1,67 @@
+# HANDOFF — {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+This is the seed handoff written at installation. The `handoff-writer` skill
+owns this file from here on and uses exactly these sections; it will replace
+the placeholders below with real state. Do not restructure it by hand.
+
+## TL;DR
+
+[CUSTOMIZE: Two to four sentences. Current phase, what is done, what is next.
+A reader who stops here should still know which direction to head.]
+
+## To pick up tomorrow
+
+Exact, copy-pasteable commands. Use the skill tree for your harness —
+`.agents/skills/...` under Codex, `.claude/skills/...` under Claude Code.
+
+```text
+git status --short
+node .agents/skills/task-tracker/scripts/task.mjs board
+```
+
+Then read the active task and its log before changing any file.
+
+## What's where
+
+[CUSTOMIZE: Table of the repo-significant paths a cold agent needs. Include
+the sources of truth named in `AGENTS.md`.]
+
+## Mental model
+
+[CUSTOMIZE: The non-obvious framing — invariants not enforced by types,
+naming that carries meaning, why the shape is what it is. Link accepted ADRs.]
+
+## What was finished this session
+
+[CUSTOMIZE: Concrete shipped items. Nothing yet at installation time.]
+
+## What's in progress / half-done
+
+[CUSTOMIZE: Started but unfinished work, why it stopped, and where it lives.]
+
+## Open questions for the human
+
+[CUSTOMIZE: Specific question plus specific options. Write `none` when
+verified.]
+
+## Validation state
+
+[CUSTOMIZE: Exact commands last run, their results, and what was not run.
+Never record an unexecuted command as passing.]
+
+## Worktree and operational state
+
+[CUSTOMIZE: Branch, uncommitted files, running services, credentials or
+external dependencies needed, and whether anything was pushed or deployed.]
+
+## Known blockers and risks
+
+[CUSTOMIZE: Link tasks or `BLOCKED-JOURNAL.md` entries. Write `none` when
+verified.]
+
+## Common pitfalls
+
+[CUSTOMIZE: Failure modes this project has already hit, with the symptom that
+identifies each one.]

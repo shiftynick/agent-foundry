@@ -42,8 +42,9 @@ even with `--force`.
 
 ## What gets installed
 
-- `.agents/skills/`: shared Codex workflows plus the `claude-cli` bridge.
-- `.claude/skills/`: matching Claude workflows plus the `codex-in-cc` bridge.
+- `.agents/skills/`: shared Codex workflows plus the `claude-in-codex` bridge.
+- `.claude/skills/`: matching Claude workflows plus the `codex-in-claude`
+  bridge.
 - `.tasks/`: Git-backed kanban state.
 - `docs/adr/`: ADR process and template.
 - `docs/SDLC.md`: task lifecycle and two-axis cold review.
@@ -57,10 +58,33 @@ even with `--force`.
   `AGENTS.md`.
 - `CONTRIBUTING.md`, `HANDOFF.md`, and planning/blocker journals.
 - `.agent-foundry.json`: commit-friendly installation provenance and version.
+- `.agent-foundry/check-skill-sync.mjs`: in-project check that the two harness
+  skill trees have not drifted apart.
 
 Product architecture, stack choices, build commands, deployment rules, and
 domain invariants are deliberately not supplied. The first bootstrap task
 requires the project agent to discover and write those from live evidence.
+
+## Updating an installed project
+
+`.agent-foundry.json` records the schema and version a project was installed
+with. To move a project to a newer Foundry release:
+
+1. Commit or stash the project's worktree first — the update overwrites
+   managed files and a clean tree is what makes the result reviewable.
+2. Re-run the installer against the same target with `--force`, using the
+   project name and description already recorded in `.agent-foundry.json`.
+3. Read the backup path the installer prints. Every overwritten managed file
+   is preserved verbatim under `.agent-foundry-backups/<timestamp>/`.
+4. Diff the result and reapply project-specific customization — `AGENTS.md`,
+   `CONTRIBUTING.md`, `HANDOFF.md`, and the two standards documents are
+   tailored per project and will have been reset to templates.
+5. Run the project's own gate plus
+   `node .agent-foundry/check-skill-sync.mjs`, then delete the backup
+   directory once the update is accepted.
+
+The board under `.tasks/` is not managed payload and is never overwritten.
+There is no in-place migration tool; the backup directory is the rollback.
 
 ## Layout
 
@@ -71,6 +95,7 @@ agent-foundry/
   CONTRIBUTING.md
   README.md
   starter/                 files installed into a target project
+    .agent-foundry/        in-project checks (skill-tree sync)
   scripts/
     bootstrap-project.mjs
     foundry-lib.mjs
@@ -83,14 +108,17 @@ agent-foundry/
 1. Edit the canonical files under `starter/`.
 2. Keep the seven shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
-3. Keep `claude-cli` only under `.agents` and `codex-in-cc` only under
-   `.claude`.
-4. Run:
+3. Keep `claude-in-codex` only under `.agents` and `codex-in-claude` only
+   under `.claude`.
+4. Keep `starter/docs/SDLC.md` the single authority for commit authority, the
+   cold-review ladder, and mid-task ADR handling; skills reference it rather
+   than restating it.
+5. Run:
 
    ```text
    node scripts/validate-foundry.mjs
    node scripts/test-bootstrap.mjs
    ```
 
-5. Use a cold reviewer from the opposite model family for changes to process
+6. Use a cold reviewer from the opposite model family for changes to process
    or agent behavior.

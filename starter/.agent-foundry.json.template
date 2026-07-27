@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "foundryVersion": "0.1.0",
+  "projectName": {{PROJECT_NAME_JSON}},
+  "projectDescription": {{PROJECT_DESCRIPTION_JSON}},
+  "installedAt": {{INSTALLED_AT_JSON}}
+}
