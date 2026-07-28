@@ -34,7 +34,14 @@ const FRONTMATTER_KEYS = [
   "blockedBy",
   "createdAt",
   "updatedAt",
+  "claimedBy",
+  "claimedAt",
 ];
+
+// Keys that only exist while a claim is live. They are omitted from
+// serialization when absent so files written before claims existed — and
+// files for unclaimed tasks — do not change shape.
+const OPTIONAL_FRONTMATTER_KEYS = new Set(["claimedBy", "claimedAt"]);
 
 const RESERVED_VALUES = new Set(["true", "false", "null", "~", "yes", "no"]);
 const QUOTE_TRIGGERS = /[:#\[\]\{\},&*!|>'"%@`]/;
@@ -77,6 +84,7 @@ export function parseTaskFile(text) {
   }
   if (!closed) throw new Error("missing frontmatter closing ---");
   for (const key of FRONTMATTER_KEYS) {
+    if (OPTIONAL_FRONTMATTER_KEYS.has(key)) continue;
     if (fm[key] == null) throw new Error(`missing required frontmatter key: ${key}`);
   }
   validateTaskFrontmatter(fm);
@@ -116,6 +124,20 @@ function validateTaskFrontmatter(fm) {
   for (const id of fm.blockedBy) {
     if (!/^task-\d{3,}$/.test(id)) throw new Error(`invalid blocker id: ${id}`);
     if (id === fm.id) throw new Error(`${fm.id} cannot block itself`);
+  }
+  if (fm.claimedBy != null || fm.claimedAt != null) {
+    if (typeof fm.claimedBy !== "string" || fm.claimedBy.trim() === "") {
+      throw new Error("claimedBy must be a non-empty string when a claim exists");
+    }
+    if (/[\u0000-\u001f\u007f]/u.test(fm.claimedBy)) {
+      throw new Error("claimedBy cannot contain control characters");
+    }
+    if (Number.isNaN(Date.parse(String(fm.claimedAt)))) {
+      throw new Error("claimedAt must be a timestamp when a claim exists");
+    }
+    if (fm.status !== "in_progress") {
+      throw new Error("claim fields are only valid while status is in_progress");
+    }
   }
   for (const key of ["createdAt", "updatedAt"]) {
     const value = String(fm[key]);
@@ -267,6 +289,7 @@ export function serializeTaskFile({ frontmatter, description, log }) {
   const lines = ["---"];
   for (const key of FRONTMATTER_KEYS) {
     const v = frontmatter[key];
+    if (OPTIONAL_FRONTMATTER_KEYS.has(key) && v == null) continue;
     if (Array.isArray(v)) {
       if (v.length === 0) {
         lines.push(`${key}: []`);

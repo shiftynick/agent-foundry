@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // task-tracker dispatcher. See SKILL.md for verbs and exit codes.
 
-import { argv, exit, stderr, stdout } from "node:process";
+import { argv, env, exit, stderr, stdout } from "node:process";
+import { spawnSync } from "node:child_process";
 import { existsSync, renameSync } from "node:fs";
+import { hostname, userInfo } from "node:os";
 import { basename, join } from "node:path";
 import {
   ConflictError,
@@ -56,6 +58,23 @@ function requireRepoRoot() {
   const root = findRepoRoot();
   if (!root) fail(1, "no repo root found (no .git ancestor)");
   return root;
+}
+
+// Who is claiming a task. FOUNDRY_AGENT names the session explicitly (useful
+// when several agents share one machine account); otherwise user@host is
+// stable enough to tell two humans' machines apart and to spot stale claims.
+function claimOwner() {
+  const explicit = env.FOUNDRY_AGENT;
+  if (typeof explicit === "string" && explicit.trim() !== "") {
+    return explicit.trim();
+  }
+  let user = "unknown";
+  try {
+    user = userInfo().username;
+  } catch {
+    // Some containers have no resolvable user; hostname alone still helps.
+  }
+  return `${user}@${hostname()}`;
 }
 
 // Every flag this CLI accepts, across all verbs. Used to tell a swallowed
@@ -290,6 +309,17 @@ function cmdMove(args) {
   found.task.frontmatter.updatedAt = nowIso();
   let logMsg = `moved to ${opts.status}`;
   const decorations = [];
+  // Claims exist only while a task is in_progress: set on entry so parallel
+  // sessions can see who owns active work, cleared on any exit so a finished
+  // or parked task never carries a stale owner.
+  if (opts.status === "in_progress") {
+    found.task.frontmatter.claimedBy = claimOwner();
+    found.task.frontmatter.claimedAt = nowIso();
+    decorations.push(`claimed by ${found.task.frontmatter.claimedBy}`);
+  } else if (found.task.frontmatter.claimedBy != null) {
+    delete found.task.frontmatter.claimedBy;
+    delete found.task.frontmatter.claimedAt;
+  }
   if (opts.force) decorations.push("forced");
   if (opts.note) decorations.push(`note: ${opts.note}`);
   if (decorations.length) logMsg += ` (${decorations.join("; ")})`;
@@ -408,7 +438,10 @@ function cmdBoard(_args) {
         t.frontmatter.title.length > 60
           ? t.frontmatter.title.slice(0, 57) + "..."
           : t.frontmatter.title;
-      stdout.write(`  ${t.frontmatter.id}  ${t.frontmatter.priority}  ${title}\n`);
+      const claim = t.frontmatter.claimedBy != null
+        ? `  [${t.frontmatter.claimedBy}]`
+        : "";
+      stdout.write(`  ${t.frontmatter.id}  ${t.frontmatter.priority}  ${title}${claim}\n`);
     }
   }
 }
@@ -425,6 +458,10 @@ function cmdShow(args) {
   for (const k of ["id", "title", "status", "priority", "tags", "blockedBy", "createdAt", "updatedAt"]) {
     const v = Array.isArray(fm[k]) ? `[${fm[k].join(", ")}]` : fm[k];
     stdout.write(`${k}: ${v}\n`);
+  }
+  if (fm.claimedBy != null) {
+    stdout.write(`claimedBy: ${fm.claimedBy}\n`);
+    stdout.write(`claimedAt: ${fm.claimedAt}\n`);
   }
   const unmet = unmetBlockers(taskContext, found.task);
   stdout.write(`unmet blockers: ${unmet.length ? unmet.join(", ") : "(none)"}\n`);
@@ -621,6 +658,107 @@ function cmdRm(args) {
   stdout.write(`${id} removed\n`);
 }
 
+// Bound so evidence entries stay readable inside a task log; the full output
+// is printed to the console at run time and is not the log's job to preserve.
+const RUN_TAIL_LINES = 30;
+const RUN_TAIL_CHARS = 3000;
+const RUN_TIMEOUT_MS = 15 * 60 * 1000;
+
+function evidenceTail(output) {
+  const clean = output
+    .replace(/\r\n/gu, "\n")
+    // The serializer rejects reserved markers anywhere in the log; command
+    // output quoting one (docs, test fixtures) must not make evidence
+    // unrecordable.
+    .replaceAll("<!-- task-tracker:", "<!- - task-tracker:")
+    .replace(/[\u0000-\u0008\u000b-\u001f\u007f]/gu, "?")
+    .trimEnd();
+  if (clean === "") return { tail: "(no output)", truncated: false };
+  let lines = clean.split("\n");
+  let truncated = false;
+  if (lines.length > RUN_TAIL_LINES) {
+    lines = lines.slice(-RUN_TAIL_LINES);
+    truncated = true;
+  }
+  let tail = lines.join("\n");
+  if (tail.length > RUN_TAIL_CHARS) {
+    tail = tail.slice(-RUN_TAIL_CHARS);
+    truncated = true;
+  }
+  return { tail, truncated };
+}
+
+// `task.mjs run <id> -- <command...>` executes the command and appends what
+// ACTUALLY happened — command, exit code, duration, output tail — to the task
+// log. This is the difference between claimed and recorded validation: the
+// entry is written by this tool from the real result, not typed by the agent.
+function cmdRun(args) {
+  const id = args[0];
+  const commandParts = args.slice(1);
+  if (!id || commandParts.length === 0) {
+    fail(2, "usage: task.mjs run <id> -- <command> [args...]");
+  }
+  const root = requireRepoRoot();
+  // Fail fast on a bad id before spending minutes running the command.
+  withRepoWriteLock(root, () => {
+    const all = loadAllTasks(root);
+    if (!all.find((t) => t.task.frontmatter.id === id)) {
+      throw new NotFoundError(id);
+    }
+  });
+
+  const commandLine = commandParts.join(" ");
+  const startedAt = nowIso();
+  const t0 = Date.now();
+  // The command itself runs OUTSIDE the repo lock: a ten-minute test suite
+  // must not block every other board command on this machine.
+  const result = spawnSync(commandLine, {
+    shell: true,
+    cwd: root,
+    encoding: "utf8",
+    maxBuffer: 16 * 1024 * 1024,
+    timeout: RUN_TIMEOUT_MS,
+    killSignal: "SIGTERM",
+    windowsHide: true,
+  });
+  const seconds = ((Date.now() - t0) / 1000).toFixed(1);
+  const timedOut = result.error?.code === "ETIMEDOUT";
+  const combined = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  const outcome = timedOut
+    ? `timed out after ${seconds}s`
+    : result.signal
+      ? `terminated by signal ${result.signal} after ${seconds}s`
+      : `exit ${result.status} in ${seconds}s`;
+
+  // Show the agent the full output now; the log keeps only the bounded tail.
+  if (combined) stdout.write(combined.endsWith("\n") ? combined : `${combined}\n`);
+
+  const { tail, truncated } = evidenceTail(combined);
+  const evidence = [
+    `run: ${commandLine}`,
+    `  started ${startedAt}, ${outcome}`,
+    truncated ? `  output tail (truncated to last ${RUN_TAIL_LINES} lines):` : "  output:",
+    ...tail.split("\n").map((line) => `  | ${line}`),
+  ].join("\n");
+
+  withRepoWriteLock(root, () => {
+    const all = loadAllTasks(root);
+    const found = all.find((t) => t.task.frontmatter.id === id);
+    if (!found) throw new NotFoundError(id);
+    found.task.frontmatter.updatedAt = nowIso();
+    found.task.log = appendLog(found.task.log, evidence);
+    writeTaskAtomic(found.path, serializeTaskFile(found.task), found.mtime);
+  });
+
+  stdout.write(`${id} evidence recorded: ${outcome}\n`);
+  if (result.error && !timedOut) {
+    fail(1, `command could not start: ${result.error.message}`);
+  }
+  if (timedOut || result.signal || result.status !== 0) {
+    fail(1, `command failed (${outcome}); evidence recorded on ${id}`);
+  }
+}
+
 const VERBS = {
   // Read
   board: cmdBoard,
@@ -634,6 +772,7 @@ const VERBS = {
   note: cmdNote,
   edit: cmdEdit,
   rm: cmdRm,
+  run: cmdRun,
 };
 function main() {
   const verb = argv[2];
@@ -646,7 +785,14 @@ function main() {
   try {
     const root = requireRepoRoot();
     const args = normalizeArgs(argv.slice(3));
-    withRepoWriteLock(root, () => handler(args));
+    if (verb === "run") {
+      // cmdRun manages the lock itself: it must execute the command with the
+      // lock RELEASED (long commands would block the whole board) and the
+      // lock is not reentrant, so wrapping here would deadlock the append.
+      handler(args);
+    } else {
+      withRepoWriteLock(root, () => handler(args));
+    }
   } catch (err) {
     if (err instanceof CliError) return failAndExit(err.code, err.message);
     if (err instanceof NotFoundError) return failAndExit(4, err.message);

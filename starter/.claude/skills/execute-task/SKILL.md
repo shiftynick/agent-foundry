@@ -68,6 +68,11 @@ isn't done — finish the blocker or surface it; don't `--force` past it.
 - Note non-obvious choices as you go:
   `task.mjs note task-NNN "tried X, switched to Y because Z"` — the
   step-4 reviewer reads these first.
+- When the **process** causes waste — an ambiguous skill instruction, two
+  documents disagreeing, a step redone because the log didn't show it was
+  done — record it the moment it bites:
+  `task.mjs note task-NNN "friction: <what and where>"`. The `retrospective`
+  skill mines these; unrecorded friction never gets fixed.
 - Out-of-scope discoveries become new tasks
   (`task.mjs add ... --blocked-by task-NNN`), never scope creep.
 - Architecture-significant choices get an ADR (see "Blockers &
@@ -157,14 +162,24 @@ qualify; classes of bug do.
 
 ### 6. Validate for real
 
-Pick the validation that actually exercises what changed, and paste the
-evidence into the task log:
+Pick the validation that actually exercises what changed. Anything
+expressible as a command is **recorded, not claimed** — run it through the
+tracker so the log entry is written from the real result:
 
-- **Tests** — for logic changes: run them, paste passing output.
-- **Run and log** — for daemon/CLI/server changes: start it, hit it,
-  capture the relevant log lines. "It compiles" is not validation.
+```bash
+node .claude/skills/task-tracker/scripts/task.mjs run task-NNN -- <the exact command>
+```
+
+- **Tests** — for logic changes: `task.mjs run task-NNN -- <test command>`.
+- **Run and log** — for daemon/CLI/server changes: start it, hit it, record
+  the probe with `task.mjs run`. "It compiles" is not validation.
 - **Browser exercise** — for UI changes: drive a real browser through the
-  golden path and one edge case; screenshot if visual.
+  golden path and one edge case; screenshot if visual, and `task.mjs note`
+  what was driven and observed (this is the case commands cannot express).
+
+A hand-typed note asserting that a command passed, where `task.mjs run` could
+have recorded it, does not satisfy this step — and the step-4 reviewer is
+entitled to treat it as unvalidated.
 
 ### 7. Complete
 
@@ -175,6 +190,13 @@ node .claude/skills/task-tracker/scripts/task.mjs move task-NNN done
 **Don't archive yet** — a visible `done` column is context for the next
 claim. Archive in one sweep at session wrap
 (`task.mjs archive --dry-run`, then `task.mjs archive`).
+
+**Re-plan check.** Before moving on, ask whether what this task *revealed*
+invalidates queued work: an approach that failed, a dependency that turned
+out unnecessary, a scope that grew. Edit or re-file the affected queued tasks
+now (`task.mjs edit`, `task.mjs rm` + `add`) — a backlog that no longer
+matches reality is how boards die. If the invalidation reaches milestone
+scope, trigger the `plan-milestone` skill instead of patching card by card.
 
 If the finished task materially changes project direction, phase, or the
 next execution step, refresh `HANDOFF.md` or the applicable planning
@@ -231,7 +253,10 @@ A task is sized to one fresh context window:
 1. Try a cold second opinion first — some "hard blockers" are missing
    context.
 2. Still blocked → `task.mjs note` the reason, `task.mjs move task-NNN
-   blocked`.
+   blocked`. If the blocker is a human decision, credential, or approval,
+   also `task.mjs edit task-NNN --add-tag needs:operator` — the operator's
+   queue is `list --tag needs:operator`, and a decision not on it is a
+   decision the human never sees.
 3. Append to `BLOCKED-JOURNAL.md` per its format — the `Resume:` line is
    the most important part; write it for someone with zero context.
 4. Surface to the user: one line + the journal reference.

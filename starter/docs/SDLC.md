@@ -3,6 +3,33 @@
 This project uses a small, evidence-driven lifecycle for humans and agents
 working from the same durable state.
 
+## Planning above the task
+
+Tasks are the unit of execution; **milestones** are the unit of steering. A
+milestone is an operator-agreed outcome plus the dependency-ordered task
+front that reaches it, produced with the `plan-milestone` skill and tagged
+`milestone:<name>` on every card.
+
+The division of authority is deliberate: **humans steer at the milestone
+level, agents execute at the task level.** An agent never invents a new
+direction by quietly filing tasks toward it — new fronts of work enter the
+board through a plan the operator has seen. Within an approved front, agents
+file follow-ups, split cards, and re-order freely.
+
+Plans decay. Re-plan — rather than patch card by card — when a completed task
+invalidates the approach behind queued work, when the front for the current
+milestone is nearly exhausted, or when the operator changes the goal. The
+`execute-task` skill's completion step includes this check.
+
+## The operator queue
+
+Anything waiting on a human — a `proposed` ADR, a credential, a design call,
+a plan awaiting approval — exists on the board tagged `needs:operator`,
+usually in `blocked`. `task.mjs list --tag needs:operator` is the single
+view that answers "what is waiting on me?"; a decision recorded only in prose
+is a decision the operator never sees. Remove the tag as soon as the human
+answers, and log the answer on the task.
+
 ## Work classification
 
 ### Conversational
@@ -131,7 +158,11 @@ Validation exercises the changed behavior:
 - UI: drive the real surface through a golden path and meaningful edge case.
 - Documentation/skills: read end-to-end and verify commands and links.
 
-The task log records exact commands and results.
+Evidence is **recorded, not claimed**: any validation expressible as a
+command goes through `task.mjs run`, which executes it and writes the real
+command, exit code, and output tail into the task log. Hand-written notes are
+reserved for evidence a command cannot express, and a note asserting that a
+runnable command passed does not count as validation.
 
 ## Definition of done
 
@@ -170,6 +201,27 @@ is a valid result, not a failed audit.
 Findings that reveal a recurring pattern are distilled into
 `docs/REVIEW-STANDARDS.md`, so per-task review begins catching that class at
 the source and the next audit has less to find.
+
+## Self-improvement
+
+The lifecycle corrects itself through two distill loops, split by what
+recurred:
+
+- **Code defects** — a review finding whose *class* would recur becomes a
+  lens in `docs/REVIEW-STANDARDS.md` (the DISTILL step in `execute-task`),
+  inline, at the moment it is found.
+- **Process defects** — workflow mistakes and friction, recorded in the
+  moment as `friction:` task notes, are mined on a cadence by the
+  `retrospective` skill. Confirmed patterns (three or more cited
+  occurrences) become **edits to the governing document** — a skill step, an
+  `AGENTS.md` rule, a standards lens — through normal reviewed tasks, and
+  guidance that has stopped preventing anything is pruned.
+
+Both loops share one constraint: corrections land in existing documents at
+the point of use, never in a separate lessons file, and the corpus must grow
+in quality rather than length. Skill corrections that are generic rather than
+project-specific are flagged for upstreaming to the Foundry via
+`.agent-foundry/LOCAL-CHANGES.md`.
 
 ## Session close
 

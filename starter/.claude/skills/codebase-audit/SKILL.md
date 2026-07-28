@@ -80,6 +80,13 @@ Look specifically for the defects that only exist in aggregate:
 - **Test-suite decay.** Tests asserting implementation rather than behavior,
   duplicated setup, suites slow enough that people skip them, long-skipped
   tests.
+- **Knowledge decay.** The orientation documents rot on the same curve as the
+  code: commands in `AGENTS.md` and `CONTRIBUTING.md` that no longer execute
+  (verify with `task.mjs run` against the audit's own task), relative links
+  that no longer resolve, an ADR index that disagrees with the directory,
+  a `HANDOFF.md` describing a state several milestones old, `[CUSTOMIZE]`
+  markers that crept back into authoritative documents. Bootstrap verified
+  all of this once, at install; nothing else re-verifies it.
 
 ### 4. Apply the evidence bar
 
@@ -166,6 +173,8 @@ every cycle.
 ## Related
 
 - `execute-task` — per-diff SPEC/STANDARDS review; the complement to this
+- `retrospective` — the same periodic discipline aimed at the workflow
+  instead of the code
 - `task-tracker` — where findings land, and how to write durable descriptions
 - `docs/REVIEW-STANDARDS.md` — where distilled patterns go
 - `docs/ENGINEERING-STANDARDS.md` — the conventions this audit measures against

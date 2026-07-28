@@ -347,6 +347,42 @@ describe("writeTaskAtomic + readTaskFile", () => {
   });
 });
 
+describe("claim frontmatter", () => {
+  it("round-trips claim fields on an in_progress task", () => {
+    const task = sampleTask("task-001");
+    task.frontmatter.status = "in_progress";
+    task.frontmatter.claimedBy = "session-42";
+    task.frontmatter.claimedAt = "2026-05-02T00:00:00Z";
+    const round = parseTaskFile(serializeTaskFile(task));
+    assert.equal(round.frontmatter.claimedBy, "session-42");
+    assert.equal(round.frontmatter.claimedAt, "2026-05-02T00:00:00Z");
+  });
+
+  it("omits claim keys entirely when no claim exists", () => {
+    const text = serializeTaskFile(sampleTask("task-001"));
+    assert.doesNotMatch(text, /claimedBy|claimedAt/);
+    // And a file without them parses — the pre-claims format stays valid.
+    assert.equal(parseTaskFile(text).frontmatter.claimedBy, undefined);
+  });
+
+  it("rejects claim fields on any status other than in_progress", () => {
+    const task = sampleTask("task-001");
+    task.frontmatter.claimedBy = "session-42";
+    task.frontmatter.claimedAt = "2026-05-02T00:00:00Z";
+    assert.throws(
+      () => serializeTaskFile(task),
+      /only valid while status is in_progress/,
+    );
+  });
+
+  it("rejects a claim owner without a timestamp", () => {
+    const task = sampleTask("task-001");
+    task.frontmatter.status = "in_progress";
+    task.frontmatter.claimedBy = "session-42";
+    assert.throws(() => serializeTaskFile(task), /claimedAt must be a timestamp/);
+  });
+});
+
 describe("scalar round-trips", () => {
   it("preserves a title with trailing whitespace", () => {
     const task = sampleTask("task-001");

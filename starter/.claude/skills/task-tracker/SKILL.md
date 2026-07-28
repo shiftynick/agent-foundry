@@ -93,8 +93,9 @@ or complete.
 ## Review checklist (before `move <id> done`)
 
 A task in `review` only moves to `done` once **all** applicable items
-below are true. Document the evidence in a `task.mjs note` before the
-move so the trail is auditable.
+below are true. Evidence that is expressible as a command must be recorded
+with `task.mjs run` (see "Recorded evidence") so the log shows what actually
+executed; use `task.mjs note` only for evidence a command cannot express.
 
 For any work touching code:
 - [ ] Unit and/or integration tests covering the change exist and pass
@@ -256,6 +257,7 @@ to write elsewhere. Offer to regenerate it whenever the user asks to
 task.mjs add "<title>" [--priority p1] [--tag k:v ...] [--blocked-by task-NNN ...] [--description "..."]
 task.mjs move <id> <status> [--force] [--note "..."]
 task.mjs note <id> "<text>"
+task.mjs run <id> -- <command> [args...]      # execute + record evidence
 task.mjs edit <id> [--title ...] [--priority ...] [--add-tag ...] [--remove-tag ...]
                    [--add-blocked-by ...] [--remove-blocked-by ...] [--description "..."]
 task.mjs rm <id>                            # soft-delete: status=done + tag deleted:true
@@ -273,12 +275,85 @@ task.mjs note task-007 -- "--force was required because ..."
 task.mjs add --title="--weird but valid title"
 ```
 
+### Recorded evidence: `task.mjs run`
+
+`run` executes a command and appends what **actually happened** — the exact
+command, exit code, duration, and a bounded output tail — to the task log,
+written by the tool from the real result rather than typed from memory:
+
+```bash
+node .claude/skills/task-tracker/scripts/task.mjs run task-007 -- npm test
+```
+
+This is the required form of validation evidence wherever the validation is
+expressible as a command: a `run` entry in the log is **recorded** evidence;
+a hand-typed note claiming a command passed is not, and reviewers treat it
+accordingly. Use `note` for evidence that is not a command (a browser
+walkthrough, a screenshot location, a manual observation).
+
+Notes on behavior:
+
+- The command executes with the repo lock *released*, so a long test suite
+  does not block other board commands; only the append takes the lock.
+- The command runs through the shell from the repository root; quote
+  accordingly. Full output streams to the console; the log keeps the tail.
+- A failing command still records its evidence, then exits 1 — failure
+  evidence is exactly as valuable as success evidence.
+- Runs longer than 15 minutes time out; split the gate or record the long run
+  with `note` plus its own logged output.
+
+### Claims: who is working on what
+
+Moving a task to `in_progress` records `claimedBy` (the `FOUNDRY_AGENT`
+environment variable when set, otherwise `user@host`) and `claimedAt`. Any
+move out of `in_progress` clears both. `board` shows the owner in brackets;
+`show` prints both fields.
+
+**Set `FOUNDRY_AGENT` to a distinct session name** when several agents work
+the same board from one machine account — otherwise their claims are
+indistinguishable.
+
+**Stale claims.** A claim does not expire on its own; a crashed session leaves
+its task claimed. Before treating a claim as stale: check `claimedAt` age
+(older than ~24h with no matching log activity is suspect), check the log for
+recent entries, and check for uncommitted work in the worktree touching the
+task's area. To take over, do not `--force` past anything — log the takeover
+(`task.mjs note`), move the task back through `blocked` or `ready`, salvage
+in-flight work from the worktree, and re-claim. The old claim is evidence of
+where the previous session died; read its log before overwriting its state.
+
+### Waiting on a human: `needs:operator`
+
+Anything that waits on a human decision must exist **on the board**, not only
+in prose. Tag it `needs:operator` (and usually move it to `blocked`):
+
+```bash
+task.mjs edit task-012 --add-tag needs:operator
+task.mjs list --tag needs:operator          # the operator's queue
+```
+
+This is the single view an operator checks to answer "what is waiting on me?"
+A `proposed` ADR awaiting acceptance gets a companion `needs:operator` task
+citing the ADR; so does a blocked credential, an unresolved design call, or a
+plan awaiting approval. Remove the tag the moment the human answers.
+
+### Process friction: the `friction:` note prefix
+
+When the workflow itself — not the code — causes waste, log it immediately as
+a note beginning with `friction:`. This exact prefix is the convention the
+`retrospective` skill greps for across the archive; friction that never gets
+written down never gets fixed.
+
+```bash
+task.mjs note task-007 "friction: SDLC and execute-task disagreed on X; spent a round reconciling"
+```
+
 ## Exit codes
 
 | Code | Meaning                                                        |
 | ---- | -------------------------------------------------------------- |
 | 0    | success (including "no claimable task" for `next`)             |
-| 1    | runtime error                                                  |
+| 1    | runtime error; also `run` when the executed command failed     |
 | 2    | bad usage / validation failure (blocked move, cycle, bad enum) |
 | 4    | task id not found                                              |
 | 5    | concurrent lock or write conflict — the CLI already retried     |

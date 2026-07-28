@@ -42,6 +42,118 @@ function completeTask(repo, id) {
   run(repo, ["move", id, "done"]);
 }
 
+describe("task run (recorded evidence)", () => {
+  it("records command, exit code, and output tail in the task log", () => {
+    const repo = fixtureRepo();
+    try {
+      run(repo, ["add", "Alpha"]);
+      const out = run(repo, ["run", "task-001", "--", "node", "-e", '"console.log(41+1)"']);
+      assert.match(out, /42/);
+      assert.match(out, /task-001 evidence recorded: exit 0 in [\d.]+s/);
+      const shown = run(repo, ["show", "task-001"]);
+      assert.match(shown, /run: node -e "console\.log\(41\+1\)"/);
+      assert.match(shown, /exit 0 in [\d.]+s/);
+      assert.match(shown, /\| 42/);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("records a failing command and exits 1", () => {
+    const repo = fixtureRepo();
+    try {
+      run(repo, ["add", "Alpha"]);
+      assert.throws(
+        () => run(repo, ["run", "task-001", "--", "node", "-e", '"process.exit(3)"']),
+        (err) => err.status === 1 && /command failed \(exit 3/.test(String(err.stderr)),
+      );
+      // The failure is still evidence: it must be in the log.
+      assert.match(run(repo, ["show", "task-001"]), /exit 3 in [\d.]+s/);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("fails fast with exit 4 for an unknown task id", () => {
+    const repo = fixtureRepo();
+    try {
+      assert.throws(
+        () => run(repo, ["run", "task-999", "--", "node", "--version"]),
+        (err) => err.status === 4,
+      );
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("requires both an id and a command", () => {
+    const repo = fixtureRepo();
+    try {
+      run(repo, ["add", "Alpha"]);
+      assert.throws(
+        () => run(repo, ["run", "task-001"]),
+        (err) => err.status === 2 && /usage: task\.mjs run/.test(String(err.stderr)),
+      );
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("claim ownership", () => {
+  it("records the claim on move to in_progress and shows it", () => {
+    const repo = fixtureRepo();
+    try {
+      run(repo, ["add", "Alpha"]);
+      const moved = run(repo, ["move", "task-001", "in_progress"], {
+        env: { ...process.env, FOUNDRY_AGENT: "session-42" },
+      });
+      assert.match(moved, /task-001 → in_progress/);
+      const shown = run(repo, ["show", "task-001"]);
+      assert.match(shown, /claimedBy: session-42/);
+      assert.match(shown, /claimedAt: \d{4}-/);
+      assert.match(run(repo, ["board"]), /task-001.*\[session-42\]/);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("clears the claim on any move out of in_progress", () => {
+    const repo = fixtureRepo();
+    try {
+      run(repo, ["add", "Alpha"]);
+      run(repo, ["move", "task-001", "in_progress"]);
+      run(repo, ["move", "task-001", "review"]);
+      const shown = run(repo, ["show", "task-001"]);
+      assert.doesNotMatch(shown, /claimedBy/);
+      const file = readFileSync(
+        join(repo, ".tasks", "tasks", "task-001-alpha.md"),
+        "utf8",
+      );
+      assert.doesNotMatch(file, /claimedBy/);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("re-claiming records the new owner", () => {
+    const repo = fixtureRepo();
+    try {
+      run(repo, ["add", "Alpha"]);
+      run(repo, ["move", "task-001", "in_progress"], {
+        env: { ...process.env, FOUNDRY_AGENT: "session-1" },
+      });
+      run(repo, ["move", "task-001", "blocked"]);
+      run(repo, ["move", "task-001", "in_progress"], {
+        env: { ...process.env, FOUNDRY_AGENT: "session-2" },
+      });
+      assert.match(run(repo, ["show", "task-001"]), /claimedBy: session-2/);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("option values that begin with dashes", () => {
   it("accepts free text starting with dashes in a note", () => {
     const repo = fixtureRepo();
@@ -308,7 +420,7 @@ describe("task move", () => {
       run(repo, ["move", "task-002", "in_progress", "--force"]);
       const file = readFileSync(join(repo, ".tasks", "tasks", "task-002-blocked.md"), "utf8");
       assert.match(file, /status: in_progress/);
-      assert.match(file, /— moved to in_progress \(forced/);
+      assert.match(file, /— moved to in_progress \(claimed by [^;)]+; forced/);
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }

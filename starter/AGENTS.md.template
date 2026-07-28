@@ -28,6 +28,10 @@ node .agents/skills/task-tracker/scripts/task.mjs board
 node .agents/skills/task-tracker/scripts/task.mjs next
 ```
 
+New fronts of work enter the board through the `plan-milestone` skill with
+operator approval (`docs/SDLC.md` → "Planning above the task"); anything
+waiting on a human carries the `needs:operator` tag.
+
 Execute claimed work with the `execute-task` skill:
 
 1. Write a checkable rubric.
@@ -68,9 +72,10 @@ Once the gate is a single command, wire it into automation so it cannot be
 skipped by forgetting: a pre-commit hook for the fast subset, and CI on every
 branch for the full gate. File that as a task if it does not exist yet.
 
-[CUSTOMIZE: Record the `codebase-audit` cadence — the default is every 15-20
-completed tasks and before a milestone. Per-task review cannot see accumulated
-drift; this is the sweep that can.]
+[CUSTOMIZE: Record the `codebase-audit` and `retrospective` cadences — the
+default for each is every 15-20 completed tasks and before a milestone.
+Per-task review cannot see accumulated drift in the code or the process;
+these are the sweeps that can.]
 
 Skill-tree sync is part of the gate:
 
@@ -85,17 +90,19 @@ Never report a planned or unavailable command as passing.
 | Skill | Purpose |
 | --- | --- |
 | `task-tracker` | Persistent board, dependencies, status, and archival. |
+| `plan-milestone` | Operator-approved decomposition of goals into task fronts. |
 | `execute-task` | End-to-end task execution and review lifecycle. |
 | `adr` | Architecture decision creation and supersession. |
 | `diagnosing-bugs` | Reproduction-first debugging discipline. |
 | `codebase-audit` | Periodic sweep for accumulated quality drift. |
+| `retrospective` | Periodic mining of process friction into corrected guidance. |
 | `handoff-writer` | Restart-from-cold `HANDOFF.md`. |
 | `the-fool` | Pre-implementation adversarial review. |
 | `grill-me` | One-question-at-a-time decision clarification. |
 | `claude-in-codex` | Invoke Claude Code for cold review from Codex. |
 | `codex-in-claude` | Invoke Codex CLI for cold review from Claude Code. |
 
-The eight shared workflows are mirrored between `.agents/skills/` and
+The ten shared workflows are mirrored between `.agents/skills/` and
 `.claude/skills/`. Preserve their behavior while retaining harness-specific
 paths and counterpart bridges. Edit both copies in the same commit and verify
 with `node .agent-foundry/check-skill-sync.mjs`.

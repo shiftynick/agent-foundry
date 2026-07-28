@@ -25,6 +25,75 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.3.0
+
+The long-horizon release: validation becomes recorded fact instead of claimed
+fact, planning gains a layer above the task, humans get a single decision
+queue, parallel sessions get claim ownership, and the framework gains a
+self-improvement loop for its own process.
+
+### Changed
+
+- **Recorded validation evidence.** New `task.mjs run <id> -- <command>`
+  executes a command and appends the real command line, exit code, duration,
+  and bounded output tail to the task log — written by the tool from the
+  actual result, not typed by the agent. The review checklist, `execute-task`
+  step 6, and `docs/SDLC.md` now require `run`-recorded evidence wherever
+  validation is expressible as a command; hand-typed claims that a runnable
+  command passed no longer count. The command executes with the board lock
+  released; a failing command records its evidence and exits 1.
+- **Planning above the task.** New shared skill `plan-milestone` decomposes an
+  operator-agreed goal into a dependency-ordered, context-sized task front —
+  proposed first, filed only after operator approval — and handles re-planning
+  when evidence invalidates queued work. `docs/SDLC.md` gains the authority
+  section ("humans steer at the milestone level, agents execute at the task
+  level"), and `execute-task` step 7 gains a re-plan check.
+- **The operator queue.** Anything waiting on a human exists on the board
+  tagged `needs:operator`; `task.mjs list --tag needs:operator` is the single
+  "what is waiting on me?" view. Documented in `docs/SDLC.md`, `task-tracker`,
+  and the blocker path of `execute-task`.
+- **Claim ownership.** Moving a task to `in_progress` records `claimedBy`
+  (`FOUNDRY_AGENT` env var, else `user@host`) and `claimedAt`; any move out
+  clears them. `board` shows the owner, `show` prints both fields, and
+  `task-tracker` documents stale-claim recovery. Files without claims are
+  unchanged on disk.
+- **Self-improvement loop.** New shared skill `retrospective` mines the task
+  archive, `friction:` notes, and journals for repeated process mistakes
+  (three or more cited occurrences) and corrects the governing document —
+  a skill step, an `AGENTS.md` rule, a standards lens — through normal
+  reviewed tasks, with a five-correction cap and a pruning obligation.
+  Working agents record process friction in the moment via the new
+  `friction:` note convention (`execute-task`, `task-tracker`).
+- **Knowledge-decay dimension** added to `codebase-audit`: stale commands and
+  links in orientation documents, ADR-index drift, and reintroduced
+  `[CUSTOMIZE]` markers are now in the audit's sweep.
+
+### Upgrade actions
+
+1. Follow the standard reinstall-and-reconcile procedure in `UPGRADING.md`
+   (drift report, `--force` reinstall, restore seed files, re-apply mold
+   divergence).
+2. In `AGENTS.md`, extend the audit-cadence line to cover `retrospective`
+   and add the skills-table rows for `plan-milestone` and `retrospective`
+   (the fresh template shows both).
+3. Adopt recorded evidence: from the first task after the upgrade, use
+   `task.mjs run task-NNN -- <command>` for command-expressible validation.
+   Existing task logs are not retrofitted.
+4. If several agents share one machine account, set a distinct
+   `FOUNDRY_AGENT` value per session so claims are distinguishable.
+5. File the operator queue: for every currently `blocked` item waiting on a
+   human and every `proposed` ADR, tag or create its `needs:operator` task.
+
+### Breaking
+
+- Task files written after a task passes through `in_progress` may contain
+  `claimedBy`/`claimedAt` frontmatter. **Older `task.mjs` copies reject
+  unknown keys**, so upgrade both harness trees' scripts together (the normal
+  reinstall does) before any agent claims a task.
+- The `move ... in_progress` log line now includes a `claimed by <owner>`
+  decoration; tooling that pattern-matched `moved to in_progress (forced` must
+  allow the claim prefix.
+
 ## 0.2.0
 
 First versioned release. Establishes the upgrade path itself, resolves the
