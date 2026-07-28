@@ -14,6 +14,7 @@ agent workflows installed by Agent Foundry.
 | `diagnosing-bugs` | Feedback-loop-first diagnosis. |
 | `codebase-audit` | Periodic sweep for accumulated quality drift. |
 | `retrospective` | Periodic mining of process friction into corrected guidance. |
+| `efficient-orchestration` | Top-tier model orchestrates; workhorse tiers do bounded slices. |
 | `handoff-writer` | Cold-start session handoff. |
 | `the-fool` | Adversarial review of ideas and plans. |
 | `grill-me` | Deliberate one-question-at-a-time decision interview. |

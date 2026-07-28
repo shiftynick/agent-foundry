@@ -96,13 +96,14 @@ Never report a planned or unavailable command as passing.
 | `diagnosing-bugs` | Reproduction-first debugging discipline. |
 | `codebase-audit` | Periodic sweep for accumulated quality drift. |
 | `retrospective` | Periodic mining of process friction into corrected guidance. |
+| `efficient-orchestration` | Top-tier model orchestrates; workhorse tiers do bounded slices. |
 | `handoff-writer` | Restart-from-cold `HANDOFF.md`. |
 | `the-fool` | Pre-implementation adversarial review. |
 | `grill-me` | One-question-at-a-time decision clarification. |
 | `claude-in-codex` | Invoke Claude Code for cold review from Codex. |
 | `codex-in-claude` | Invoke Codex CLI for cold review from Claude Code. |
 
-The ten shared workflows are mirrored between `.agents/skills/` and
+The eleven shared workflows are mirrored between `.agents/skills/` and
 `.claude/skills/`. Preserve their behavior while retaining harness-specific
 paths and counterpart bridges. Edit both copies in the same commit and verify
 with `node .agent-foundry/check-skill-sync.mjs`.

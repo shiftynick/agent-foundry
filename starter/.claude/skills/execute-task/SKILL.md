@@ -286,6 +286,8 @@ A task is sized to one fresh context window:
 - `adr` — recording architecture decisions
 - `codebase-audit` — the periodic sweep for drift this per-diff review
   cannot see
+- `efficient-orchestration` — delegating labor-heavy slices to cheaper
+  workers while executing a task (review stays cold; evidence stays recorded)
 - `docs/REVIEW-STANDARDS.md` — pasted into the step-4 STANDARDS prompt;
   appended via DISTILL
 - `docs/ENGINEERING-STANDARDS.md` — the conventions reviews check against

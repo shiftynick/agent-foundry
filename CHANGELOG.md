@@ -25,6 +25,42 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.5.0
+
+Adds the cost dimension the kit was missing: how to spend the expensive
+model's tokens only where its judgment matters.
+
+### Changed
+
+- **New shared skill `efficient-orchestration`** (eleventh shared workflow).
+  The top-tier model orchestrates — decomposition, architecture, synthesis,
+  judgment, final review — while cheaper workhorse models take bounded,
+  token-heavy research, coding, and testing slices in parallel. Distills two
+  battle-tested source skills into one tier-neutral contract: self-contained
+  handoff packets with stop conditions, the model-vs-effort dial distinction
+  (mechanical bulk → cheap model at low effort; verification → high effort
+  even on a small model), the context → effort → model diagnostic ladder for
+  disappointing results, and vet-don't-forward discipline for worker reports.
+  An opt-in backend routes work slices to the other model family through this
+  harness's bridge skill. Integrated with the lifecycle: delegated work never
+  substitutes for cold review, decisive validation is re-recorded via
+  `task.mjs run`, and board writes stay with the orchestrator.
+
+### Upgrade actions
+
+1. Follow the standard procedure in `UPGRADING.md`.
+2. Add the `efficient-orchestration` row to the skills table in `AGENTS.md`
+   and change "ten shared workflows" to "eleven" (the fresh template shows
+   both).
+3. If the project carried a local variant of this pattern (an
+   efficiency/delegation skill added under a different name), reconcile it
+   with the shared skill and retire the local copy or record the divergence
+   in `.agent-foundry/LOCAL-CHANGES.md`.
+
+### Breaking
+
+- None.
+
 ## 0.4.0
 
 Field-report release. Every item here came from an install that upgraded

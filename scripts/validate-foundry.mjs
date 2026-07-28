@@ -76,9 +76,9 @@ export function validateFoundry() {
     .filter((file) => path.basename(file) === "SKILL.md");
   const claudeSkillFiles = listFiles(claudeSkillsRoot)
     .filter((file) => path.basename(file) === "SKILL.md");
-  if (agentSkillFiles.length !== 11 || claudeSkillFiles.length !== 11) {
+  if (agentSkillFiles.length !== 12 || claudeSkillFiles.length !== 12) {
     throw new Error(
-      "Expected 11 skills per harness (10 shared + 1 bridge); "
+      "Expected 12 skills per harness (11 shared + 1 bridge); "
       + `found agents=${agentSkillFiles.length}, `
       + `claude=${claudeSkillFiles.length}.`,
     );
@@ -107,6 +107,7 @@ export function validateFoundry() {
     "adr",
     "codebase-audit",
     "diagnosing-bugs",
+    "efficient-orchestration",
     "execute-task",
     "grill-me",
     "handoff-writer",

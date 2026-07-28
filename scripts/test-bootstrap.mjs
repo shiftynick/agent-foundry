@@ -319,7 +319,7 @@ try {
     [path.join(testRoot, ".agent-foundry", "check-skill-sync.mjs")],
     { cwd: testRoot, label: "installed skill-sync check" },
   ).stdout;
-  assert.match(syncOutput, /skill-sync: PASS \(10 shared skills\)/u);
+  assert.match(syncOutput, /skill-sync: PASS \(11 shared skills\)/u);
 
   const agents = readFileSync(path.join(testRoot, "AGENTS.md"), "utf8");
   assert(agents.includes(projectName));
