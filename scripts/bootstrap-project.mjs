@@ -36,6 +36,7 @@ const starterRoot = path.join(foundryRoot, "starter");
 // must never silently overwrite these; everything else is "mold" the Foundry
 // owns and replaces, with local edits surfaced as drift instead.
 const SEED_FILES = new Set([
+  ".agent-foundry/LOCAL-CHANGES.md",
   "AGENTS.md",
   "BLOCKED-JOURNAL.md",
   "CLAUDE.md",
@@ -151,12 +152,31 @@ function buildCopyPlan(targetRoot) {
       if (relative.toLowerCase().endsWith(".template")) {
         relative = relative.slice(0, -".template".length);
       }
+      const key = relative.split(path.sep).join("/");
       return {
         source,
         relative,
         destination: path.join(targetRoot, relative),
+        // Append-only project logs: the payload version is an empty header
+        // with no upgrade value, while the project's version is irreplaceable
+        // history. Seeding them once is the whole contract; overwriting them
+        // on a later --force destroys exactly what they exist to accumulate.
+        preserveIfExists: PRESERVE_IF_EXISTS.has(key),
       };
     });
+}
+
+// Once written, never rewritten — not even with --force. `seed` files are
+// reset by an upgrade and reconciled from the backup; these are not, because
+// the file whose purpose is surviving upgrades must actually survive them.
+const PRESERVE_IF_EXISTS = new Set([
+  ".agent-foundry/LOCAL-CHANGES.md",
+  "BLOCKED-JOURNAL.md",
+  "PLANNING-JOURNAL.md",
+]);
+
+function isPreserved(item) {
+  return item.preserveIfExists && pathKind(item.destination) === "file";
 }
 
 function findCollisions(copyPlan, targetRoot, targetExists) {
@@ -196,7 +216,11 @@ function findCollisions(copyPlan, targetRoot, targetExists) {
     );
   }
 
-  return copyPlan.filter((item) => pathKind(item.destination) === "file");
+  // A preserved log is not a collision: nothing overwrites it, so there is
+  // nothing to refuse and nothing to back up.
+  return copyPlan.filter((item) => (
+    pathKind(item.destination) === "file" && !item.preserveIfExists
+  ));
 }
 
 function verifyRuntime() {
@@ -301,13 +325,25 @@ function renderStarter(copyPlan, options, installedAt, foundryVersion) {
   ]);
 
   const tokenPattern = /\{\{(?:PROJECT_NAME|PROJECT_DESCRIPTION|PROJECT_NAME_JSON|PROJECT_DESCRIPTION_JSON|INSTALLED_AT_JSON|FOUNDRY_VERSION_JSON)\}\}/gu;
+  const preserved = [];
   for (const item of copyPlan) {
+    if (isPreserved(item)) {
+      preserved.push(item.relative);
+      continue;
+    }
     mkdirSync(path.dirname(item.destination), { recursive: true });
     const content = readFileSync(item.source, "utf8").replace(
       tokenPattern,
       (token) => replacements.get(token),
     );
     writeFileSync(item.destination, content, "utf8");
+  }
+  if (preserved.length > 0) {
+    console.log(
+      `Preserved existing project logs (not overwritten):\n  ${
+        preserved.sort().join("\n  ")
+      }`,
+    );
   }
 }
 

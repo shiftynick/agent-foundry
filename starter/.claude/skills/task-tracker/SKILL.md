@@ -51,6 +51,11 @@ In this repo:
 
 ## Standard workflow (autonomous)
 
+**Single-agent assumption.** The self-selection in step 1 is correct when one
+agent works the board. When several agents run in parallel, the operator
+assigns tasks and agents do **not** self-select — see "Parallel work" below
+before running `next`.
+
 ```bash
 # 1. Find work. If nothing is ready, triage first (see next section).
 node .claude/skills/task-tracker/scripts/task.mjs next
@@ -162,8 +167,7 @@ archived `done` task satisfies dependencies; a soft-deleted task never does.
 If you discover a follow-up that's out of scope for the current task:
 
 ```bash
-node .claude/skills/task-tracker/scripts/task.mjs add "Refactor X once Y lands" \
-  --priority p2 --tag area:process --blocked-by task-007
+node .claude/skills/task-tracker/scripts/task.mjs add "Refactor X once Y lands" --priority p2 --tag area:process --blocked-by task-007
 ```
 
 Tell the user (when surfacing): "Filed as task-NNN, blocked by current task."
@@ -313,6 +317,13 @@ move out of `in_progress` clears both. `board` shows the owner in brackets;
 the same board from one machine account — otherwise their claims are
 indistinguishable.
 
+**What a claim does and does not guarantee.** `claimedBy` is an *advisory
+active-owner marker*, *not a lock.* `.tasks/` is tracked in Git, so a claim
+made in one worktree or clone is invisible everywhere else until it is
+committed, merged, and pulled. Nothing prevents two agents from claiming the
+same task. The repo lock serializes *writes to the board files*; it does not
+coordinate *who works on what*.
+
 **Stale claims.** A claim does not expire on its own; a crashed session leaves
 its task claimed. Before treating a claim as stale: check `claimedAt` age
 (older than ~24h with no matching log activity is suspect), check the log for
@@ -321,6 +332,43 @@ task's area. To take over, do not `--force` past anything — log the takeover
 (`task.mjs note`), move the task back through `blocked` or `ready`, salvage
 in-flight work from the worktree, and re-claim. The old claim is evidence of
 where the previous session died; read its log before overwriting its state.
+
+### Parallel work: one agent per worktree
+
+**Two agents must never share one working directory.** They share `HEAD`, the
+index, and the worktree, so in practice: one agent's `git add` is wiped by the
+other's staging, a finished change lands committed on the other task's branch
+because `HEAD` moved underneath it, and both edit the same shared documents.
+None of these fail loudly. Only the "stage named paths, never `git add -A`"
+rule keeps the damage recoverable.
+
+Give each agent its own worktree, branched from an **explicit** start point:
+
+```bash
+git fetch origin
+git worktree add ../<project>-task-NNN -b task-NNN-short-slug origin/main
+```
+
+The `origin/main` is load-bearing. Without it the new branch forks from
+whatever the calling shell has checked out — during parallel work, usually
+another task's branch — which reproduces the wrong-branch failure while
+looking correct.
+
+Two things that already work in a worktree, verified: the board CLI (repo-root
+discovery matches a linked worktree's `.git` file as well as a directory), and
+`core.hooksPath`, which lives in the shared config and so applies everywhere
+with no per-worktree setup.
+
+**Preflight for parallel sessions:**
+
+1. The **operator assigns** tasks; agents do not self-select with `next`.
+2. Pull before claiming, so the board you read is current.
+3. Each agent edits only its own task card — separate files merge cleanly.
+4. Expect shared documents (`AGENTS.md`, standards) to conflict; coordinate
+   edits to them through the operator or sequence them.
+
+This model works for a small number of agents with a human in the loop. It
+does not scale further, and the board is advisory under concurrency by design.
 
 ### Waiting on a human: `needs:operator`
 

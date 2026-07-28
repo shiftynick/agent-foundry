@@ -738,7 +738,13 @@ function cmdRun(args) {
     `run: ${commandLine}`,
     `  started ${startedAt}, ${outcome}`,
     truncated ? `  output tail (truncated to last ${RUN_TAIL_LINES} lines):` : "  output:",
-    ...tail.split("\n").map((line) => `  | ${line}`),
+    // The prefix must not manufacture whitespace: an interior blank output
+    // line would otherwise become "  | " and fail `git diff --check` and any
+    // trailing-whitespace hook — on the one feature whose whole purpose is
+    // producing committable evidence. Trailing space *within* a command's own
+    // output line is preserved deliberately; evidence is a record, not a
+    // reformat.
+    ...tail.split("\n").map((line) => (line ? `  | ${line}` : "  |")),
   ].join("\n");
 
   withRepoWriteLock(root, () => {

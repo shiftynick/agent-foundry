@@ -59,6 +59,30 @@ describe("task run (recorded evidence)", () => {
     }
   });
 
+  it("never writes trailing whitespace, even for blank output lines", () => {
+    const repo = fixtureRepo();
+    try {
+      run(repo, ["add", "Alpha"]);
+      run(repo, [
+        "run", "task-001", "--",
+        "node", "-e", `"console.log('a');console.log('');console.log('b')"`,
+      ]);
+      const file = readFileSync(
+        join(repo, ".tasks", "tasks", "task-001-alpha.md"),
+        "utf8",
+      );
+      // Evidence has to be committable: a "  | " line fails `git diff --check`
+      // and any trailing-whitespace hook. Scope note: this asserts the PREFIX
+      // adds none — whitespace inside a command's own output is preserved on
+      // purpose, because evidence is a record, not a reformat.
+      const offenders = file.split("\n").filter((line) => /[ \t]$/u.test(line));
+      assert.deepEqual(offenders, []);
+      assert.match(file, /\n {2}\|\n/u);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
   it("records a failing command and exits 1", () => {
     const repo = fixtureRepo();
     try {

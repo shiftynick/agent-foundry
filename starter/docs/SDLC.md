@@ -21,6 +21,22 @@ invalidates the approach behind queued work, when the front for the current
 milestone is nearly exhausted, or when the operator changes the goal. The
 `execute-task` skill's completion step includes this check.
 
+## Concurrency
+
+The board is **advisory under concurrency**, deliberately. `.tasks/` is
+tracked in Git, so board state is per-worktree: a claim is invisible elsewhere
+until committed, merged, and pulled. `claimedBy` marks the active owner; it is
+not a lock and cannot prevent double-claiming.
+
+The supported model is **one agent per worktree**, with the operator assigning
+tasks rather than agents self-selecting. Two agents in one working directory
+share `HEAD`, the index, and the tree, and will silently corrupt each other's
+work. `task-tracker` → "Parallel work" has the worktree recipe and preflight.
+
+This is a deliberate trade: real cross-agent locking needs state outside the
+versioned tree, which would break the property that every piece of project
+state is a reviewable, mergeable file in the repository.
+
 ## The operator queue
 
 Anything waiting on a human — a `proposed` ADR, a credential, a design call,

@@ -49,13 +49,18 @@ compared to the next one.
 Let the repository nominate its own suspects rather than reading top-down:
 
 ```bash
-git log --format= --name-only | sort | uniq -c | sort -rn | head -30
-git log --format= --name-only --since="6 months ago" | sort | uniq -c | sort -rn | head -20
+node .agents/skills/codebase-audit/scripts/churn-report.mjs --limit 30
+node .agents/skills/codebase-audit/scripts/churn-report.mjs --since "6 months ago" --limit 20
 ```
 
 Churn concentrates debt: the files edited most often are where accumulation
 happens and where it costs the most. Cross-reference with the largest files,
 and with areas that appear repeatedly in bug-fix commit messages.
+
+(The helper exists so this step runs identically on every shell. The obvious
+`git log … | sort | uniq -c | sort -rn` pipeline is GNU-only, and its
+PowerShell equivalent is case-insensitive by default — it would silently merge
+paths that differ only in case.)
 
 Then read those files. Findings must come from reading code, not from metrics —
 churn only chooses where to look.
@@ -108,9 +113,7 @@ Each surviving finding becomes one board task sized to a single fresh context,
 priority set by the cost in step 4:
 
 ```bash
-node .agents/skills/task-tracker/scripts/task.mjs add "<the defect, not the fix>" \
-  --priority p2 --tag area:quality --tag phase:audit \
-  --description "<locations, accumulation evidence, cost, first step>"
+node .agents/skills/task-tracker/scripts/task.mjs add "<the defect, not the fix>" --priority p2 --tag area:quality --tag phase:audit --description "<locations, accumulation evidence, cost, first step>"
 ```
 
 Write the description so it survives drift: name behaviors and interfaces, not

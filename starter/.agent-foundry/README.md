@@ -35,7 +35,14 @@ argument. So:
 - **`seed`** — installed once; this project owns it from then on. `AGENTS.md`,
   `CONTRIBUTING.md`, `HANDOFF.md`, the journals, and the two standards
   documents. Editing these is the normal case and needs no `LOCAL-CHANGES.md`
-  entry. An upgrade must not overwrite them.
+  entry. An upgrade resets them to the new template and expects you to restore
+  and re-merge (see `UPGRADING.md`).
+  - **Append-only logs are stronger than seed**: `LOCAL-CHANGES.md`,
+    `PLANNING-JOURNAL.md`, and `BLOCKED-JOURNAL.md` are never rewritten once
+    they exist — not even by `--force`. Their stock content is an empty
+    header with no upgrade value, while your content is irreplaceable, and
+    `LOCAL-CHANGES.md` in particular is the file an upgrade *reads* to know
+    what not to revert.
 - **`mold`** — the Foundry owns it: the skills, `docs/SDLC.md`, the ADR
   template, these checks. Upgrades replace them, so divergence here is what
   `LOCAL-CHANGES.md` exists to protect.
@@ -50,8 +57,15 @@ node .agent-foundry/check-skill-sync.mjs      # harness trees agree
 node .agent-foundry/check-foundry-drift.mjs   # what we have changed
 ```
 
-Neither is a gate. `check-skill-sync` fails on real drift between the trees
-because that is always a mistake; `check-foundry-drift` only reports, because
-divergence from stock is a legitimate choice this project is allowed to make.
+The two have deliberately different force:
+
+- **`check-skill-sync` should be a gate.** It exits non-zero on real drift
+  between the trees, and that drift is always a mistake — two harness trees
+  disagreeing silently breaks the cross-family cold review the whole review
+  ladder depends on. Wire it into the project's quality gate and CI alongside
+  the tests.
+- **`check-foundry-drift` is a report, never a gate.** Divergence from stock
+  is a legitimate choice this project is allowed to make; the check exists so
+  an upgrade knows what to preserve, not to forbid customization.
 
 Upgrade procedure: `UPGRADING.md` in the Agent Foundry repository.

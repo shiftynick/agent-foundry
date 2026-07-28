@@ -49,6 +49,13 @@ When `execute-task` is active and the CLI is working:
   SPEC; supply the relevant review and engineering standards for STANDARDS.
 - Keep tools disabled and session persistence off so the review stays cold
   and read-only.
+- **The packet must be a commit or an exported diff file — never the index.**
+  The reviewer runs in its own process, so `git diff --cached` reads empty
+  from there and the review comes back "no content to review", costing a full
+  round. Commit the work (or write `git diff > packet.diff`) before invoking.
+- With tools disabled the reviewer **cannot execute the system under review**:
+  say so in the prompt, and ask it to reason from the diff, the tests as
+  written, and the supplied context rather than from a running system.
 - Verify every finding against the live repository before fixing or filing
   it. When concrete counter-evidence may change the verdict, send a focused
   reconsideration prompt and record the adjudicated outcome in the task log.

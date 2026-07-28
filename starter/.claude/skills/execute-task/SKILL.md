@@ -50,6 +50,11 @@ behaviors, test targets, observable outcomes; no adjectives). Log it:
 node .claude/skills/task-tracker/scripts/task.mjs note task-NNN "rubric: (1) ... (2) ... (3) ..."
 ```
 
+**Log the rubric before claiming, not after.** Entry criteria require it on
+the card at the moment the task moves to `in_progress`; a rubric reconstructed
+later, under review pressure, is a description of what you did rather than a
+standard you worked to — and reviewers correctly flag it.
+
 The rubric is what the step-4 reviewer judges against and what step 6's
 validation must produce evidence for. If you can't write a checkable
 rubric, you don't understand the task yet — read more before claiming.

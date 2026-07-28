@@ -187,8 +187,11 @@ try {
   assert.equal(existsSync(path.join(collisionRoot, ".git")), false);
   rmSync(path.join(collisionRoot, "docs"));
 
+  // AGENTS.md is a seed file the installer does overwrite, so it is a real
+  // collision. (The append-only journals are deliberately not — see the
+  // preserve-if-exists assertions further down.)
   writeFileSync(
-    path.join(collisionRoot, "PLANNING-JOURNAL.md"),
+    path.join(collisionRoot, "AGENTS.md"),
     "pre-existing contract",
   );
   const preflightError = invokeBootstrap(
@@ -201,7 +204,7 @@ try {
   );
   assertFailure(preflightError, /refused to overwrite existing files/u);
   assert.equal(existsSync(path.join(collisionRoot, ".git")), false);
-  rmSync(path.join(collisionRoot, "PLANNING-JOURNAL.md"));
+  rmSync(path.join(collisionRoot, "AGENTS.md"));
 
   mkdirSync(path.join(collisionRoot, "HANDOFF.md"));
   const directoryError = invokeBootstrap(
@@ -426,12 +429,36 @@ try {
   appendFileSync(ignorePath, "existing-project-entry\r\n", "utf8");
   const ignoreBeforeForce = readFileSync(ignorePath, "utf8");
   const agentsBeforeForce = readFileSync(path.join(testRoot, "AGENTS.md"));
+
+  // Append-only project logs accumulate irreplaceable history and must
+  // survive a forced reinstall untouched — LOCAL-CHANGES.md especially, since
+  // it is the record an upgrade consults to know what not to revert.
+  const preservedLogs = [
+    path.join(".agent-foundry", "LOCAL-CHANGES.md"),
+    "PLANNING-JOURNAL.md",
+    "BLOCKED-JOURNAL.md",
+  ];
+  const preservedBefore = new Map();
+  for (const relative of preservedLogs) {
+    const full = path.join(testRoot, relative);
+    appendFileSync(full, `\nproject-authored entry for ${relative}\n`, "utf8");
+    preservedBefore.set(relative, readFileSync(full, "utf8"));
+  }
+
   invokeBootstrap(
     bootstrapArgs(testRoot, [
       "--force",
       "--skip-validation",
     ]),
   );
+
+  for (const relative of preservedLogs) {
+    assert.equal(
+      readFileSync(path.join(testRoot, relative), "utf8"),
+      preservedBefore.get(relative),
+      `--force overwrote an append-only project log: ${relative}`,
+    );
+  }
   const ignore = readFileSync(ignorePath, "utf8");
   assert(ignore.includes("existing-project-entry"));
   assert(ignore.startsWith(ignoreBeforeForce));

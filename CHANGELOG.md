@@ -25,6 +25,82 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.4.0
+
+Field-report release. Every item here came from an install that upgraded
+0.1.0 → 0.2.0 → 0.3.0 in one day and ran two agents concurrently against a
+protected branch — conditions this kit had documented but never exercised.
+
+### Changed
+
+- **Append-only project logs survive `--force`.** `.agent-foundry/LOCAL-CHANGES.md`,
+  `PLANNING-JOURNAL.md`, and `BLOCKED-JOURNAL.md` are now written once and
+  never rewritten, and the installer reports which it preserved. Previously a
+  forced upgrade reset all three: the divergence record whose entire purpose is
+  surviving upgrades was destroyed *by* an upgrade, and the planning and
+  blocker history — which `retrospective` and `plan-milestone` read — went with
+  it. They are also no longer treated as collisions, since nothing overwrites
+  them.
+- **`task.mjs run` no longer manufactures trailing whitespace.** An interior
+  blank line in recorded output became `"  | "`, so any evidence containing a
+  blank line failed `git diff --check` and trailing-whitespace hooks — on the
+  one feature whose purpose is producing committable evidence. Whitespace
+  inside a command's own output lines is still preserved verbatim.
+- **Shell-portable evidence gathering.** `codebase-audit` and `retrospective`
+  documented GNU-only pipelines (`sort -rn`, `uniq -c`, recursive `grep`) that
+  fail under PowerShell. Both now call tested zero-dep helpers —
+  `codebase-audit/scripts/churn-report.mjs` and
+  `retrospective/scripts/process-signals.mjs` — which also fix a subtler
+  problem: the natural PowerShell equivalents are case-insensitive by default,
+  so they would silently merge paths differing only in case and widen the
+  `friction:` convention to match `Friction:`. Backslash line continuations
+  were removed from `task-tracker`, `plan-milestone`, and `codebase-audit`.
+- **Concurrency documented honestly.** `claimedBy` is now stated to be an
+  advisory active-owner marker, **not a lock**: `.tasks/` is versioned, so a
+  claim is invisible to other worktrees until merged, and nothing prevents
+  double-claiming. `task-tracker` gains a "Parallel work" section with the
+  one-agent-per-worktree recipe (including the load-bearing `origin/main`
+  start point) and a preflight, and its "Standard workflow (autonomous)" no
+  longer tells an agent to self-select while parallel guidance says the
+  operator assigns. `docs/SDLC.md` records the trade-off.
+- **Cold-review packet rules.** Both bridge skills now state that the packet
+  must be a commit or an exported diff file, never the index — a reviewer in
+  its own process reads `git diff --cached` as empty — and that the reviewer
+  cannot execute the system under review, which previously caused stalls on
+  package locks under a read-only sandbox.
+- **Facts get logged where they are produced.** `UPGRADING.md` step 1 now says
+  to record the drift baseline in the task log (with the `task.mjs run` form),
+  and `execute-task` states that the rubric is logged *before* the claim.
+- **Upgrade guidance sharpened.** Seed restore now leads with
+  `git checkout HEAD -- <files>` (exact and verifiable, since step 1 required
+  a clean tree) with the backup directory as fallback, and
+  `.agent-foundry/README.md` recommends gating on `check-skill-sync` while
+  keeping `check-foundry-drift` a report.
+
+### Upgrade actions
+
+1. Follow the standard procedure in `UPGRADING.md`.
+2. **Before reinstalling, if the project predates 0.4.0**: copy
+   `.agent-foundry/LOCAL-CHANGES.md`, `PLANNING-JOURNAL.md`, and
+   `BLOCKED-JOURNAL.md` somewhere safe. Earlier installers overwrote them on
+   `--force`; if a prior upgrade already did, recover them from the relevant
+   `.agent-foundry-backups/<timestamp>/` directory now.
+3. Wire `node .agent-foundry/check-skill-sync.mjs` into the project's quality
+   gate and CI if it is not already there.
+4. If the project runs more than one agent, adopt one worktree per agent per
+   `task-tracker` → "Parallel work", and confirm the operator (not `next`)
+   assigns tasks.
+5. Carried over from 0.3.0 and easy to miss: existing boards do not
+   retroactively carry `milestone:<name>` tags. Either tag the current front
+   or accept that the convention starts from the next planned milestone.
+
+### Breaking
+
+- None for behavior. Note only that the installer no longer refuses to install
+  when the three append-only logs already exist, because it no longer
+  overwrites them — a project that relied on that refusal as a guard should
+  drop the expectation.
+
 ## 0.3.0
 
 The long-horizon release: validation becomes recorded fact instead of claimed

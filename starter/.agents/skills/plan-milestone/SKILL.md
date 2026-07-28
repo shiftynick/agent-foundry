@@ -99,9 +99,7 @@ it is autonomous precisely because this step happened.
 On approval, file each task with the milestone tag and the dependency edges:
 
 ```bash
-node .agents/skills/task-tracker/scripts/task.mjs add "<task title>" \
-  --priority p1 --tag milestone:<name> --tag area:<area> \
-  --blocked-by task-NNN --description "<durable description + acceptance criteria>"
+node .agents/skills/task-tracker/scripts/task.mjs add "<task title>" --priority p1 --tag milestone:<name> --tag area:<area> --blocked-by task-NNN --description "<durable description + acceptance criteria>"
 ```
 
 Record the approved plan summary in `PLANNING-JOURNAL.md` — date, milestone

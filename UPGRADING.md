@@ -24,6 +24,18 @@ node .agent-foundry/check-foundry-drift.mjs
   explicitly, and inspect every managed file that the project's history shows
   it has touched.
 
+**Write these into the task log now**, before going further — the version you
+came from, the full drift report, and (after step 3) the exact reinstall
+command and backup path:
+
+```text
+node .agent-foundry/check-foundry-drift.mjs
+node .claude/skills/task-tracker/scripts/task.mjs run <id> -- node .agent-foundry/check-foundry-drift.mjs
+```
+
+The second form records the baseline as evidence rather than leaving it in
+the session, where it evaporates and has to be reconstructed under review.
+
 ## 2. Read the changelog forward
 
 Read `<agent-foundry-root>/CHANGELOG.md` from the version *after* the one
@@ -48,9 +60,23 @@ Never delete it until the upgrade is accepted.
 The manifest classifies every managed file:
 
 - **`seed`** — the project owns it. The installer has just reset it to a
-  template. Restore the project's version from the backup directory, then fold
-  in anything genuinely new from the fresh template. Never accept the template
-  wholesale.
+  template. Restore the project's version, then fold in anything genuinely new
+  from the fresh template. Never accept the template wholesale.
+
+  Because step 1 required a clean worktree, Git is the exact and easily
+  verified route; the backup directory is the fallback when the file was not
+  committed:
+
+  ```text
+  git checkout HEAD -- AGENTS.md CONTRIBUTING.md HANDOFF.md docs/ENGINEERING-STANDARDS.md docs/REVIEW-STANDARDS.md docs/adr/README.md docs/out-of-scope/README.md
+  git diff HEAD -- <the same paths>    # then re-add anything new from the templates
+  ```
+
+  **Not reset, and never to be restored:** `.agent-foundry/LOCAL-CHANGES.md`,
+  `PLANNING-JOURNAL.md`, and `BLOCKED-JOURNAL.md`. Since 0.4.0 the installer
+  preserves these append-only logs even under `--force` and prints which ones
+  it kept. If your project predates 0.4.0, check them first — an older
+  installer overwrote them, and the backup directory holds the only copy.
 - **`mold`** — the Foundry owns it. The new version is authoritative. For each
   file the step-1 report flagged as locally modified, re-apply the local change
   on top of the new file, or drop it deliberately — and either way record the

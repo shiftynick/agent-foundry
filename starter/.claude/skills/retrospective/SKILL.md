@@ -31,18 +31,19 @@ length.
 The board archive is a complete behavioral record. Mine it, don't recall it:
 
 ```bash
-# Friction agents flagged in the moment (the highest-value signal)
-grep -rn "friction:" .tasks/archive/ .tasks/tasks/
-
-# Discipline bypasses — every forced transition is logged
-grep -rln "forced" .tasks/archive/
-
-# Review churn — tasks that bounced review -> in_progress repeatedly
-grep -rc "moved to in_progress" .tasks/archive/ | grep -v ":1"
-
-# Validation failures that were re-run — recorded by task.mjs run
-grep -rn "| .*failed\|exit [1-9]" .tasks/archive/
+node .claude/skills/retrospective/scripts/process-signals.mjs
+node .claude/skills/retrospective/scripts/process-signals.mjs --since 2026-07-01
 ```
+
+It reports four classes across active and archived tasks: `friction:` notes
+flagged in the moment (the highest-value signal), forced transitions
+(discipline bypassed), review churn (tasks that re-entered `in_progress`), and
+failed recorded runs. `--json` emits the same data for further slicing.
+
+(The helper exists so this step runs identically on every shell. Recursive
+`grep` is GNU-only, and the PowerShell equivalent — `Select-String` — is
+case-insensitive by default, which would quietly widen the `friction:`
+convention to match `Friction:` and `FRICTION:` too.)
 
 Plus: `BLOCKED-JOURNAL.md` (what kinds of things block, and how often the
 `Resume:` line was actually enough), `PLANNING-JOURNAL.md` (how many re-plans,
