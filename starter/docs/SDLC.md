@@ -155,6 +155,22 @@ When work cannot proceed:
 3. Append a concise entry to `BLOCKED-JOURNAL.md`, including `Resume:`.
 4. Surface the missing decision, authority, credential, or external change.
 
+## Periodic codebase audit
+
+Task-scoped review judges one change. It cannot see defects that only exist in
+aggregate — the third near-duplicate, the module that outgrew comprehension
+over ten tasks, the abstraction that stopped matching its callers. Every
+individual diff was correct; the accumulation is not.
+
+The `codebase-audit` skill covers that gap on a cadence (default: every 15-20
+completed tasks, and before a milestone). It files board tasks and never gates
+a commit, a task, or a release. A run that finds nothing above its evidence bar
+is a valid result, not a failed audit.
+
+Findings that reveal a recurring pattern are distilled into
+`docs/REVIEW-STANDARDS.md`, so per-task review begins catching that class at
+the source and the next audit has less to find.
+
 ## Session close
 
 - Leave recent completed work visible in `done`.

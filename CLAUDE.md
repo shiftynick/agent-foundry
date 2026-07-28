@@ -26,6 +26,11 @@ node scripts/validate-foundry.mjs    # structural checks on starter/ (fast)
 node scripts/test-bootstrap.mjs      # end-to-end install into a temp dir (~30s)
 ```
 
+`VERSION` is the single source of truth for the release number and is
+substituted into the payload at install time. `validate-foundry.mjs` fails if
+`CHANGELOG.md` has no entry for the current `VERSION`, so a version bump and a
+changelog entry always land together.
+
 Both must pass before any change is complete. `test-bootstrap.mjs` runs
 `validate-foundry.mjs` first, so run them in that order when debugging.
 
@@ -46,9 +51,10 @@ node starter/.agent-foundry/check-skill-sync.mjs starter
 ## The dual-tree invariant (most common source of breakage)
 
 `starter/.agents/skills/` (Codex) and `starter/.claude/skills/` (Claude Code)
-contain **the same seven shared skills**: `adr`, `diagnosing-bugs`,
-`execute-task`, `grill-me`, `handoff-writer`, `task-tracker`, `the-fool`.
-Editing one copy without the other fails validation.
+contain **the same eight shared skills**: `adr`, `codebase-audit`,
+`diagnosing-bugs`, `execute-task`, `grill-me`, `handoff-writer`,
+`task-tracker`, `the-fool`. Editing one copy without the other fails
+validation.
 
 Treat `.claude/` as canonical and mirror to `.agents/` with this transform:
 
@@ -66,7 +72,7 @@ The two bridge skills are the deliberate exception and are tree-exclusive:
 - `claude-in-codex` — only under `.agents/` (calls Claude Code from Codex)
 - `codex-in-claude` — only under `.claude/` (calls Codex CLI from Claude Code)
 
-Each harness ships exactly 8 `SKILL.md` files (7 shared + 1 bridge); the counts
+Each harness ships exactly 9 `SKILL.md` files (8 shared + 1 bridge); the counts
 and the shared-skill list are hardcoded in `scripts/validate-foundry.mjs`, so
 adding or renaming a skill means updating that file too.
 
@@ -100,6 +106,15 @@ conventions apply during the copy:
 
 Any `*.test.mjs` in the payload is executed against the freshly installed tree
 as part of installation, so a new script in `starter/` should ship with a test.
+
+Installation also writes `.agent-foundry/manifest.json`, recording every
+managed file with a tier (`seed` = project owns it after install, `mold` =
+Foundry owns it) and a line-ending-normalized hash. This is what makes upgrades
+non-destructive, so a new payload file should be classified: add it to
+`SEED_FILES` in `bootstrap-project.mjs` if the project is meant to own it, or
+leave it as mold. `bootstrap-project.mjs` deliberately imports its hash
+function from the payload's `check-foundry-drift.mjs` so the recorded and
+verified hashes cannot diverge.
 
 Collision safety is a core invariant and is heavily tested: existing files are
 never overwritten without `--force`, `--force` backs up every overwritten file

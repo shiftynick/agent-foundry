@@ -53,9 +53,17 @@ The installer:
 and tests. Do not use either in a normal installation or claim the skipped
 behavior succeeded.
 
-It also writes `.agent-foundry.json`, a commit-friendly manifest containing
-the Foundry schema/version, project identity, and installation time. It is
-generated provenance, not a product specification; do not hand-edit it.
+It also writes two pieces of generated provenance — do not hand-edit either:
+
+- `.agent-foundry.json`: Foundry schema/version, project identity, install
+  time.
+- `.agent-foundry/manifest.json`: every managed file with its tier (`seed` =
+  the project owns it from now on, `mold` = the Foundry owns it) and a content
+  hash. This is what lets a later upgrade tell deliberate local evolution from
+  an untouched file.
+
+Upgrading an existing installation is a different procedure — see
+`UPGRADING.md`, not this document.
 
 If the target already has active board tasks, the installer deliberately does
 not choose or mutate one. Create and claim the tailoring task yourself:
@@ -93,8 +101,9 @@ Run:
 node .agents/skills/task-tracker/scripts/task.mjs board
 node --test .agents/skills/claude-in-codex/scripts/claude-ask.test.mjs .agents/skills/task-tracker/scripts/task.test.mjs .agents/skills/task-tracker/scripts/_lib.test.mjs .agents/skills/task-tracker/scripts/board-html.test.mjs
 node --test .claude/skills/task-tracker/scripts/task.test.mjs .claude/skills/task-tracker/scripts/_lib.test.mjs .claude/skills/task-tracker/scripts/board-html.test.mjs
-node --test .agent-foundry/check-skill-sync.test.mjs
+node --test .agent-foundry/check-skill-sync.test.mjs .agent-foundry/check-foundry-drift.test.mjs
 node .agent-foundry/check-skill-sync.mjs
+node .agent-foundry/check-foundry-drift.mjs
 ```
 
 Then verify:
@@ -105,6 +114,8 @@ Then verify:
   intentionally differs (the sync check above proves this);
 - `AGENTS.md` states a commit-authority policy, or explicitly accepts the
   `docs/SDLC.md` default;
+- `AGENTS.md` records a `codebase-audit` cadence;
+- a fresh install reports no drift;
 - `claude-in-codex` and `codex-in-claude` use the currently installed CLI
   flags;
 - the board reflects the real implementation front; and

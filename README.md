@@ -58,33 +58,44 @@ even with `--force`.
   `AGENTS.md`.
 - `CONTRIBUTING.md`, `HANDOFF.md`, and planning/blocker journals.
 - `.agent-foundry.json`: commit-friendly installation provenance and version.
-- `.agent-foundry/check-skill-sync.mjs`: in-project check that the two harness
-  skill trees have not drifted apart.
+- `.agent-foundry/`: install manifest, the skill-sync and drift checks, the
+  local-evolution guide, and the `LOCAL-CHANGES.md` divergence log.
 
 Product architecture, stack choices, build commands, deployment rules, and
 domain invariants are deliberately not supplied. The first bootstrap task
 requires the project agent to discover and write those from live evidence.
 
-## Updating an installed project
+## Versioning and upgrades
 
-`.agent-foundry.json` records the schema and version a project was installed
-with. To move a project to a newer Foundry release:
+`VERSION` is the single source of truth for the release number. The installer
+stamps it into each target's `.agent-foundry.json` and
+`.agent-foundry/manifest.json`, so every installed project knows exactly which
+release it came from.
 
-1. Commit or stash the project's worktree first — the update overwrites
-   managed files and a clean tree is what makes the result reviewable.
-2. Re-run the installer against the same target with `--force`, using the
-   project name and description already recorded in `.agent-foundry.json`.
-3. Read the backup path the installer prints. Every overwritten managed file
-   is preserved verbatim under `.agent-foundry-backups/<timestamp>/`.
-4. Diff the result and reapply project-specific customization — `AGENTS.md`,
-   `CONTRIBUTING.md`, `HANDOFF.md`, and the two standards documents are
-   tailored per project and will have been reset to templates.
-5. Run the project's own gate plus
-   `node .agent-foundry/check-skill-sync.mjs`, then delete the backup
-   directory once the update is accepted.
+`CHANGELOG.md` is written for the agent performing an upgrade as much as for
+people: each release carries **Upgrade actions** — concrete, imperative steps —
+and flags anything **Breaking**. An upgrading agent reads every entry after the
+project's recorded version and applies them in order.
 
-The board under `.tasks/` is not managed payload and is never overwritten.
-There is no in-place migration tool; the backup directory is the rollback.
+The install manifest records a tier and hash for every managed file:
+
+- **`seed`** — installed once, then owned by the project (`AGENTS.md`, the
+  standards documents, journals). Upgrades must not overwrite these.
+- **`mold`** — owned by the Foundry (skills, `docs/SDLC.md`, the checks).
+  Upgrades replace these, and local divergence is surfaced rather than lost.
+
+Installed projects are expected to evolve their own copies; that is documented
+in `.agent-foundry/README.md` inside every install, and deliberate divergence
+is recorded in `.agent-foundry/LOCAL-CHANGES.md` so an upgrade can preserve it.
+
+To upgrade a project, point an agent at `UPGRADING.md`. In short: commit the
+worktree, run `node .agent-foundry/check-foundry-drift.mjs` to learn what the
+project has customized, reinstall with `--force` (which backs up everything it
+replaces), then reconcile by tier and re-run the checks.
+
+The board under `.tasks/`, real ADRs, and journal entries are project state the
+installer never touches. There is no in-place migration tool; the backup
+directory is the rollback.
 
 ## Layout
 
@@ -92,10 +103,13 @@ There is no in-place migration tool; the backup directory is the rollback.
 agent-foundry/
   AGENTS.md
   BOOTSTRAP.md
+  CHANGELOG.md             per-release upgrade actions, read by agents
   CONTRIBUTING.md
   README.md
+  UPGRADING.md             agent-facing upgrade procedure
+  VERSION                  single source of truth for the release number
   starter/                 files installed into a target project
-    .agent-foundry/        in-project checks (skill-tree sync)
+    .agent-foundry/        install manifest, in-project checks, local-change log
   scripts/
     bootstrap-project.mjs
     foundry-lib.mjs
@@ -106,14 +120,17 @@ agent-foundry/
 ## Maintaining the foundry
 
 1. Edit the canonical files under `starter/`.
-2. Keep the seven shared workflow skills semantically synchronized between
+2. Keep the eight shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
 3. Keep `claude-in-codex` only under `.agents` and `codex-in-claude` only
    under `.claude`.
 4. Keep `starter/docs/SDLC.md` the single authority for commit authority, the
    cold-review ladder, and mid-task ADR handling; skills reference it rather
    than restating it.
-5. Run:
+5. Bump `VERSION` and add a `CHANGELOG.md` entry with concrete
+   `Upgrade actions` whenever installed behavior changes. Validation fails if
+   the current `VERSION` has no changelog entry.
+6. Run:
 
    ```text
    node scripts/validate-foundry.mjs

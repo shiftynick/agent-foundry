@@ -30,6 +30,21 @@ function requireFile(relative) {
 }
 
 export function validateFoundry() {
+  // The version is single-sourced in VERSION and substituted at install time;
+  // a hardcoded version in the payload would silently go stale.
+  const versionPath = path.join(foundryRoot, "VERSION");
+  if (!existsSync(versionPath)) {
+    throw new Error("VERSION is missing from the Foundry root.");
+  }
+  const version = readFileSync(versionPath, "utf8").trim();
+  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(version)) {
+    throw new Error(`VERSION must contain a semantic version; found: ${version}`);
+  }
+  const changelog = readFileSync(path.join(foundryRoot, "CHANGELOG.md"), "utf8");
+  if (!changelog.includes(`## ${version}`)) {
+    throw new Error(`CHANGELOG.md has no entry for the current version ${version}.`);
+  }
+
   const maintainedRoots = [path.join(foundryRoot, "scripts"), starterRoot];
   const maintainedFiles = maintainedRoots.flatMap((root) => listFiles(root));
   const powerShellFiles = maintainedFiles.filter((file) => (
@@ -61,9 +76,9 @@ export function validateFoundry() {
     .filter((file) => path.basename(file) === "SKILL.md");
   const claudeSkillFiles = listFiles(claudeSkillsRoot)
     .filter((file) => path.basename(file) === "SKILL.md");
-  if (agentSkillFiles.length !== 8 || claudeSkillFiles.length !== 8) {
+  if (agentSkillFiles.length !== 9 || claudeSkillFiles.length !== 9) {
     throw new Error(
-      "Expected 8 skills per harness; "
+      "Expected 9 skills per harness (8 shared + 1 bridge); "
       + `found agents=${agentSkillFiles.length}, `
       + `claude=${claudeSkillFiles.length}.`,
     );
@@ -90,6 +105,7 @@ export function validateFoundry() {
 
   const sharedSkills = [
     "adr",
+    "codebase-audit",
     "diagnosing-bugs",
     "execute-task",
     "grill-me",
@@ -151,6 +167,7 @@ export function validateFoundry() {
     "{{PROJECT_NAME_JSON}}",
     "{{PROJECT_DESCRIPTION_JSON}}",
     "{{INSTALLED_AT_JSON}}",
+    "{{FOUNDRY_VERSION_JSON}}",
   ]);
   for (const file of listFiles(starterRoot)) {
     const text = readFileSync(file, "utf8");

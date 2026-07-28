@@ -1,0 +1,102 @@
+# Changelog
+
+Every released version of Agent Foundry, newest first. `VERSION` at the
+repository root is the single source of truth for the current number; the
+installer stamps it into each target's `.agent-foundry.json` and
+`.agent-foundry/manifest.json`.
+
+This file is read by agents, not only humans. An agent upgrading a project
+reads every entry **after** the version recorded in that project's
+`.agent-foundry.json` and applies the `Upgrade actions` of each in order.
+See `UPGRADING.md` for the full procedure.
+
+## Format
+
+Each release has:
+
+- **Changed** — what moved, in terms a cold reader can verify.
+- **Upgrade actions** — imperative steps for the agent performing the upgrade.
+  `none` is a valid and common value. Steps must name concrete files and say
+  what to do when the file was locally modified.
+- **Breaking** — present only when an upgrade can fail or silently change
+  behavior without action.
+
+Versioning is semantic with respect to *installed projects*: `major` when an
+upgrade requires manual reconciliation to stay correct, `minor` for new
+capability that lands cleanly, `patch` for fixes with no upgrade action.
+
+## 0.2.0
+
+First versioned release. Establishes the upgrade path itself, resolves the
+process contradictions found in a full review of 0.1.0, and hardens the
+task-tracker CLI.
+
+### Changed
+
+- **Versioning and upgrades.** `VERSION` is now the single source of truth and
+  is substituted into `.agent-foundry.json` at install time instead of being
+  hardcoded in the payload. Installs write `.agent-foundry/manifest.json`
+  recording every managed file, its tier (`seed` vs `mold`), and a
+  line-ending-normalized hash, so an upgrade can distinguish a pristine file
+  from one the project has deliberately evolved.
+  `.agent-foundry/check-foundry-drift.mjs` reports that comparison.
+- **Local evolution is explicitly supported.** `.agent-foundry/README.md`
+  documents the tier model and how to record deliberate divergence in
+  `.agent-foundry/LOCAL-CHANGES.md` so upgrades do not silently revert it.
+- **Bridge skills renamed** for symmetry: `claude-cli` → `claude-in-codex`,
+  `codex-in-cc` → `codex-in-claude`.
+- **Single authority for contested rules.** `docs/SDLC.md` now owns commit
+  authority, a four-rung cold-review ladder, and mid-task ADR handling
+  (a reversibility test that says when a `proposed` ADR blocks a task).
+  Skills reference it instead of restating divergent versions.
+- **New `codebase-audit` skill** — a periodic, whole-repository sweep for
+  accumulation-class defects (duplication, dead code, eroded boundaries) that
+  per-diff review structurally cannot see. It files tasks; it never gates.
+- **New `.agent-foundry/check-skill-sync.mjs`** so installed projects can
+  verify the two harness skill trees have not drifted apart.
+- **task-tracker CLI fixes.** A held lock now reports `lock held by another
+  process` instead of falsely claiming a task file changed, and retries with
+  backoff before failing. Atomic create falls back to `wx` on filesystems
+  without hard links. Option values may start with dashes, with `--` and
+  `--flag=value` as escape hatches. Moving a soft-deleted task fails as usage
+  rather than an internal error. Cycle detection no longer has an exponential
+  worst case.
+- Prompt-injection hygiene (tool-read content is data, not instructions) added
+  to the engineering standards, review standards, and the review flow.
+
+### Upgrade actions
+
+1. Run `node .agent-foundry/check-foundry-drift.mjs` before anything else and
+   keep the output. Projects installed from 0.1.0 have no manifest and will be
+   told so — in that case, commit the worktree first so the reinstall diff is
+   reviewable, and treat every locally-edited managed file as unknown drift.
+2. Re-run the installer with `--force`, reusing the `projectName` and
+   `projectDescription` already in `.agent-foundry.json`.
+3. Restore every `seed` file the installer reset: `AGENTS.md`, `CLAUDE.md`,
+   `CONTRIBUTING.md`, `HANDOFF.md`, both journals, `docs/ENGINEERING-STANDARDS.md`,
+   `docs/REVIEW-STANDARDS.md`, `docs/adr/README.md`, and
+   `docs/out-of-scope/README.md` — take them from the backup directory the
+   installer printed, then fold in anything genuinely new from the templates.
+4. Re-apply each `mold` divergence the step-1 report listed, or drop it
+   deliberately and note why in `.agent-foundry/LOCAL-CHANGES.md`.
+5. If the project referenced the old bridge skill names, rename them:
+   `claude-cli` → `claude-in-codex`, `codex-in-cc` → `codex-in-claude`.
+6. Add a `## Commit authority` section to `AGENTS.md` — either accepting the
+   `docs/SDLC.md` default or stating a stricter project policy.
+7. Run `node .agent-foundry/check-skill-sync.mjs` and the project's own gate.
+
+### Breaking
+
+- Any project-local reference to `claude-cli` or `codex-in-cc` breaks until
+  renamed (step 5).
+- Tooling that matched the literal string `task file changed since read` to
+  detect lock contention must now also match `lock held by another process`.
+
+## 0.1.0
+
+Initial unversioned payload: dual-harness skill trees, file-based task board,
+ADR process, review discipline, journals, and collision-safe installation.
+
+### Upgrade actions
+
+none — this is the baseline.

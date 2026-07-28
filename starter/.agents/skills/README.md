@@ -11,6 +11,7 @@ agent workflows installed by Agent Foundry.
 | `execute-task` | Rubric through implementation, review, validation and commit. |
 | `adr` | MADR-style architecture decision workflow. |
 | `diagnosing-bugs` | Feedback-loop-first diagnosis. |
+| `codebase-audit` | Periodic sweep for accumulated quality drift. |
 | `handoff-writer` | Cold-start session handoff. |
 | `the-fool` | Adversarial review of ideas and plans. |
 | `grill-me` | Deliberate one-question-at-a-time decision interview. |

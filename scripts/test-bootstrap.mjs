@@ -316,7 +316,7 @@ try {
     [path.join(testRoot, ".agent-foundry", "check-skill-sync.mjs")],
     { cwd: testRoot, label: "installed skill-sync check" },
   ).stdout;
-  assert.match(syncOutput, /skill-sync: PASS \(7 shared skills\)/u);
+  assert.match(syncOutput, /skill-sync: PASS \(8 shared skills\)/u);
 
   const agents = readFileSync(path.join(testRoot, "AGENTS.md"), "utf8");
   assert(agents.includes(projectName));
@@ -329,6 +329,33 @@ try {
   const manifest = JSON.parse(manifestText);
   assert.equal(manifest.projectName, projectName);
   assert.equal(manifest.projectDescription, projectDescription);
+  const foundryVersion = readFileSync(
+    path.join(foundryRoot, "VERSION"),
+    "utf8",
+  ).trim();
+  assert.equal(manifest.foundryVersion, foundryVersion);
+
+  // The install manifest drives every upgrade decision, so assert its shape
+  // and that a freshly installed tree reports zero drift against it.
+  const installManifest = JSON.parse(
+    readFileSync(
+      path.join(testRoot, ".agent-foundry", "manifest.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(installManifest.foundryVersion, foundryVersion);
+  assert.equal(installManifest.files["AGENTS.md"].tier, "seed");
+  assert.equal(installManifest.files["docs/SDLC.md"].tier, "mold");
+  assert.equal(
+    installManifest.files[".claude/skills/task-tracker/SKILL.md"].tier,
+    "mold",
+  );
+  const driftOutput = run(
+    process.execPath,
+    [path.join(testRoot, ".agent-foundry", "check-foundry-drift.mjs")],
+    { cwd: testRoot, label: "installed drift check" },
+  ).stdout;
+  assert.match(driftOutput, /No drift: all \d+ managed files match the install/u);
   for (const templatedFile of [
     "AGENTS.md",
     "CLAUDE.md",

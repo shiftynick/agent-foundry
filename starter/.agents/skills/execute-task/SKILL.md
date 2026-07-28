@@ -254,6 +254,8 @@ A task is sized to one fresh context window:
 
 - `task-tracker` — the board and column transitions
 - `adr` — recording architecture decisions
+- `codebase-audit` — the periodic sweep for drift this per-diff review
+  cannot see
 - `docs/REVIEW-STANDARDS.md` — pasted into the step-4 STANDARDS prompt;
   appended via DISTILL
 - `docs/ENGINEERING-STANDARDS.md` — the conventions reviews check against

@@ -22,12 +22,39 @@ import {
   run,
   samePath,
 } from "./foundry-lib.mjs";
+// Imported from the payload on purpose: the installer records these hashes and
+// the installed drift checker verifies them, so they must be the same function.
+import { hashManagedFile } from "../starter/.agent-foundry/check-foundry-drift.mjs";
 
 const foundryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
 const starterRoot = path.join(foundryRoot, "starter");
+
+// Files the installer seeds once and the project owns from then on. An upgrade
+// must never silently overwrite these; everything else is "mold" the Foundry
+// owns and replaces, with local edits surfaced as drift instead.
+const SEED_FILES = new Set([
+  "AGENTS.md",
+  "BLOCKED-JOURNAL.md",
+  "CLAUDE.md",
+  "CONTRIBUTING.md",
+  "HANDOFF.md",
+  "PLANNING-JOURNAL.md",
+  "docs/ENGINEERING-STANDARDS.md",
+  "docs/REVIEW-STANDARDS.md",
+  "docs/adr/README.md",
+  "docs/out-of-scope/README.md",
+]);
+
+export function readFoundryVersion() {
+  const version = readFileSync(path.join(foundryRoot, "VERSION"), "utf8").trim();
+  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(version)) {
+    throw new Error(`VERSION must contain a semantic version; found: ${version}`);
+  }
+  return version;
+}
 
 const optionDefinitions = new Map([
   ["--target-path", { name: "targetPath", takesValue: true }],
@@ -259,7 +286,7 @@ function backupCollisions(targetRoot, collisions, installedAt) {
   return backupRoot;
 }
 
-function renderStarter(copyPlan, options, installedAt) {
+function renderStarter(copyPlan, options, installedAt, foundryVersion) {
 
   const replacements = new Map([
     ["{{PROJECT_NAME}}", options.projectName],
@@ -270,9 +297,10 @@ function renderStarter(copyPlan, options, installedAt) {
       JSON.stringify(options.projectDescription),
     ],
     ["{{INSTALLED_AT_JSON}}", JSON.stringify(installedAt)],
+    ["{{FOUNDRY_VERSION_JSON}}", JSON.stringify(foundryVersion)],
   ]);
 
-  const tokenPattern = /\{\{(?:PROJECT_NAME|PROJECT_DESCRIPTION|PROJECT_NAME_JSON|PROJECT_DESCRIPTION_JSON|INSTALLED_AT_JSON)\}\}/gu;
+  const tokenPattern = /\{\{(?:PROJECT_NAME|PROJECT_DESCRIPTION|PROJECT_NAME_JSON|PROJECT_DESCRIPTION_JSON|INSTALLED_AT_JSON|FOUNDRY_VERSION_JSON)\}\}/gu;
   for (const item of copyPlan) {
     mkdirSync(path.dirname(item.destination), { recursive: true });
     const content = readFileSync(item.source, "utf8").replace(
@@ -281,6 +309,36 @@ function renderStarter(copyPlan, options, installedAt) {
     );
     writeFileSync(item.destination, content, "utf8");
   }
+}
+
+// Records what was installed, at which version, and the hash of every managed
+// file as written. An upgrade reads this to tell a pristine file (safe to
+// replace) from one the project has deliberately evolved (must be reconciled).
+function writeInstallManifest(targetRoot, copyPlan, installedAt, foundryVersion) {
+  const files = {};
+  for (const item of copyPlan) {
+    const relative = item.relative.split(path.sep).join("/");
+    files[relative] = {
+      tier: SEED_FILES.has(relative) ? "seed" : "mold",
+      sha256: hashManagedFile(readFileSync(item.destination, "utf8")),
+    };
+  }
+  const manifestPath = path.join(targetRoot, ".agent-foundry", "manifest.json");
+  mkdirSync(path.dirname(manifestPath), { recursive: true });
+  writeFileSync(
+    manifestPath,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        foundryVersion,
+        installedAt,
+        files: Object.fromEntries(Object.entries(files).sort()),
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
 }
 
 function mergeGitignore(targetRoot) {
@@ -494,10 +552,12 @@ export function bootstrap(options) {
     throw error;
   }
   const installedAt = new Date().toISOString();
+  const foundryVersion = readFoundryVersion();
   if (options.force) {
     backupCollisions(targetRoot, collisions, installedAt);
   }
-  renderStarter(copyPlan, options, installedAt);
+  renderStarter(copyPlan, options, installedAt, foundryVersion);
+  writeInstallManifest(targetRoot, copyPlan, installedAt, foundryVersion);
   mergeGitignore(targetRoot);
 
   if (!options.skipValidation) {
@@ -507,7 +567,9 @@ export function bootstrap(options) {
     createBootstrapTask(targetRoot);
   }
 
-  console.log(`Agent Foundry installed successfully at ${targetRoot}`);
+  console.log(
+    `Agent Foundry ${foundryVersion} installed successfully at ${targetRoot}`,
+  );
 }
 
 function main() {
