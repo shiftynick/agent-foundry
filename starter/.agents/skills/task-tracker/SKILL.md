@@ -221,8 +221,23 @@ same claimable filter.
 ## Tags
 
 Convention is `key:value`. Common keys: `area:core`, `area:desktop`,
-`area:architecture`, `area:tooling`, `area:process`, and `phase:<name>`.
-Filter with `list --tag area:core`.
+`area:architecture`, `area:tooling`, `area:process`, `milestone:<name>`, and
+`needs:operator`. Filter with `list --tag area:core`.
+
+**`milestone:` and `phase:` are not interchangeable:**
+
+- `milestone:<name>` — the **work front** a task belongs to. `plan-milestone`
+  files and queries by this tag, so a front card tagged anything else is
+  invisible to it, and the failure is silent: the filter returns a partial
+  front, which reads as "most of the milestone is done" rather than "the query
+  missed half the board".
+- `phase:<name>` — the **kind or provenance** of the work, independent of any
+  milestone: `phase:bootstrap` for installation tailoring, `phase:audit` for
+  cards a `codebase-audit` filed.
+
+A card can carry both. If a board was seeded by hand with `phase:` names that
+were meant as milestones, retag those to `milestone:` — `list --tag` will not
+tell you they are missing.
 
 ## Read commands
 

@@ -160,6 +160,13 @@ under "Commit authority", which then overrides this default.
   rebase or amend already-pushed commits.
 - **Never bypass hooks or gates** (`--no-verify`, `--amend` to hide a failure).
   A failing hook is fixed in a new commit.
+- **A commit is not the end of the lifecycle.** Committing work to a task
+  branch so a cold reviewer can see it is part of the review step, not a claim
+  that the task is done — a reviewer in its own process cannot read your index,
+  so an uncommitted packet must be exported instead (the bridge skills show
+  how). Review findings are then addressed in further commits on the same
+  branch. What requires the task to be *complete* is not the first commit; it
+  is merging or delivering the branch.
 
 If a project sets a stricter policy, the agent stops at the boundary that
 policy defines and reports the change packet instead of committing it.

@@ -18,7 +18,7 @@
 // pipeline is GNU-only, and its PowerShell counterpart (Select-String) is
 // case-insensitive by default, which silently changes what matches.
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { argv, cwd, exit, stdout } from "node:process";
 import { fileURLToPath } from "node:url";
@@ -73,6 +73,29 @@ function taskFiles(repoRoot) {
   return out;
 }
 
+// When a task last changed, read from the file's own content — never from
+// filesystem mtime, which any fresh clone, new worktree, or CI checkout resets
+// to "now". Under mtime, `--since` silently matches everything and degrades to
+// no filter at all, which would let months-old friction be counted as a
+// current pattern and edit a governing document on bad evidence. Worktrees are
+// the recommended layout for parallel agents, so this is the common case.
+export function taskTimestamp(text) {
+  const raw = text.match(/^updatedAt:\s*(.+)$/mu)?.[1]?.trim();
+  if (raw) {
+    const parsed = Date.parse(raw.replace(/^["']|["']$/gu, ""));
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  // Fall back to the newest dated log line for hand-edited or older files.
+  let newest = null;
+  for (const match of text.matchAll(/^-\s(\d{4}-\d{2}-\d{2}T[\d:]+Z)/gmu)) {
+    const parsed = Date.parse(match[1]);
+    if (!Number.isNaN(parsed) && (newest === null || parsed > newest)) {
+      newest = parsed;
+    }
+  }
+  return newest;
+}
+
 export function collectSignals(repoRoot, since = null) {
   const cutoff = since ? Date.parse(since) : null;
   if (since && Number.isNaN(cutoff)) {
@@ -80,8 +103,13 @@ export function collectSignals(repoRoot, since = null) {
   }
   const rows = [];
   for (const file of taskFiles(repoRoot)) {
-    if (cutoff !== null && statSync(file).mtimeMs < cutoff) continue;
     const text = readFileSync(file, "utf8");
+    if (cutoff !== null) {
+      const stamp = taskTimestamp(text);
+      // A file carrying no usable timestamp is kept: over-reporting is
+      // recoverable at the evidence bar, silently dropping evidence is not.
+      if (stamp !== null && stamp < cutoff) continue;
+    }
     const id = text.match(/^id:\s*(task-\d+)/mu)?.[1] ?? file;
     rows.push(scanTaskText(id, text));
   }

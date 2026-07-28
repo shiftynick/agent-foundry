@@ -208,6 +208,12 @@ export function validateFoundry() {
     ".gitignore.append",
     ".agent-foundry/check-skill-sync.mjs",
     ".agent-foundry/check-skill-sync.test.mjs",
+    ".agent-foundry/check-foundry-drift.mjs",
+    ".agent-foundry/check-foundry-drift.test.mjs",
+    ".agent-foundry/run-checks.mjs",
+    ".agent-foundry/run-checks.test.mjs",
+    ".agent-foundry/README.md",
+    ".agent-foundry/LOCAL-CHANGES.md",
   ].forEach(requireFile);
 
   console.log("Agent Foundry structural validation: PASS");

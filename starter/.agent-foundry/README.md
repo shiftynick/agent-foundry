@@ -6,6 +6,7 @@ product code and it is not the task board.
 | File | Purpose |
 | --- | --- |
 | `manifest.json` | What was installed, at which version, with a hash and tier per managed file. Generated — do not hand-edit. |
+| `run-checks.mjs` | Runs the skill-sync gate plus every test suite the kit owns. |
 | `check-skill-sync.mjs` | Verifies the two harness skill trees still agree. |
 | `check-foundry-drift.mjs` | Reports how installed files differ from what was installed. |
 | `LOCAL-CHANGES.md` | Your record of deliberate divergence from the stock workflow. |
@@ -53,12 +54,18 @@ is project state the installer never reads or writes.
 ## Routine checks
 
 ```bash
-node .agent-foundry/check-skill-sync.mjs      # harness trees agree
+node .agent-foundry/run-checks.mjs            # sync gate + every kit test suite
 node .agent-foundry/check-foundry-drift.mjs   # what we have changed
 ```
 
-The two have deliberately different force:
+`run-checks` discovers suites rather than listing them, so a skill that ships
+new tests in a future release is covered without touching the project's gate.
 
+The checks have deliberately different force:
+
+- **`run-checks` should be a gate.** It is the sync check plus every installed
+  suite, and both are things this project should never be able to break
+  silently. Wire it into the quality gate and CI.
 - **`check-skill-sync` should be a gate.** It exits non-zero on real drift
   between the trees, and that drift is always a mistake — two harness trees
   disagreeing silently breaks the cross-family cold review the whole review

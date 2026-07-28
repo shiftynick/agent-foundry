@@ -123,10 +123,17 @@ merged, so neither axis's findings can mask the other's:
   conformance; do NOT filter — coverage first."
 
 Give each reviewer the file paths in scope, read access to the repo, and a
-complete change packet. When `HEAD` exists, use `git diff HEAD`; before the
-first commit, use `git status --short` and the tracked diff. In every repo
-state, list `git ls-files --others --exclude-standard` and include the complete
-contents of every untracked in-scope file so new files are not invisible.
+complete change packet. When `HEAD` exists, use `git diff --binary HEAD` —
+**not** a bare `git diff`, which is working-tree versus index and therefore
+omits everything already staged. Before the first commit, use
+`git status --short` and the tracked diff. In every repo state, list
+`git ls-files --others --exclude-standard` and include the complete contents of
+every untracked in-scope file so new files are not invisible.
+
+A reviewer running in its own process cannot see your index at all, so either
+export the packet as above or commit it to the task branch first — that
+review-packet commit is part of this step, not a claim the task is done (see
+`docs/SDLC.md` → "Commit authority").
 Coverage-first matters: "skip nits" filters
 at collection time and measurably drops recall on real bugs. Collect
 everything; *you* triage in step 5 — per axis, so the worst finding on

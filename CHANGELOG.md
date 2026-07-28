@@ -25,6 +25,76 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.6.0
+
+Second field-report release, from a project that traversed 0.1.0 → 0.5.0 in a
+week. Two of the defects were in code 0.4.0 and 0.5.0 shipped — surfaced by a
+project *using* the kit, not by the kit's own tests.
+
+### Changed
+
+- **`retrospective --since` no longer trusts filesystem mtime.** It filtered on
+  `statSync().mtimeMs`, which any fresh clone, new worktree, or CI checkout
+  resets to "now" — so `--since` silently matched everything and degraded to no
+  filter. Since the skill's premise is counting *recent repeated* occurrences
+  to justify editing a governing document, that let months-old friction be
+  scored as a current pattern. It now reads the task's own `updatedAt`
+  frontmatter, falling back to the newest dated log line, and keeps files with
+  no usable timestamp rather than dropping evidence. This mattered most in a
+  worktree, which 0.4.0 itself recommends for parallel agents — the two
+  features were in tension as shipped.
+- **The bridge skills' packet escape hatch no longer drops content.** Both
+  suggested `git diff > packet.diff`, which is working-tree *versus index* and
+  therefore omits exactly the staged changes the surrounding paragraph exists
+  to rescue — reintroducing the wasted review round it was added to prevent.
+  Now `git diff --binary HEAD`, plus an explicit instruction to list untracked
+  files with `git ls-files --others --exclude-standard` and attach their
+  contents, since a task that adds a module has its most important files
+  untracked. `execute-task` carries the same correction.
+- **Review-packet commits are part of the lifecycle.** The bridge skills said
+  the packet must be a commit while `docs/SDLC.md` placed the commit after
+  review — both authoritative, and jointly unsatisfiable. Commit authority now
+  states that committing to a task branch so a cold reviewer can see the work
+  is part of the review step, not a claim of completion; what requires the task
+  to be complete is merging or delivering the branch.
+- **One tag convention per concept.** `task-tracker` listed `phase:<name>`
+  while `plan-milestone` files and queries `milestone:<name>`, so a hand-seeded
+  front was invisible to the skill that owns it — and the failure is silent, a
+  partial result reading as "most of the milestone is done". The tag list now
+  distinguishes `milestone:` (the work front, queried by `plan-milestone`) from
+  `phase:` (kind or provenance, such as `phase:bootstrap` or `phase:audit`).
+- **New `.agent-foundry/run-checks.mjs`.** Discovers and runs the skill-sync
+  gate plus every `*.test.mjs` under the managed trees. The kit now ships
+  executable code inside the skill trees, and hand-maintained suite lists in
+  `UPGRADING.md` had already fallen behind — 0.4.0's two new suites shipped but
+  a project following the procedure exactly never ran them. Upgrade, gate, and
+  bootstrap docs now name this one command instead of enumerating paths.
+- **`UPGRADING.md` opens by filing the upgrade task**, with a standing rubric,
+  because the procedure is normally entered directly from an operator request
+  and bypasses `execute-task`'s preamble — so the rubric was being written
+  after the work, where it cannot fail the work that produced it. The rubric
+  promotes verifying each retirement against the installed file rather than
+  trusting the changelog.
+- `LOCAL-CHANGES.md`'s header no longer describes itself as a `mold` file it
+  is no longer classified as.
+
+### Upgrade actions
+
+1. Follow the standard procedure in `UPGRADING.md` — which now starts by
+   filing the upgrade task and logging its rubric.
+2. Replace any project gate or CI step that runs `check-skill-sync.mjs` or a
+   hand-listed set of `--test` paths with `node .agent-foundry/run-checks.mjs`.
+3. Audit the board for front cards tagged `phase:<name>` that were meant as
+   milestones and retag them `milestone:<name>`; `list --tag` will not report
+   the split.
+4. If any local process documentation repeats `git diff > packet.diff` as the
+   review-packet command, correct it to `git diff --binary HEAD` plus the
+   untracked-file listing.
+
+### Breaking
+
+- None.
+
 ## 0.5.0
 
 Adds the cost dimension the kit was missing: how to spend the expensive

@@ -77,10 +77,11 @@ default for each is every 15-20 completed tasks and before a milestone.
 Per-task review cannot see accumulated drift in the code or the process;
 these are the sweeps that can.]
 
-Skill-tree sync is part of the gate:
+The Foundry's own checks are part of the gate — one command, which discovers
+the skill-sync check plus every test suite the installed kit owns:
 
 ```text
-node .agent-foundry/check-skill-sync.mjs
+node .agent-foundry/run-checks.mjs
 ```
 
 Never report a planned or unavailable command as passing.

@@ -52,7 +52,19 @@ When `execute-task` is active and the CLI is working:
 - **The packet must be a commit or an exported diff file — never the index.**
   The reviewer runs in its own process, so `git diff --cached` reads empty
   from there and the review comes back "no content to review", costing a full
-  round. Commit the work (or write `git diff > packet.diff`) before invoking.
+  round. Either commit the work to the task branch (see `docs/SDLC.md` →
+  "Commit authority" on review-packet commits), or export it:
+
+  ```bash
+  git diff --binary HEAD > packet.diff
+  git ls-files --others --exclude-standard
+  ```
+
+  Use `HEAD`, not a bare `git diff`: plain `git diff` is working-tree
+  *versus index*, so it omits everything already staged — which is exactly
+  the case this rule exists to fix. Untracked files are in neither diff, so
+  list them and attach their full contents; a task that adds a new module has
+  its most important files untracked.
 - With tools disabled the reviewer **cannot execute the system under review**:
   say so in the prompt, and ask it to reason from the diff, the tests as
   written, and the supplied context rather than from a running system.
