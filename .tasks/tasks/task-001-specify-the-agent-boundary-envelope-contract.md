@@ -66,7 +66,7 @@ Objective: add a concise Foundry-native convention for bounded delegation, evide
   output:
   | [eval]:1
   | const
-  |      
+  |
   | Unexpected token `<eof>`. Expected yield, an identifier, [ or {
   |
   | SyntaxError: Unexpected end of input
@@ -140,7 +140,7 @@ Objective: add a concise Foundry-native convention for bounded delegation, evide
 - 2026-07-29T14:37:02Z — run: powershell -NoProfile -Command Select-String -Path starter/docs/SDLC.md -Pattern ## Planning above the task
   started 2026-07-29T14:37:02Z, exit 1 in 0.3s
   output:
-  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try 
+  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try
   | again.
   | At line:1 char:42
   | + Select-String -Path starter/docs/SDLC.md -Pattern ## Planning above t ...
@@ -150,7 +150,7 @@ Objective: add a concise Foundry-native convention for bounded delegation, evide
 - 2026-07-29T14:37:02Z — run: powershell -NoProfile -Command Select-String -Path starter/docs/SDLC.md -Pattern ## Concurrency
   started 2026-07-29T14:37:02Z, exit 1 in 0.3s
   output:
-  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try 
+  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try
   | again.
   | At line:1 char:42
   | + Select-String -Path starter/docs/SDLC.md -Pattern ## Concurrency
@@ -160,7 +160,7 @@ Objective: add a concise Foundry-native convention for bounded delegation, evide
 - 2026-07-29T14:37:03Z — run: powershell -NoProfile -Command Select-String -Path starter/docs/SDLC.md -Pattern ## The operator queue
   started 2026-07-29T14:37:02Z, exit 1 in 0.2s
   output:
-  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try 
+  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try
   | again.
   | At line:1 char:42
   | + Select-String -Path starter/docs/SDLC.md -Pattern ## The operator que ...
@@ -170,7 +170,7 @@ Objective: add a concise Foundry-native convention for bounded delegation, evide
 - 2026-07-29T14:37:03Z — run: powershell -NoProfile -Command Select-String -Path starter/docs/SDLC.md -Pattern ## Review
   started 2026-07-29T14:37:03Z, exit 1 in 0.3s
   output:
-  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try 
+  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try
   | again.
   | At line:1 char:42
   | + Select-String -Path starter/docs/SDLC.md -Pattern ## Review
@@ -180,7 +180,7 @@ Objective: add a concise Foundry-native convention for bounded delegation, evide
 - 2026-07-29T14:37:03Z — run: powershell -NoProfile -Command Select-String -Path starter/docs/SDLC.md -Pattern ## Commit authority
   started 2026-07-29T14:37:03Z, exit 1 in 0.3s
   output:
-  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try 
+  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try
   | again.
   | At line:1 char:42
   | + Select-String -Path starter/docs/SDLC.md -Pattern ## Commit authority
@@ -190,7 +190,7 @@ Objective: add a concise Foundry-native convention for bounded delegation, evide
 - 2026-07-29T14:37:04Z — run: powershell -NoProfile -Command Select-String -Path starter/docs/SDLC.md -Pattern ## Blockers
   started 2026-07-29T14:37:03Z, exit 1 in 0.3s
   output:
-  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try 
+  | Select-String : Missing an argument for parameter 'Pattern'. Specify a parameter of type 'System.String[]' and try
   | again.
   | At line:1 char:42
   | + Select-String -Path starter/docs/SDLC.md -Pattern ## Blockers
