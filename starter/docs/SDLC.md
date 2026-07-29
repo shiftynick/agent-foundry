@@ -37,6 +37,34 @@ This is a deliberate trade: real cross-agent locking needs state outside the
 versioned tree, which would break the property that every piece of project
 state is a reviewable, mergeable file in the repository.
 
+## Agent boundaries
+
+Capability is not assignment. Whenever work crosses an agent boundary, the
+delegating prompt states three things in plain language:
+
+- the exact objective;
+- the mutation ceiling: `report-only` (inspect and return findings), `patch`
+  (edit only the assigned scope, without committing), or `task-commit` (the
+  task owner may commit under this SDLC's commit-authority rules); and
+- the files, systems, and decisions in scope.
+
+The receiver may do less, but never more. A missing or ambiguous ceiling means
+`report-only`; out-of-scope work returns to the delegator instead of being
+silently absorbed. Tool access describes technical capability and never
+widens the assignment.
+
+Delegated results label consequential claims as:
+
+- **observed** — witnessed directly in a file, command result, or live surface;
+- **reported** — supplied by another agent, person, or external source; or
+- **inferred** — concluded from cited evidence.
+
+The task owner verifies high-impact reported or inferred claims before acting
+on them. When a receiver cannot continue safely, it stops the affected action
+and returns: the reason, viable options, its recommendation, and the condition
+that would let work resume. This is a concise handoff convention, not a wire
+protocol, permission system, or replacement for task ownership.
+
 ## The operator queue
 
 Anything waiting on a human — a `proposed` ADR, a credential, a design call,
@@ -251,4 +279,3 @@ project-specific are flagged for upstreaming to the Foundry via
 - Leave recent completed work visible in `done`.
 - Archive completed tasks before a formal handoff.
 - Use `handoff-writer` for a durable cold-start checkpoint.
-

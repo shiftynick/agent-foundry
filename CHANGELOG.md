@@ -25,6 +25,30 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.7.0
+
+### Changed
+
+- Added a lightweight agent-boundary convention to `docs/SDLC.md`.
+  Delegations now state their objective, mutation ceiling, and scope; results
+  distinguish observed, reported, and inferred evidence; blocked receivers
+  return a reason, options, recommendation, and resume condition. This is
+  intentionally a prose handoff convention, not an authorization protocol.
+- `efficient-orchestration` now defers boundary semantics to the SDLC rather
+  than growing a second set of rules in the skill.
+
+### Upgrade actions
+
+1. Apply the normal upgrade; unmodified managed files receive the new SDLC
+   section and skill pointer without manual work.
+2. Only when `docs/SDLC.md` has local delegation-policy changes, reconcile the
+   new "Agent boundaries" section with them. Preserve stricter project rules,
+   but keep the three mutation ceilings and evidence labels semantically
+   recognizable.
+3. Only when either copy of `efficient-orchestration/SKILL.md` has local
+   changes, add the SDLC reference at its handoff-packet step rather than
+   replacing the customized workflow.
+
 ## 0.6.0
 
 Second field-report release, from a project that traversed 0.1.0 → 0.5.0 in a
