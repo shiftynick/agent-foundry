@@ -2,9 +2,10 @@
 name: task-tracker
 description: >-
   Operate the persistent file-based task board: inspect, add, claim, move,
-  block, annotate, validate, and archive tasks. Use for board state or CLI
-  semantics. For the work performed between claim and completion, use
-  execute-task.
+  block, annotate, validate, and archive tasks. Use for "what's next", "what
+  should I work on", tasks, board, kanban, backlog, ready, in_progress,
+  review, blocked, or task-tracker CLI semantics. Distinct from a
+  transcript-scoped plan; use execute-task for work after selection.
 ---
 
 # Task Tracker
@@ -37,7 +38,7 @@ task.mjs archive --dry-run
 task.mjs archive
 ```
 
-Use the full `node .agents/.../task.mjs` prefix in actual commands. Read
+Use the harness-local full `task.mjs` prefix shown above in actual commands. Read
 `references/cli-reference.md` completely before using less common flags,
 editing or deleting cards, diagnosing exit codes/locks, or generating HTML.
 
@@ -48,7 +49,7 @@ intentional queue signal and wins only as a same-priority tiebreaker. If
 `next` returns no output with exit code 0, run `board` and `list --blocked`;
 all remaining work is blocked, active, under review, or complete.
 
-Before `in_progress`, `execute-task` requires a logged 3-6 item rubric.
+Before `in_progress`, follow `execute-task`'s rubric requirement.
 Dependency guards reject claims while blockers are incomplete. Never use
 `--force` without explicit user authorization.
 
@@ -65,8 +66,8 @@ Normal states are:
 `blocked` is for an external condition the agent cannot resolve. The CLI
 enforces legal transitions and dependencies. `--blocked-by task-NNN` adds a
 dependency, rejects cycles and unknown/deleted IDs, and prevents movement into
-active or completed states until every blocker is a live or archived `done`
-task.
+`in_progress`, `review`, or `done` until every blocker is a live or archived
+`done` task.
 
 Moving to `in_progress` records `claimedBy` and `claimedAt`; the owner comes
 from `FOUNDRY_AGENT` when set, otherwise `user@host`. Claims are advisory, not

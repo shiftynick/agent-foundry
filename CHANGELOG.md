@@ -32,18 +32,19 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
 - Slimmed the default-loaded `execute-task` and `task-tracker` instructions.
   `execute-task` is now the sole detailed task-lifecycle authority, while
   `task-tracker` is the sole detailed board and CLI authority.
-- Moved cold-review mechanics, decision/blocker handling, concurrency,
-  durable task authoring, and uncommon CLI details into explicitly routed
-  reference files. Agents load those references only when the named condition
-  occurs; safety rules and command behavior are unchanged.
+- Moved phase-specific cold-review and decision/blocker mechanics, plus
+  uncommon concurrency, task-authoring, and CLI details, into explicitly
+  routed reference files. Agents load them only at the relevant phase or
+  condition; safety rules and command behavior are unchanged.
 - Cold SPEC and STANDARDS reviews remain independent but are now dispatched
   concurrently when supported. Their output is `PASS` or concise findings
   tied to an existing rubric line, standard, or invariant, so review prose
   and uncited scope expansion do not consume the task.
 - Validation now uses targeted checks during editing and runs expensive
   applicable full gates once after the diff freezes. Post-gate edits rerun
-  affected gates; uncertain, high-risk, and cross-cutting changes always run
-  full applicable validation.
+  full applicable gates unless a versioned, CI-enforced file-to-gate map
+  proves a narrower set; uncertain, high-risk, and cross-cutting changes
+  always run full applicable validation.
 - Both counterpart-CLI bridges operationalize the centralized SDLC review
   rules without defining a second policy.
 
@@ -62,11 +63,21 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
 4. If `docs/SDLC.md` has local review or validation policy, reconcile it with
    the concurrent-but-separate review contract and conservative invalidation
    rule. Preserve stricter full-gate requirements.
-5. If either counterpart bridge is locally modified, retain its invocation
+5. If the target already contains files at any new reference path under
+   `execute-task/references/` or `task-tracker/references/`, reconcile each
+   collision. Retain useful project-specific mechanics while adopting the new
+   routing and centralized policy references.
+6. If either counterpart bridge is locally modified, retain its invocation
    details but add concurrent independent dispatch and the findings-only
    output contract.
-6. Keep both harness copies semantically synchronized and run
-   `node .agent-foundry/run-checks.mjs`.
+7. From the installed project root, run
+   `node .agent-foundry/run-checks.mjs`. It must discover the managed suites,
+   including skill synchronization; discovering no suites means the
+   installation is incomplete and the upgrade has failed.
+
+Unmodified installations upgrade cleanly as a minor release. The conditional
+reconciliation steps above apply only to project-owned drift in managed
+`mold` files.
 
 ## 0.7.0
 

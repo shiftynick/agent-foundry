@@ -14,7 +14,7 @@ architecture decision or cannot continue safely.
      within this task may proceed provisionally with a log note. Expensive to
      reverse moves the task to `blocked` pending acceptance.
    - For a minor choice, add a concise task note.
-   - When rejecting a direction for reusable reasons, also add an
+   - When rejecting a direction for reusable reasons, also add a
      `docs/out-of-scope/` record with a revisit condition.
 
 ## Blocker
@@ -23,6 +23,9 @@ architecture decision or cannot continue safely.
 2. If still blocked, log the exact condition and attempted alternatives, then
    move the task to `blocked`.
 3. For a human decision, credential, or approval, add `needs:operator`.
+   A `proposed` ADR awaiting acceptance gets a companion `needs:operator`
+   task citing the ADR. The operator queue is
+   `task.mjs list --tag needs:operator`.
 4. Append to `BLOCKED-JOURNAL.md` using its format, especially `Resume:`.
 5. Surface one concise line naming the missing input and journal reference.
 

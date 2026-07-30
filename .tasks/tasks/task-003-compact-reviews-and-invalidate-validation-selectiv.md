@@ -1,12 +1,12 @@
 ---
 id: task-003
 title: Compact reviews and invalidate validation selectively
-status: review
+status: done
 priority: p1
 tags: [area:process]
 blockedBy: []
 createdAt: "2026-07-30T12:24:06Z"
-updatedAt: "2026-07-30T12:34:11Z"
+updatedAt: "2026-07-30T15:40:40Z"
 ---
 
 <!-- task-tracker:description -->
@@ -119,3 +119,52 @@ Reduce review and validation time/token cost without lowering quality. Make sepa
   started 2026-07-30T12:34:11Z, exit 0 in 0.1s
   output:
   | (no output)
+- 2026-07-30T15:28:32Z — note: cold review round 1 used rung 1 with concurrent separate Claude SPEC/STANDARDS calls. Accepted and fixed: incomplete concurrent-axis failure handling, duplicated findings policy, runtime-only event-sequence wording, undefined file-to-gate mapping, unsafe prose carve-out, pre-review targeted-check sequencing, bridge policy duplication, and missing cold-review upgrade reconciliation. The earlier quota and run-checks entries remain historical evidence; required source gates are validate-foundry/test-bootstrap plus sync/diff, and 0.8.0 is one unreleased stacked release. Re-review required after material fixes.
+- 2026-07-30T15:33:56Z — note: Round 2 adjudication: accepted enforced file-to-gate mapping, non-vacuous prose handling, centralized concurrent-round contract, defined severity/confidence, validation-authority deduplication, and installed-root run-checks semantics. Targeted sync, structural validation, and diff checks pass after fixes.
+- 2026-07-30T15:38:59Z — run: node starter/.agent-foundry/check-skill-sync.mjs starter
+  started 2026-07-30T15:38:59Z, exit 0 in 0.1s
+  output:
+  | skill-sync: PASS (11 shared skills)
+- 2026-07-30T15:39:01Z — run: node scripts/validate-foundry.mjs
+  started 2026-07-30T15:38:59Z, exit 0 in 1.9s
+  output:
+  | Agent Foundry structural validation: PASS
+- 2026-07-30T15:39:23Z — run: node scripts/test-bootstrap.mjs
+  started 2026-07-30T15:39:01Z, exit 0 in 21.9s
+  output tail (truncated to last 30 lines):
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ...........
+  | task-001 → in_progress
+  | task-001 noted
+  | Agent Foundry 0.8.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-gPZSHv\clean-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-gPZSHv\clean-project\.agent-foundry-backups\20260730T153922752Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | The target board already has active tasks; no bootstrap task was created.
+  | Agent Foundry 0.8.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-gPZSHv\clean-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-gPZSHv\clean-project\.agent-foundry-backups\20260730T153923172Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.8.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-gPZSHv\clean-project
+  | Agent Foundry clean-project bootstrap: PASS
+- 2026-07-30T15:39:23Z — run: git diff --check
+  started 2026-07-30T15:39:23Z, exit 0 in 0.1s
+  output:
+  | (no output)
+- 2026-07-30T15:40:40Z — note: Cold review round 3 complete at ladder rung 1 (Claude counterpart CLI): SPEC PASS and shared STANDARDS PASS after adjudicated fixes. Frozen-tree skill sync, structural validation, disposable bootstrap, and diff hygiene all passed.
+- 2026-07-30T15:40:40Z — moved to done

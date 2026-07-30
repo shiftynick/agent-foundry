@@ -2,9 +2,10 @@
 name: execute-task
 description: >-
   Execute one board task end-to-end: rubric, claim, implementation, cold
-  review, validation, completion, and local commit. Use after task-tracker
-  identifies or claims a specific task. This skill owns lifecycle execution;
-  task-tracker owns board state and CLI semantics.
+  review, validation, completion, and local commit. Use for "work on
+  task-NNN", "pick up the next task", or after task-tracker `next` or `move
+  ... in_progress` identifies a task. This skill owns lifecycle execution;
+  task-tracker owns board and CLI semantics.
 ---
 
 # Execute Task
@@ -76,26 +77,14 @@ task-scoped changes made after the latest review.
 
 ## Validate
 
-Exercise the behavior that changed. Record every command-expressible signal
-through the tracker:
+Before validating, read `docs/SDLC.md` → "Validation" completely and apply
+its gate-selection and invalidation rules. Apply the testing requirements in
+`docs/ENGINEERING-STANDARDS.md` and the project's lint, type, or static gates.
+Record every command-expressible signal through the tracker:
 
 ```bash
 node .agents/skills/task-tracker/scripts/task.mjs run task-NNN -- <exact command>
 ```
-
-Use the appropriate evidence:
-
-- logic: focused tests plus the relevant full suite;
-- CLI/runtime: execute the real command and inspect its result;
-- service/API: boot it and probe a golden path and meaningful failure;
-- UI: drive the real surface through a golden path and edge case;
-- docs/skills: read end-to-end and verify commands, links, and synchronization.
-
-Follow `docs/SDLC.md` → "Validation": use targeted checks while editing, then
-freeze the diff and run each expensive applicable full gate once. Any later
-edit reruns the gates it could affect. A project-owned file-to-gate map may
-prove narrower invalidation; uncertainty and high-risk or cross-cutting
-changes require the full applicable gates.
 
 Use `task.mjs note` only for evidence a command cannot express, such as a
 browser observation. A hand-written claim that a runnable check passed is not
@@ -110,8 +99,10 @@ Before completion, verify:
 - both review axes are adjudicated and their ladder rung is logged;
 - documentation and ADRs are current;
 - follow-ups are separate;
-- the diff contains only this task; and
-- the task log contains real validation evidence.
+- the diff contains only this task;
+- the task log contains real validation evidence; and
+- any changed shared skill has its counterpart copy in the same commit, with
+  `node .agent-foundry/check-skill-sync.mjs` recorded.
 
 Then:
 

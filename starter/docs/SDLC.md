@@ -151,15 +151,25 @@ verify findings against the live repository.
 Dispatch the two axes concurrently when the harness supports independent
 calls. They remain separate calls and separate outputs; concurrency must not
 merge their prompts, context, or adjudication.
+Both axes must return a valid terminal result. A failed, timed-out, cancelled,
+missing, or malformed axis makes the round incomplete; retry that axis and
+never treat the other axis's `PASS` as a complete review.
 
 Review output is findings-only:
 
 - return `PASS` when the axis has no findings;
 - otherwise return only numbered findings, highest severity first;
 - each SPEC finding names its location, the existing objective or rubric line
-  it violates, the failing event sequence, and confidence;
+  it violates, the concrete failure or contradiction, severity, and
+  confidence;
 - each STANDARDS finding names its location, the existing standard or project
-  invariant it violates, the failing event sequence, and confidence.
+  invariant it violates, the concrete failure or contradiction, severity, and
+  confidence.
+
+Severity is `high` when the defect blocks correctness, safety, or the stated
+objective; `medium` when it materially harms operability or maintainability;
+and `low` when it is localized and nonblocking. Confidence is `high`, `medium`,
+or `low`.
 
 No preamble, praise, recap, or clean-check inventory is needed. Reviewers still
 report every substantiated defect on their axis, including low-severity
@@ -237,13 +247,22 @@ Use two validation phases:
    The diff is frozen only after implementation and material review fixes are
    complete.
 
+Targeted checks must pass before cold review. Expensive full gates may wait
+until review fixes are complete so they exercise the final behavior once.
+
 A post-gate edit invalidates every gate whose inputs or behavior it could
-affect. A project-owned file-to-gate map may prove that only a narrower gate
-needs rerunning; without such a map, or whenever the impact is uncertain,
-rerun the full applicable gates. Pure prose edits made after a runtime gate do
-not invalidate that runtime gate only when they cannot affect generated
-content, commands, configuration, packaging, or executable behavior; their
-documentation/link/release checks still rerun.
+affect. Narrower reruns are allowed only when the repository's governing
+validation documentation names a versioned file-to-gate map with explicit
+path inputs for every gate and a project check or CI job enforces that map. A
+change to the map invalidates all gates. With no enforced map, an incomplete
+map, or uncertain impact, rerun the full applicable gates.
+
+Prose is not automatically exempt. When a valid enforced map exists,
+documentation outside every declared gate input may rerun only its
+documentation, link, and release checks. Installed, generated, parsed,
+packaged, command-bearing, configuration-bearing, or policy prose is gate
+input; after it changes, rerun its applicable structural, bootstrap, or
+runtime gates.
 
 Always run full applicable validation for high-risk or cross-cutting changes,
 regardless of a narrower file mapping. This includes security or

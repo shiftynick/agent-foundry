@@ -19,6 +19,8 @@ task.mjs next
 
 Archived tasks are hidden from normal reads. A normal archived `done` task
 satisfies dependencies; a soft-deleted task does not.
+`list --ready` uses the same claimable filter as `next`. `board` shows active
+owners in brackets, while `show` prints `claimedBy` and `claimedAt`.
 
 Generate the read-only HTML board with:
 
@@ -44,6 +46,8 @@ task.mjs archive [--dry-run]
 
 Priorities are `p0`, `p1`, `p2`, `p3`; the default is `p2`. New tasks start
 in `backlog`. `rm` is a soft delete (`done` plus `deleted:true`).
+Every move out of `in_progress` clears `claimedBy` and `claimedAt`. An
+authorized `--force` transition is recorded in the task log.
 
 Free text may begin with dashes. Use a bare `--` before ambiguous positional
 text or the `--flag=value` form:
@@ -52,6 +56,9 @@ text or the `--flag=value` form:
 task.mjs note task-007 -- "--force was considered"
 task.mjs add --title="--valid title"
 ```
+
+`## Description` is hand-editable; `## Log` is CLI-owned. Never edit or
+remove `<!-- task-tracker:... -->` markers because they delimit those sections.
 
 ## Tags
 
