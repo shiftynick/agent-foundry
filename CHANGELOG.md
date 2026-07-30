@@ -71,8 +71,8 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
    details but add concurrent independent dispatch and the findings-only
    output contract.
 7. From the installed project root, run
-   `node .agent-foundry/run-checks.mjs`. It must discover the managed suites,
-   including skill synchronization; discovering no suites means the
+   `node .agent-foundry/run-checks.mjs`. It must run skill synchronization and
+   discover the managed test suites; discovering no test suites means the
    installation is incomplete and the upgrade has failed.
 
 Unmodified installations upgrade cleanly as a minor release. The conditional
