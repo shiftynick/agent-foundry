@@ -25,6 +25,33 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.8.0
+
+### Changed
+
+- Slimmed the default-loaded `execute-task` and `task-tracker` instructions.
+  `execute-task` is now the sole detailed task-lifecycle authority, while
+  `task-tracker` is the sole detailed board and CLI authority.
+- Moved cold-review mechanics, decision/blocker handling, concurrency,
+  durable task authoring, and uncommon CLI details into explicitly routed
+  reference files. Agents load those references only when the named condition
+  occurs; safety rules and command behavior are unchanged.
+
+### Upgrade actions
+
+1. Apply the normal upgrade. Unmodified skill directories receive the shorter
+   entrypoints and their new `references/` files automatically.
+2. If either installed `execute-task/SKILL.md` was customized, reconcile its
+   lifecycle changes into the new entrypoint and move local cold-review or
+   blocker detail into the matching reference instead of restoring duplicate
+   prose.
+3. If either installed `task-tracker/SKILL.md` was customized, keep board and
+   CLI semantics in that skill, move lifecycle requirements to `execute-task`,
+   and preserve project-specific concurrency or task-authoring guidance in
+   the matching reference.
+4. Keep both harness copies semantically synchronized and run
+   `node .agent-foundry/run-checks.mjs`.
+
 ## 0.7.0
 
 ### Changed
