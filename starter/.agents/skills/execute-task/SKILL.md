@@ -67,7 +67,8 @@ node .agents/skills/task-tracker/scripts/task.mjs move task-NNN review
 
 Before constructing or running any review, read
 `references/cold-review.md` completely. It defines the two independent axes,
-complete packet, review ladder, triage, re-review cap, and DISTILL rule.
+concurrent dispatch, findings-only output, complete packet, review ladder,
+triage, re-review cap, and DISTILL rule.
 
 Do not promote work merely because review ran. Verify and adjudicate findings
 against live repository evidence, fix confirmed defects, and re-review
@@ -89,6 +90,12 @@ Use the appropriate evidence:
 - service/API: boot it and probe a golden path and meaningful failure;
 - UI: drive the real surface through a golden path and edge case;
 - docs/skills: read end-to-end and verify commands, links, and synchronization.
+
+Follow `docs/SDLC.md` → "Validation": use targeted checks while editing, then
+freeze the diff and run each expensive applicable full gate once. Any later
+edit reruns the gates it could affect. A project-owned file-to-gate map may
+prove narrower invalidation; uncertainty and high-risk or cross-cutting
+changes require the full applicable gates.
 
 Use `task.mjs note` only for evidence a command cannot express, such as a
 browser observation. A hand-written claim that a runnable check passed is not

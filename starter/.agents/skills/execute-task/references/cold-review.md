@@ -5,18 +5,24 @@ Read this file completely before reviewing an `execute-task` change.
 ## Independence and axes
 
 Use the highest available cold-review ladder rung in `docs/SDLC.md` and log
-the rung. Run two separate calls so one axis cannot mask the other:
+the rung. Run two separate calls so one axis cannot mask the other. Dispatch
+them concurrently when the harness supports independent calls; never merge
+their prompts, context, outputs, or adjudication.
 
-- **SPEC:** compare only with the task objective and rubric. Report missing or
-  partial requirements, wrong behavior, and scope creep.
+- **SPEC:** compare only with the task objective and rubric. Return `PASS` or
+  numbered findings, highest severity first. Each finding names its location,
+  the existing objective or rubric line violated, the failing event sequence,
+  and confidence.
 - **STANDARDS:** compare only with `docs/REVIEW-STANDARDS.md`, relevant
-  `docs/ENGINEERING-STANDARDS.md` sections, and project invariants. Report
-  correctness, edge-case, safety, maintainability, test, and documentation
-  defects.
+  `docs/ENGINEERING-STANDARDS.md` sections, and project invariants. Return
+  `PASS` or numbered findings, highest severity first. Each finding names its
+  location, the existing standard or invariant violated, the failing event
+  sequence, and confidence.
 
-Ask for every finding, not only severe ones. Each finding names its location,
-violated requirement or rule, and confidence. The task owner triages results
-after collection.
+Ask for every substantiated finding, including low severity, but omit
+preamble, praise, recap, clean-check inventories, and improvement ideas that
+cannot cite supplied authority. The task owner triages results after
+collection; an uncited suggestion never expands the current task.
 
 ## Complete packet
 
