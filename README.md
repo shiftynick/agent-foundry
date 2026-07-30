@@ -42,9 +42,10 @@ even with `--force`.
 
 ## What gets installed
 
-- `.agents/skills/`: shared Codex workflows plus the `claude-in-codex` bridge.
+- `.agents/skills/`: shared Codex workflows, including opt-in `cursor-cli`,
+  plus the `claude-in-codex` bridge.
 - `.claude/skills/`: matching Claude workflows plus the `codex-in-claude`
-  bridge.
+  bridge and the shared `cursor-cli`.
 - `.tasks/`: Git-backed kanban state.
 - `docs/adr/`: ADR process and template.
 - `docs/SDLC.md`: task lifecycle and two-axis cold review.
@@ -120,7 +121,7 @@ agent-foundry/
 ## Maintaining the foundry
 
 1. Edit the canonical files under `starter/`.
-2. Keep the eleven shared workflow skills semantically synchronized between
+2. Keep the twelve shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
 3. Keep `claude-in-codex` only under `.agents` and `codex-in-claude` only
    under `.claude`.

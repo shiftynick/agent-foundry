@@ -76,9 +76,9 @@ export function validateFoundry() {
     .filter((file) => path.basename(file) === "SKILL.md");
   const claudeSkillFiles = listFiles(claudeSkillsRoot)
     .filter((file) => path.basename(file) === "SKILL.md");
-  if (agentSkillFiles.length !== 12 || claudeSkillFiles.length !== 12) {
+  if (agentSkillFiles.length !== 13 || claudeSkillFiles.length !== 13) {
     throw new Error(
-      "Expected 12 skills per harness (11 shared + 1 bridge); "
+      "Expected 13 skills per harness (12 shared + 1 bridge); "
       + `found agents=${agentSkillFiles.length}, `
       + `claude=${claudeSkillFiles.length}.`,
     );
@@ -95,7 +95,13 @@ export function validateFoundry() {
   }
 
   requireFile(".agents/skills/claude-in-codex/SKILL.md");
+  requireFile(".agents/skills/cursor-cli/SKILL.md");
+  requireFile(".agents/skills/cursor-cli/scripts/cursor-agent.mjs");
+  requireFile(".agents/skills/cursor-cli/scripts/cursor-agent.test.mjs");
   requireFile(".claude/skills/codex-in-claude/SKILL.md");
+  requireFile(".claude/skills/cursor-cli/SKILL.md");
+  requireFile(".claude/skills/cursor-cli/scripts/cursor-agent.mjs");
+  requireFile(".claude/skills/cursor-cli/scripts/cursor-agent.test.mjs");
   if (existsSync(path.join(claudeSkillsRoot, "claude-in-codex"))) {
     throw new Error("claude-in-codex must exist only in the Codex-facing tree.");
   }
@@ -106,6 +112,7 @@ export function validateFoundry() {
   const sharedSkills = [
     "adr",
     "codebase-audit",
+    "cursor-cli",
     "diagnosing-bugs",
     "efficient-orchestration",
     "execute-task",

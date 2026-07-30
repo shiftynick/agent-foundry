@@ -101,10 +101,11 @@ Never report a planned or unavailable command as passing.
 | `handoff-writer` | Restart-from-cold `HANDOFF.md`. |
 | `the-fool` | Pre-implementation adversarial review. |
 | `grill-me` | One-question-at-a-time decision clarification. |
+| `cursor-cli` | Operator-selected Cursor model for read-only review or isolated work. |
 | `claude-in-codex` | Invoke Claude Code for cold review from Codex. |
 | `codex-in-claude` | Invoke Codex CLI for cold review from Claude Code. |
 
-The eleven shared workflows are mirrored between `.agents/skills/` and
+The twelve shared workflows are mirrored between `.agents/skills/` and
 `.claude/skills/`. Preserve their behavior while retaining harness-specific
 paths and counterpart bridges. Edit both copies in the same commit and verify
 with `node .agent-foundry/check-skill-sync.mjs`.

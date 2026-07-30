@@ -285,8 +285,14 @@ try {
   const required = [
     ".agents/skills/claude-in-codex/SKILL.md",
     ".agents/skills/claude-in-codex/scripts/claude-ask.mjs",
+    ".agents/skills/cursor-cli/SKILL.md",
+    ".agents/skills/cursor-cli/scripts/cursor-agent.mjs",
+    ".agents/skills/cursor-cli/scripts/cursor-agent.test.mjs",
     ".agents/skills/diagnosing-bugs/scripts/hitl-loop.template.mjs",
     ".claude/skills/codex-in-claude/SKILL.md",
+    ".claude/skills/cursor-cli/SKILL.md",
+    ".claude/skills/cursor-cli/scripts/cursor-agent.mjs",
+    ".claude/skills/cursor-cli/scripts/cursor-agent.test.mjs",
     ".claude/skills/diagnosing-bugs/scripts/hitl-loop.template.mjs",
     ".agents/skills/task-tracker/scripts/task.mjs",
     ".claude/skills/task-tracker/scripts/task.mjs",
@@ -319,7 +325,7 @@ try {
     [path.join(testRoot, ".agent-foundry", "check-skill-sync.mjs")],
     { cwd: testRoot, label: "installed skill-sync check" },
   ).stdout;
-  assert.match(syncOutput, /skill-sync: PASS \(11 shared skills\)/u);
+  assert.match(syncOutput, /skill-sync: PASS \(12 shared skills\)/u);
 
   const agents = readFileSync(path.join(testRoot, "AGENTS.md"), "utf8");
   assert(agents.includes(projectName));

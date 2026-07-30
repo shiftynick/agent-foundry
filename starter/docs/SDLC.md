@@ -188,9 +188,12 @@ Review independence is a ladder, not a single vendor requirement. Use the
 highest rung available in the current environment, and **log which rung was
 used** in the task log — an unrecorded rung is treated as rung 4.
 
-1. **Counterpart CLI, different model family.** Codex uses
-   `claude-in-codex`; Claude Code uses `codex-in-claude`. Each axis is a
-   separate read-only, ephemeral call supplied with the complete change packet.
+1. **Separate CLI, different model family.** Codex normally uses
+   `claude-in-codex`; Claude Code normally uses `codex-in-claude`. An
+   operator-selected neutral router such as Cursor also qualifies only when
+   the operator explicitly selected its exact model and that model's family
+   differs from the implementer. Log the transport, model ID, and family.
+   Each axis is a separate read-only call supplied with the complete packet.
 2. **Fresh subagent, same model family.** A subagent that receives only the
    review packet — no conversation history — one per axis.
 3. **Fresh session, same agent.** A new session opened against the packet

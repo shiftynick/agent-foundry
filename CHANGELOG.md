@@ -25,6 +25,48 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.9.0
+
+### Changed
+
+- Added one shared `cursor-cli` skill to both harnesses. It invokes Cursor
+  Agent noninteractively for operator-selected reviews, planning, second
+  opinions, or isolated implementation work.
+- Cursor is never an automatic reviewer or worker. Every invocation requires
+  the operator to request Cursor and name an exact model ID; `auto` is
+  rejected because Cursor routes across model families.
+- The bundled cross-platform wrapper defaults to read-only `ask` mode, accepts
+  large packets over standard input, and gates write access behind
+  `--allow-write`, an explicit workspace, and Cursor's isolated worktree.
+- Cold-review independence follows the selected model family, not the Cursor
+  transport: a different-family model may satisfy rung 1, while same-family
+  or unknown-family selection is rung 2 at best.
+
+### Upgrade actions
+
+1. Apply the normal upgrade. Unmodified installations receive
+   `.agents/skills/cursor-cli/` and `.claude/skills/cursor-cli/`, including
+   their wrapper tests.
+2. If either target path already exists, reconcile the collision into one
+   shared skill: preserve useful local invocation details, but require an
+   explicit non-`auto` model and keep the read-only/write-isolated boundary.
+3. If `docs/SDLC.md` has local cold-review ladder changes, reconcile its rung
+   1 with the explicit Cursor transport, model-ID, and model-family rule while
+   preserving any stricter independence requirements.
+4. During normal seed-file reconciliation, optionally add `cursor-cli` to any
+   project-maintained skill index. A stale local index does not prevent the
+   new shared skill or its checks from working.
+5. Do not replace `claude-in-codex` or `codex-in-claude` as the automatic
+   counterpart review bridge. Cursor remains opt-in, and its selected model
+   family determines the cold-review rung.
+6. From the installed project root, run
+   `node .agent-foundry/run-checks.mjs`; confirm skill synchronization and both
+   Cursor wrapper suites pass.
+
+Unmodified installations upgrade cleanly as a minor release. No Cursor
+installation or authentication is required unless the project invokes the
+new skill.
+
 ## 0.8.0
 
 ### Changed
