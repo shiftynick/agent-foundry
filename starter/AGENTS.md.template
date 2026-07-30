@@ -51,12 +51,17 @@ halt the task — apply the reversibility test in `docs/SDLC.md`.
 ## Commit authority
 
 The default policy is defined in `docs/SDLC.md`: local, task-scoped commits are
-part of the lifecycle and need no per-task approval; pushing, publishing,
-deploying, tagging, or rewriting shared history always requires explicit
-authorization; hooks and gates are never bypassed.
+part of the lifecycle and need no per-task approval. The repository default
+branch is integration-only unless this project explicitly permits direct
+local commits there; use the project's or harness's task-branch naming
+convention. Pushing, publishing, deploying, tagging, or rewriting shared
+history always requires explicit authorization; hooks and gates are never
+bypassed.
 
-[CUSTOMIZE: Delete this line to accept the default, or state a stricter policy
-here — this section overrides `docs/SDLC.md` for this project.]
+[CUSTOMIZE: Delete this line to accept the default, or state this project's
+different policy here — including permission for direct local default-branch
+commits or required branch naming — this section overrides
+`docs/SDLC.md` for this project.]
 
 ## Product invariants
 

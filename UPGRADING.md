@@ -11,8 +11,15 @@ that.
 
 ## 1. Establish the starting point
 
-**File the upgrade task and log its rubric before touching anything.** An
-upgrade is normally triggered by an operator saying "pull in the new Foundry
+**Start from the current default branch, then file the upgrade task and log
+its rubric before touching anything.** Resolve the default branch from the
+project's Git policy or remote HEAD; do not assume a branch name. Reconcile
+the local branch with its already-known tracking state before task creation,
+and do not fetch, pull, or switch away from uncommitted work without the
+operator's authority. This guard keeps the upgrade card on the board state
+other branches will inherit.
+
+An upgrade is normally triggered by an operator saying "pull in the new Foundry
 version", which enters this document directly and bypasses `execute-task`'s
 preamble — so the rubric gets reconstructed afterward, and a rubric written
 after the work cannot fail the work that produced it. The acceptance criteria
@@ -83,14 +90,26 @@ The manifest classifies every managed file:
   template. Restore the project's version, then fold in anything genuinely new
   from the fresh template. Never accept the template wholesale.
 
-  Because step 1 required a clean worktree, Git is the exact and easily
-  verified route; the backup directory is the fallback when the file was not
-  committed:
+  Because step 1 required a clean worktree, the installed reconciliation
+  command derives the complete non-preserved seed set from `manifest.json`
+  and restores every seed that existed in `HEAD`. A seed introduced by the
+  new release remains as the fresh template:
 
   ```text
-  git checkout HEAD -- AGENTS.md CONTRIBUTING.md HANDOFF.md docs/ENGINEERING-STANDARDS.md docs/REVIEW-STANDARDS.md docs/adr/README.md docs/out-of-scope/README.md
-  git diff HEAD -- <the same paths>    # then re-add anything new from the templates
+  node .agent-foundry/reconcile-seeds.mjs --list
+  node .agent-foundry/reconcile-seeds.mjs --restore-from-head
   ```
+
+  This includes `CLAUDE.md` and any future seed automatically. The backup
+  directory remains the fallback for a seed that was never committed.
+
+  To find genuinely new stock content without burying it under project
+  customization, first diff the old and new Foundry `starter/` versions when
+  both release refs or source snapshots are available. Use that stock-to-stock
+  diff to identify changed templates, then merge those changes into the
+  restored project seeds. The manifest-derived list remains the completeness
+  check; never omit a seed merely because the stock diff is unavailable or
+  empty.
 
   **Not reset, and never to be restored:** `.agent-foundry/LOCAL-CHANGES.md`,
   `PLANNING-JOURNAL.md`, and `BLOCKED-JOURNAL.md`. Since 0.4.0 the installer
@@ -100,7 +119,11 @@ The manifest classifies every managed file:
 - **`mold`** — the Foundry owns it. The new version is authoritative. For each
   file the step-1 report flagged as locally modified, re-apply the local change
   on top of the new file, or drop it deliberately — and either way record the
-  outcome in `.agent-foundry/LOCAL-CHANGES.md`.
+  outcome in `.agent-foundry/LOCAL-CHANGES.md`. When a release restructures a
+  mold file, reconcile by meaning rather than old line location: decide
+  whether the local behavior belongs in the new entrypoint, an existing
+  reference, or should be retired. Do not recreate a dissolved section merely
+  to make the old patch apply.
 
 Anything not in the manifest — the board under `.tasks/`, real ADRs, journal
 entries, out-of-scope records — is project state the installer never touches.

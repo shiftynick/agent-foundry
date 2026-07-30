@@ -3,5 +3,6 @@
   "foundryVersion": {{FOUNDRY_VERSION_JSON}},
   "projectName": {{PROJECT_NAME_JSON}},
   "projectDescription": {{PROJECT_DESCRIPTION_JSON}},
+  "defaultBranch": {{DEFAULT_BRANCH_JSON}},
   "installedAt": {{INSTALLED_AT_JSON}}
 }

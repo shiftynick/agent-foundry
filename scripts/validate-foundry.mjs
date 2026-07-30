@@ -178,6 +178,7 @@ export function validateFoundry() {
     "{{PROJECT_DESCRIPTION_JSON}}",
     "{{INSTALLED_AT_JSON}}",
     "{{FOUNDRY_VERSION_JSON}}",
+    "{{DEFAULT_BRANCH_JSON}}",
   ]);
   for (const file of listFiles(starterRoot)) {
     const text = readFileSync(file, "utf8");
@@ -219,6 +220,8 @@ export function validateFoundry() {
     ".agent-foundry/check-foundry-drift.test.mjs",
     ".agent-foundry/run-checks.mjs",
     ".agent-foundry/run-checks.test.mjs",
+    ".agent-foundry/reconcile-seeds.mjs",
+    ".agent-foundry/reconcile-seeds.test.mjs",
     ".agent-foundry/README.md",
     ".agent-foundry/LOCAL-CHANGES.md",
   ].forEach(requireFile);

@@ -285,6 +285,36 @@ function initializeOrVerifyGit(targetRoot, initializeGit) {
   }
 }
 
+function optionalGitText(targetRoot, args) {
+  try {
+    return run("git", ["-C", targetRoot, ...args], {
+      label: `git ${args[0]}`,
+    }).stdout.trim();
+  } catch (error) {
+    if (error instanceof CommandError) return "";
+    throw error;
+  }
+}
+
+function resolveDefaultBranch(targetRoot) {
+  const originHead = optionalGitText(
+    targetRoot,
+    ["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"],
+  );
+  if (originHead) return originHead.replace(/^origin\//u, "");
+  const remoteHeads = optionalGitText(
+    targetRoot,
+    ["for-each-ref", "--format=%(symref:short)", "refs/remotes/*/HEAD"],
+  ).split(/\r?\n/u).filter(Boolean);
+  if (remoteHeads.length === 1) {
+    return remoteHeads[0].replace(/^[^/]+\//u, "");
+  }
+  return optionalGitText(
+    targetRoot,
+    ["symbolic-ref", "--quiet", "--short", "HEAD"],
+  ) || null;
+}
+
 function backupCollisions(targetRoot, collisions, installedAt) {
   if (collisions.length === 0) {
     return null;
@@ -310,7 +340,7 @@ function backupCollisions(targetRoot, collisions, installedAt) {
   return backupRoot;
 }
 
-function renderStarter(copyPlan, options, installedAt, foundryVersion) {
+function renderStarter(copyPlan, options, installedAt, foundryVersion, defaultBranch) {
 
   const replacements = new Map([
     ["{{PROJECT_NAME}}", options.projectName],
@@ -322,9 +352,10 @@ function renderStarter(copyPlan, options, installedAt, foundryVersion) {
     ],
     ["{{INSTALLED_AT_JSON}}", JSON.stringify(installedAt)],
     ["{{FOUNDRY_VERSION_JSON}}", JSON.stringify(foundryVersion)],
+    ["{{DEFAULT_BRANCH_JSON}}", JSON.stringify(defaultBranch)],
   ]);
 
-  const tokenPattern = /\{\{(?:PROJECT_NAME|PROJECT_DESCRIPTION|PROJECT_NAME_JSON|PROJECT_DESCRIPTION_JSON|INSTALLED_AT_JSON|FOUNDRY_VERSION_JSON)\}\}/gu;
+  const tokenPattern = /\{\{(?:PROJECT_NAME|PROJECT_DESCRIPTION|PROJECT_NAME_JSON|PROJECT_DESCRIPTION_JSON|INSTALLED_AT_JSON|FOUNDRY_VERSION_JSON|DEFAULT_BRANCH_JSON)\}\}/gu;
   const preserved = [];
   for (const item of copyPlan) {
     if (isPreserved(item)) {
@@ -357,6 +388,7 @@ function writeInstallManifest(targetRoot, copyPlan, installedAt, foundryVersion)
     files[relative] = {
       tier: SEED_FILES.has(relative) ? "seed" : "mold",
       sha256: hashManagedFile(readFileSync(item.destination, "utf8")),
+      ...(item.preserveIfExists ? { preserveIfExists: true } : {}),
     };
   }
   const manifestPath = path.join(targetRoot, ".agent-foundry", "manifest.json");
@@ -589,10 +621,11 @@ export function bootstrap(options) {
   }
   const installedAt = new Date().toISOString();
   const foundryVersion = readFoundryVersion();
+  const defaultBranch = resolveDefaultBranch(targetRoot);
   if (options.force) {
     backupCollisions(targetRoot, collisions, installedAt);
   }
-  renderStarter(copyPlan, options, installedAt, foundryVersion);
+  renderStarter(copyPlan, options, installedAt, foundryVersion, defaultBranch);
   writeInstallManifest(targetRoot, copyPlan, installedAt, foundryVersion);
   mergeGitignore(targetRoot);
 

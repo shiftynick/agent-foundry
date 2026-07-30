@@ -12,6 +12,10 @@ From the target project:
 1. Resolve the repository root and read existing `README.md`, `AGENTS.md`,
    `CLAUDE.md`, contribution docs, build configuration, and task tooling.
 2. Run `git status --short` when the target is a Git repository.
+   Install from the repository's current default branch when one exists; the
+   installer records that branch for collision-safe task ID allocation.
+   `origin/HEAD` is authoritative when configured; with no `origin`, a single
+   other remote HEAD is used.
 3. Identify existing `.agents`, `.claude`, `.tasks`, `docs/adr`, or similarly
    named process files.
 4. Do not overwrite or flatten an existing workflow. If managed paths collide,

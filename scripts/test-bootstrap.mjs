@@ -25,6 +25,7 @@ const tempRoot = mkdtempSync(path.join(os.tmpdir(), "agent-foundry-tests-"));
 const testRoot = path.join(tempRoot, "clean-project");
 const collisionRoot = path.join(tempRoot, "collision-project");
 const missingRoot = path.join(tempRoot, "missing-project");
+const seedUpgradeRoot = path.join(tempRoot, "seed-upgrade-project");
 const projectName = String.raw`Foundry "Test" \ Project $& $' $1 {{PROJECT_DESCRIPTION}}`;
 const projectDescription = String.raw`A disposable "quoted" $& project fixture.`;
 
@@ -338,6 +339,8 @@ try {
   const manifest = JSON.parse(manifestText);
   assert.equal(manifest.projectName, projectName);
   assert.equal(manifest.projectDescription, projectDescription);
+  assert.equal(typeof manifest.defaultBranch, "string");
+  assert.notEqual(manifest.defaultBranch, "");
   const foundryVersion = readFileSync(
     path.join(foundryRoot, "VERSION"),
     "utf8",
@@ -354,6 +357,10 @@ try {
   );
   assert.equal(installManifest.foundryVersion, foundryVersion);
   assert.equal(installManifest.files["AGENTS.md"].tier, "seed");
+  assert.equal(
+    installManifest.files["PLANNING-JOURNAL.md"].preserveIfExists,
+    true,
+  );
   assert.equal(installManifest.files["docs/SDLC.md"].tier, "mold");
   assert.equal(
     installManifest.files[".claude/skills/task-tracker/SKILL.md"].tier,
@@ -488,6 +495,79 @@ try {
     }).stdout,
     /task-001/u,
   );
+
+  // A forced upgrade resets seed files and rewrites the manifest, so the
+  // ordinary drift report cannot detect the loss afterward. The installed
+  // reconciliation command must derive the complete seed set from that new
+  // manifest and restore committed project content, including CLAUDE.md.
+  invokeBootstrap(
+    bootstrapArgs(seedUpgradeRoot, [
+      "--create-target",
+      "--initialize-git",
+      "--skip-validation",
+      "--skip-bootstrap-task",
+    ]),
+  );
+  run("git", ["config", "user.email", "foundry-test@example.invalid"], {
+    cwd: seedUpgradeRoot,
+    label: "configure seed fixture Git email",
+  });
+  run("git", ["config", "user.name", "Foundry Test"], {
+    cwd: seedUpgradeRoot,
+    label: "configure seed fixture Git name",
+  });
+  run("git", ["config", "commit.gpgsign", "false"], {
+    cwd: seedUpgradeRoot,
+    label: "disable seed fixture signing",
+  });
+  run("git", ["config", "core.autocrlf", "false"], {
+    cwd: seedUpgradeRoot,
+    label: "pin seed fixture line endings",
+  });
+  run("git", ["config", "core.hooksPath", ".no-hooks"], {
+    cwd: seedUpgradeRoot,
+    label: "isolate seed fixture hooks",
+  });
+  run("git", ["add", "."], { cwd: seedUpgradeRoot, label: "stage seed fixture" });
+  run("git", ["commit", "-m", "baseline"], {
+    cwd: seedUpgradeRoot,
+    label: "commit seed fixture baseline",
+  });
+  const claudePath = path.join(seedUpgradeRoot, "CLAUDE.md");
+  appendFileSync(claudePath, "\nProject-specific Claude instruction.\n", "utf8");
+  const customizedClaude = readFileSync(claudePath, "utf8");
+  run("git", ["add", "CLAUDE.md"], {
+    cwd: seedUpgradeRoot,
+    label: "stage customized CLAUDE.md",
+  });
+  run("git", ["commit", "-m", "customize Claude instructions"], {
+    cwd: seedUpgradeRoot,
+    label: "commit customized CLAUDE.md",
+  });
+  invokeBootstrap(
+    bootstrapArgs(seedUpgradeRoot, [
+      "--force",
+      "--skip-validation",
+      "--skip-bootstrap-task",
+    ]),
+  );
+  assert.notEqual(readFileSync(claudePath, "utf8"), customizedClaude);
+  const resetDrift = run(
+    process.execPath,
+    [path.join(seedUpgradeRoot, ".agent-foundry", "check-foundry-drift.mjs")],
+    { cwd: seedUpgradeRoot, label: "drift after forced seed reset" },
+  ).stdout;
+  assert.match(resetDrift, /No drift:/u);
+  const seedRestore = run(
+    process.execPath,
+    [
+      path.join(seedUpgradeRoot, ".agent-foundry", "reconcile-seeds.mjs"),
+      "--restore-from-head",
+    ],
+    { cwd: seedUpgradeRoot, label: "restore project seed files" },
+  ).stdout;
+  assert.match(seedRestore, /restored: CLAUDE\.md/u);
+  assert.equal(readFileSync(claudePath, "utf8"), customizedClaude);
 
   invokeBootstrap(
     bootstrapArgs(testRoot, [

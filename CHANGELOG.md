@@ -25,6 +25,68 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.10.0
+
+### Changed
+
+- Added a manifest-driven seed reconciliation command. It restores every
+  committed, non-preserved project seed after `--force`, including
+  `CLAUDE.md` and seeds introduced by future releases, while leaving new seeds
+  and append-only logs intact.
+- Upgrade guidance now starts task creation from the current default branch,
+  uses stock-to-stock diffs to isolate new template content when both source
+  versions are available, and reconciles restructured mold files by meaning
+  rather than obsolete line placement.
+- Task IDs created away from the known default branch use a stable numeric
+  branch namespace. Independently created stale or concurrent branch cards no
+  longer collide when merged; default-branch cards retain compact sequential
+  IDs. Installation metadata records the default branch so local-only
+  repositories do not depend on `origin/HEAD` discovery.
+- The stock commit policy treats the repository default branch as
+  integration-only unless `AGENTS.md` explicitly permits direct local
+  commits. Branch naming remains project- or harness-owned, and push,
+  publishing, and deployment authority is unchanged.
+- `run-checks.mjs` now fails closed when its required skill-sync checker is
+  missing or fails, excludes nested `node_modules` trees, and has CLI-level
+  exit and output regression coverage.
+- `task.mjs archive <id>` now explains that archive sweeps every done task and
+  accepts only `--dry-run`. Cursor CLI guidance identifies the standard
+  `%LOCALAPPDATA%\cursor-agent\agent.cmd` Windows shim and retains the
+  cross-platform `CURSOR_AGENT_BIN` fallback.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade and keep its backup directory.
+2. From the target project root, run
+   `node .agent-foundry/reconcile-seeds.mjs --list`, then
+   `node .agent-foundry/reconcile-seeds.mjs --restore-from-head`. Recover any
+   uncommitted seed from the backup, and merge genuinely new stock content
+   into the restored project files.
+3. If old and new Foundry source refs or snapshots are available, diff their
+   `starter/` trees to identify changed seed templates before merging. If a
+   locally modified mold file was restructured, place the behavior in the new
+   entrypoint or reference by meaning; do not recreate removed structure.
+4. Reconcile local task-tracker changes into both harness trees. Preserve any
+   stricter project concurrency rules, but retain branch-namespaced allocation
+   for cards created away from the known default branch and the
+   `.agent-foundry.json` default-branch metadata written by the installer.
+5. Reconcile `docs/SDLC.md` and the project's `AGENTS.md` commit policy.
+   Explicitly record any project permission for direct default-branch commits
+   and any required branch naming; otherwise use a task branch for local
+   commits. Do not broaden push, publish, deploy, tag, or history-rewrite
+   authority.
+6. Reconcile local `run-checks.mjs` changes so a missing skill-sync checker is
+   a failure and dependency-tree tests are excluded. Do not retain a
+   conditional skip for the required checker.
+7. If either Cursor skill was locally customized, retain those changes while
+   adding the Windows shim discovery path and cross-platform executable
+   lookup guidance.
+8. Run `node .agent-foundry/run-checks.mjs`, the project quality gate, and the
+   post-upgrade drift report. Confirm the aggregate gate actually executes and
+   reports skill synchronization.
+
+Unmodified installations upgrade cleanly as a minor release.
+
 ## 0.9.0
 
 ### Changed
