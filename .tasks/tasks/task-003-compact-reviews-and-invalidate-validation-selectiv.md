@@ -6,7 +6,7 @@ priority: p1
 tags: [area:process]
 blockedBy: []
 createdAt: "2026-07-30T12:24:06Z"
-updatedAt: "2026-07-30T12:28:58Z"
+updatedAt: "2026-07-30T12:34:11Z"
 ---
 
 <!-- task-tracker:description -->
@@ -74,3 +74,48 @@ Reduce review and validation time/token cost without lowering quality. Make sepa
   | (no output)
 - 2026-07-30T12:28:46Z — note: validation: run-checks.mjs exited 2 because this source tree has no managed *.test.mjs suites; this command is an installed-project discovery runner, not one of AGENTS.md's source acceptance gates. Required source gates validate-foundry and clean bootstrap passed, as did skill sync and diff check.
 - 2026-07-30T12:28:58Z — note: review status: other-model-family SPEC and STANDARDS passes remain pending due Claude weekly quota. Per SDLC review-packet authority, the validated packet will be committed locally without moving the task to done; resume by reviewing that exact commit after quota resets.
+- 2026-07-30T12:33:33Z — run: node starter/.agent-foundry/check-skill-sync.mjs starter
+  started 2026-07-30T12:33:33Z, exit 0 in 0.1s
+  output:
+  | skill-sync: PASS (11 shared skills)
+- 2026-07-30T12:33:35Z — run: node scripts/validate-foundry.mjs
+  started 2026-07-30T12:33:33Z, exit 0 in 2.5s
+  output:
+  | Agent Foundry structural validation: PASS
+- 2026-07-30T12:34:02Z — run: node scripts/test-bootstrap.mjs
+  started 2026-07-30T12:33:39Z, exit 0 in 22.7s
+  output tail (truncated to last 30 lines):
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ...........
+  | task-001 → in_progress
+  | task-001 noted
+  | Agent Foundry 0.8.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-6F3cXL\clean-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-6F3cXL\clean-project\.agent-foundry-backups\20260730T123401389Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | The target board already has active tasks; no bootstrap task was created.
+  | Agent Foundry 0.8.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-6F3cXL\clean-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-6F3cXL\clean-project\.agent-foundry-backups\20260730T123401842Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.8.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-6F3cXL\clean-project
+  | Agent Foundry clean-project bootstrap: PASS
+- 2026-07-30T12:34:11Z — run: git diff --check
+  started 2026-07-30T12:34:11Z, exit 0 in 0.1s
+  output:
+  | (no output)
