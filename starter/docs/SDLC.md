@@ -155,7 +155,7 @@ Both axes must return a valid terminal result. A failed, timed-out, cancelled,
 missing, or malformed axis makes the round incomplete; retry that axis and
 never treat the other axis's `PASS` as a complete review.
 
-Review output is findings-only:
+Review output is findings-only, closed by a coverage attestation:
 
 - return `PASS` when the axis has no findings;
 - otherwise return only numbered findings, highest severity first;
@@ -164,14 +164,20 @@ Review output is findings-only:
   confidence;
 - each STANDARDS finding names its location, the existing standard or project
   invariant it violates, the concrete failure or contradiction, severity, and
-  confidence.
+  confidence;
+- in both cases the output ends with a `CHECKED` list naming each rubric line
+  or standard the reviewer actively verified and how. `PASS` is a complete
+  terminal result only when its `CHECKED` list demonstrates real coverage; a
+  thin or missing list makes the axis incomplete — re-run it with a more
+  complete packet rather than treating silence as a pass.
 
 Severity is `high` when the defect blocks correctness, safety, or the stated
 objective; `medium` when it materially harms operability or maintainability;
 and `low` when it is localized and nonblocking. Confidence is `high`, `medium`,
 or `low`.
 
-No preamble, praise, recap, or clean-check inventory is needed. Reviewers still
+No preamble, praise, or recap is needed; the `CHECKED` list is the one
+required inventory. Reviewers still
 report every substantiated defect on their axis, including low-severity
 defects; concise output does not lower recall. An improvement idea that cannot
 cite the supplied objective, rubric, standard, or invariant is not a defect

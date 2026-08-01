@@ -25,6 +25,37 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.11.0
+
+### Changed
+
+- The cold-review output contract in `starter/docs/SDLC.md` now closes every
+  axis result with a `CHECKED` coverage attestation: a list naming each
+  rubric line or standard the reviewer actively verified and how. `PASS` is
+  a complete terminal result only when its `CHECKED` list demonstrates real
+  coverage; a thin or missing list makes the axis incomplete and the axis is
+  re-run with a more complete packet. This closes the silence-as-pass
+  failure mode where an under-informed reviewer returns `PASS` because it
+  saw nothing, not because it verified anything.
+- `starter/.claude/skills/execute-task/references/cold-review.md` and its
+  `.agents` mirror gained a "Prompt template" section: a per-axis review
+  prompt encoding that contract, with the SDLC finding schema (`location |
+  rubric line or standard violated | concrete failure | severity |
+  confidence`, numbered, highest severity first) and the `CHECKED` section.
+  One call per axis, consistent with the two-independent-calls contract.
+
+### Upgrade actions
+
+- Replace `docs/SDLC.md` and both copies of
+  `execute-task/references/cold-review.md` with the new molds. If the
+  project locally modified either file, re-apply its recorded divergences
+  from `.agent-foundry/LOCAL-CHANGES.md` on top of the new versions; a
+  project whose divergence was an equivalent review-prompt graft can drop
+  that entry after confirming the installed files match the new molds.
+- Reviews dispatched after this upgrade must end with the `CHECKED` list;
+  treat a bare `PASS` from an older prompt as an incomplete axis and re-run
+  it.
+
 ## 0.10.0
 
 ### Changed
