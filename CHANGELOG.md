@@ -25,6 +25,38 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.11.1
+
+### Changed
+
+- `run-checks.mjs` no longer loses its final summary line. It called
+  `process.exit()` immediately after writing, and on Windows a piped stdout
+  write is asynchronous, so the `FAIL (...)` line could be truncated — the
+  CLI's own regression test failed intermittently for exactly this reason,
+  most visibly when run from a pre-commit hook. It now sets
+  `process.exitCode` and returns, letting Node flush before exiting.
+- Both skill-tree `README.md` files list the shared `cursor-cli` skill,
+  which shipped in 0.9.0 but was never added to their tables.
+- `docs/adr/template.md` states Status/Date/Task as a list instead of
+  trailing-whitespace hard breaks, and no longer ends with a blank line, so
+  a project whose convention is a clean `git diff --check` does not inherit
+  a violation in every ADR copied from it.
+- `.agent-foundry/README.md` no longer claims the installer "never reads or
+  writes" `.tasks/`: the payload ships the two `.gitkeep` files. Board cards
+  and archives are untouched, which is what the sentence meant to say.
+- `.agent-foundry/LOCAL-CHANGES.md` says what its own lifecycle is: entries
+  are live records of present divergence, deleted when the divergence goes
+  away, rather than an append-only log that accumulates retired entries.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade and reconcile as usual.
+2. If `run-checks.mjs` was locally modified, re-apply that change on top of
+   the new version and keep the `process.exitCode` return path — do not
+   restore a `process.exit()` call that follows a `stdout.write`.
+3. No action for the documentation fixes; they are seed-adjacent text in
+   Foundry-owned files and land with the upgrade.
+
 ## 0.11.0
 
 ### Changed

@@ -4,6 +4,13 @@ Deliberate divergence from stock Agent Foundry, newest first. An upgrade reads
 this file to know what must survive being overwritten — an unrecorded change is
 one a future upgrade will silently revert.
 
+Entries are live records, not history: an entry stays as long as its
+divergence does. When an upgrade retires a divergence — the local change is
+upstreamed, or dropped, or its `On upgrade` condition is met — delete that
+entry in the same commit, so this file always describes the tree as it is
+now. (The project's journals are the append-only record of what happened;
+this one answers "what is different today".)
+
 Record a divergence here when the Foundry owns the file and would replace it:
 the skills, `docs/SDLC.md`, the ADR template, and the checks under
 `.agent-foundry/` (the `mold` tier in `manifest.json`).

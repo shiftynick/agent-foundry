@@ -18,6 +18,7 @@ workflows installed by Agent Foundry.
 | `handoff-writer` | Cold-start session handoff. |
 | `the-fool` | Adversarial review of ideas and plans. |
 | `grill-me` | Deliberate one-question-at-a-time decision interview. |
+| `cursor-cli` | Operator-selected Cursor model for read-only review or isolated work. |
 | `codex-in-claude` | Calls to Codex CLI for cold review and bounded delegation. |
 
 ## Rules

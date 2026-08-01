@@ -50,7 +50,11 @@ argument. So:
   `LOCAL-CHANGES.md` exists to protect.
 
 Everything else — `.tasks/`, real ADRs, journal entries, out-of-scope records —
-is project state the installer never reads or writes.
+is project state the installer does not manage: it is absent from the
+manifest, never replaced, and never reconciled on upgrade. The one contact
+point is `.tasks/tasks/.gitkeep` and `.tasks/archive/.gitkeep`, which the
+payload ships so the empty directories survive Git; board cards, archives,
+and their content are untouched.
 
 ## Routine checks
 
