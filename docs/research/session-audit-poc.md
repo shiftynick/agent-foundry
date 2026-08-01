@@ -158,4 +158,3 @@ The POC is successful when it:
   version.
 - Building a universal transcript schema or graph infrastructure.
 - Replacing task logs, Git evidence, codebase audit, or retrospective.
-
