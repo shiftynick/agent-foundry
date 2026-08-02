@@ -25,6 +25,32 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.13.0
+
+### Changed
+
+- New shared skill `upgrade-agent-foundry` in both harness trees: a
+  triggerable entry point for moving an installed project to a newer
+  foundry release. It reads the installed version from
+  `.agent-foundry.json`, acquires the new foundry from an operator-named
+  local checkout or a Git URL (confirming before any network fetch and
+  cloning outside the project), verifies the source is foundry-shaped and
+  strictly newer, reports source and versions before changing anything, and
+  then follows the acquired foundry's `UPGRADING.md` completely as the
+  single authority for the procedure, deferring to it wherever the two
+  disagree, while the upgrade task itself still completes under
+  `execute-task`. Both
+  skill-tree `README.md` tables and the installed `AGENTS.md` skill table
+  list it.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade; the new skill directories land in both
+   trees automatically.
+2. If the project's `AGENTS.md` keeps the stock project-local skills table,
+   fold in the new `upgrade-agent-foundry` row when reconciling that seed;
+   projects that replaced the table need no action.
+
 ## 0.12.0
 
 ### Changed

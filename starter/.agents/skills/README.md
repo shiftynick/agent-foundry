@@ -20,6 +20,7 @@ agent workflows installed by Agent Foundry.
 | `the-fool` | Adversarial review of ideas and plans. |
 | `grill-me` | Deliberate one-question-at-a-time decision interview. |
 | `cursor-cli` | Operator-selected Cursor model for read-only review or isolated work. |
+| `upgrade-agent-foundry` | Guided in-place upgrade of the installed workflow kit. |
 | `claude-in-codex` | Read-only calls to Claude Code for cold review and second opinions. |
 
 ## Rules
