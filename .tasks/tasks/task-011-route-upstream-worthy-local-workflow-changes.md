@@ -6,7 +6,7 @@ priority: p3
 tags: [area:process, type:improvement]
 blockedBy: []
 createdAt: "2026-07-30T19:30:24Z"
-updatedAt: "2026-07-30T19:30:24Z"
+updatedAt: "2026-08-02T12:27:23Z"
 ---
 
 <!-- task-tracker:description -->
@@ -18,3 +18,4 @@ Give every LOCAL-CHANGES entry marked Upstream: yes a lightweight visible delive
 ## Log
 
 - 2026-07-30T19:30:24Z — created (status: backlog)
+- 2026-08-02T12:27:23Z — note: task-015 (agent-foundry-feedback skill) is a candidate delivery mechanism for Upstream: yes entries; coordinate rather than build a second channel
