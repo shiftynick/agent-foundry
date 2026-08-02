@@ -76,9 +76,9 @@ export function validateFoundry() {
     .filter((file) => path.basename(file) === "SKILL.md");
   const claudeSkillFiles = listFiles(claudeSkillsRoot)
     .filter((file) => path.basename(file) === "SKILL.md");
-  if (agentSkillFiles.length !== 15 || claudeSkillFiles.length !== 15) {
+  if (agentSkillFiles.length !== 16 || claudeSkillFiles.length !== 16) {
     throw new Error(
-      "Expected 15 skills per harness (14 shared + 1 bridge); "
+      "Expected 16 skills per harness (15 shared + 1 bridge); "
       + `found agents=${agentSkillFiles.length}, `
       + `claude=${claudeSkillFiles.length}.`,
     );
@@ -111,6 +111,7 @@ export function validateFoundry() {
 
   const sharedSkills = [
     "adr",
+    "agent-foundry-feedback",
     "attack-the-board",
     "codebase-audit",
     "cursor-cli",

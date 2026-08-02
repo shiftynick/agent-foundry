@@ -11,6 +11,7 @@ product code and it is not the task board.
 | `check-skill-sync.mjs` | Verifies the two harness skill trees still agree. |
 | `check-foundry-drift.mjs` | Reports how installed files differ from what was installed. |
 | `LOCAL-CHANGES.md` | Your record of deliberate divergence from the stock workflow. |
+| `feedback/` | Transient feedback packets bound for the Foundry, written by `agent-foundry-feedback`. Git-ignored and unmanaged; deleted once delivered. |
 
 ## The installed workflow is yours to evolve
 
@@ -49,8 +50,9 @@ argument. So:
   template, these checks. Upgrades replace them, so divergence here is what
   `LOCAL-CHANGES.md` exists to protect.
 
-Everything else — `.tasks/`, real ADRs, journal entries, out-of-scope records —
-is project state the installer does not manage: it is absent from the
+Everything else — `.tasks/`, real ADRs, journal entries, out-of-scope records,
+and any `feedback/` packets — is project state the installer does not manage:
+it is absent from the
 manifest, never replaced, and never reconciled on upgrade. The one contact
 point is `.tasks/tasks/.gitkeep` and `.tasks/archive/.gitkeep`, which the
 payload ships so the empty directories survive Git; board cards, archives,

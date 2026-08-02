@@ -25,6 +25,40 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.14.0
+
+### Changed
+
+- New shared skill `agent-foundry-feedback` in both harness trees: package
+  feedback about the installed kit — defects, recurring friction, and
+  locally fixed mold files worth upstreaming — into self-contained packets
+  under `.agent-foundry/feedback/`. It gathers only from signal that
+  already exists — the operator's named concern, `friction:` notes,
+  retrospective findings that target a mold file *and* are generic rather
+  than project-specific, and `LOCAL-CHANGES.md` entries marked
+  `Upstream: yes` — preferring a real diff against stock and naming the
+  baseline that produced it, falling back to the changed region's current
+  content when no baseline is recoverable. Delivery is two tiers: the local
+  packet file always; a hosted issue only when an issue-filing CLI is
+  available and authenticated and the operator names the destination,
+  reviews the sanitized packet in full, and authorizes the submission. Both
+  skill-tree `README.md` tables and the installed `AGENTS.md` skill table
+  list it.
+- `.gitignore.append` ignores `.agent-foundry/feedback/`: packets are
+  transient working material that can quote project content, so they are
+  not committed by accident. `.agent-foundry/README.md` documents the
+  directory and its unmanaged, delete-once-delivered lifecycle.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade; the new skill directories land in both
+   trees automatically.
+2. If the project's `AGENTS.md` keeps the stock project-local skills table,
+   fold in the new `agent-foundry-feedback` row when reconciling that seed;
+   projects that replaced the table need no action.
+3. Add `.agent-foundry/feedback/` to the project's `.gitignore` if the
+   installer's merge did not (it appends only lines that are missing).
+
 ## 0.13.0
 
 ### Changed

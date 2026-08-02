@@ -1,5 +1,6 @@
 # Agent Foundry generated/transient state
 .agent-foundry-backups/
+.agent-foundry/feedback/
 .tasks/board.html
 .tasks/.write-lock
 .tasks/tasks/.*.tmp

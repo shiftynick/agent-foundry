@@ -21,6 +21,7 @@ workflows installed by Agent Foundry.
 | `grill-me` | Deliberate one-question-at-a-time decision interview. |
 | `cursor-cli` | Operator-selected Cursor model for read-only review or isolated work. |
 | `upgrade-agent-foundry` | Guided in-place upgrade of the installed workflow kit. |
+| `agent-foundry-feedback` | Package kit defects and upstream-worthy fixes into feedback packets. |
 | `codex-in-claude` | Calls to Codex CLI for cold review and bounded delegation. |
 
 ## Rules
