@@ -25,6 +25,44 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.14.1
+
+### Changed
+
+- `task.mjs run` no longer writes terminal escape sequences or trailing
+  whitespace into recorded evidence. Colorized tool output previously
+  survived as scrub artifacts like `?[0m` and could leave a trailing space
+  on an evidence line, failing a trailing-whitespace gate on the one feature
+  whose purpose is producing committable evidence. Escapes are now removed
+  before the control-character scrub — CSI (including SGR), control strings
+  (OSC, DCS, SOS, PM, APC) ended at their own terminator or cancelled by
+  CAN/SUB, and two-character escapes, each in both their 7-bit and 8-bit
+  spellings, plus any remaining C1 control the C0 scrub cannot reach — and
+  each evidence line is trimmed;
+  interior blank lines still render as a bare `  |`. The same sanitization
+  applies to the recorded command line, which is forced onto one line and
+  falls back to a placeholder when sanitizing empties it. Recorded evidence
+  is a readable record, not a verbatim byte copy — the full output still
+  streams to the console. Eight regression tests cover colored output,
+  non-SGR escape forms, 8-bit C1 introducers, control-string terminator
+  semantics, a reset followed by a trailing space, command-line
+  sanitization, an all-escape command, and reserved-marker scrubbing.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade. Both harness copies of
+   `task-tracker/scripts/task.mjs` and `task.test.mjs` are replaced
+   together; they must stay identical.
+2. If the project locally modified either file, re-apply its recorded
+   divergences from `.agent-foundry/LOCAL-CHANGES.md` on top of the new
+   versions, and keep `stripTerminalEscapes` ahead of the control-character
+   scrub inside `sanitizeForLog` — reordering them reintroduces the `?[`
+   artifacts.
+3. Evidence already recorded in existing task logs is not rewritten. A task
+   file that fails a trailing-whitespace gate from a pre-upgrade `run` entry
+   is fixed by trimming those lines by hand; the CLI owns `## Log`, so make
+   the edit only when a gate actually rejects the file.
+
 ## 0.14.0
 
 ### Changed
