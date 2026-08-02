@@ -33,7 +33,7 @@ model family.
 - Installation never overwrites an existing managed file without `--force`.
 - Agents never use `--force` without explicit approval after listing collisions.
 - Existing `.gitignore` content is merged, not replaced.
-- The twelve shared workflows remain semantically synchronized across harnesses;
+- The thirteen shared workflows remain semantically synchronized across harnesses;
   `starter/.agent-foundry/check-skill-sync.mjs` is the check installed projects
   use for the same invariant.
 - `starter/docs/SDLC.md` is the single authority for commit authority, the

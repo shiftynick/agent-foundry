@@ -64,6 +64,16 @@ reporting — not just how long it thinks.
   find it — so low-effort slices need packets that leave nothing to ask
   about.
 
+## Announce the dials
+
+Before dispatching delegated work, state the routing plan to the operator:
+for work slices and for review/verification slices separately, which backend
+and model family runs them, which specific model, and at which effort
+level — plus the reason for any deviation from the defaults above. When a dial changes mid-run (effort raised, a slice escalated to a
+bigger model, work pulled back to the orchestrator), announce the change and
+why as it happens. The operator should never have to ask which model and
+effort produced or reviewed a given piece of work.
+
 ## Workflow
 
 1. Name the expensive-token risk: large repo search, long logs, broad docs,

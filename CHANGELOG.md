@@ -25,6 +25,34 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.12.0
+
+### Changed
+
+- New shared skill `attack-the-board` in both harness trees: interrogate the
+  remaining backlog up front, then execute as much of it as possible
+  autonomously. It scopes the remaining in-filter work (offering filters when the
+  backlog is large and none was given), orders a work path, harvests every
+  operator-only question in one quick per-task pass and records the answers
+  as board notes, then drives task after task through the unchanged
+  `execute-task` lifecycle — efficient-orchestration posture by default,
+  operator-selectable worker family — routing around real blockers (a
+  closed four-item list) until nothing claimable remains, ending with a
+  completed/blocked/filed report. Both skill-tree `README.md` tables list it.
+- `efficient-orchestration` gained an "Announce the dials" section: before
+  dispatching, the orchestrator states which backend and model family the
+  workers run on and which model tier and effort level each slice class gets
+  (work vs. review/verification), and announces any mid-run dial change with
+  its reason.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade; the new skill directories land in both
+   trees automatically.
+2. Replace both copies of `efficient-orchestration/SKILL.md` with the new
+   molds. If a project locally modified them, re-apply its recorded
+   divergences on top and keep the "Announce the dials" section.
+
 ## 0.11.1
 
 ### Changed

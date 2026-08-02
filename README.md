@@ -121,7 +121,7 @@ agent-foundry/
 ## Maintaining the foundry
 
 1. Edit the canonical files under `starter/`.
-2. Keep the twelve shared workflow skills semantically synchronized between
+2. Keep the thirteen shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
 3. Keep `claude-in-codex` only under `.agents` and `codex-in-claude` only
    under `.claude`.

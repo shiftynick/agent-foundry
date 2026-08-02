@@ -10,6 +10,7 @@ workflows installed by Agent Foundry.
 | `task-tracker` | Durable file-based kanban and dependency graph. |
 | `plan-milestone` | Operator-approved decomposition of goals into task fronts. |
 | `execute-task` | Rubric through implementation, review, validation and commit. |
+| `attack-the-board` | Front-loaded question harvest, then an autonomous multi-task run. |
 | `adr` | MADR-style architecture decision workflow. |
 | `diagnosing-bugs` | Feedback-loop-first diagnosis. |
 | `codebase-audit` | Periodic sweep for accumulated quality drift. |
