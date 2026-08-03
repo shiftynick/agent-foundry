@@ -286,11 +286,14 @@ try {
   const required = [
     ".agents/skills/claude-in-codex/SKILL.md",
     ".agents/skills/claude-in-codex/scripts/claude-ask.mjs",
+    ".agents/skills/claude-in-codex/scripts/claude-ask.test.mjs",
+    ".agents/skills/agent-headless/SKILL.md",
     ".agents/skills/cursor-cli/SKILL.md",
     ".agents/skills/cursor-cli/scripts/cursor-agent.mjs",
     ".agents/skills/cursor-cli/scripts/cursor-agent.test.mjs",
     ".agents/skills/diagnosing-bugs/scripts/hitl-loop.template.mjs",
     ".claude/skills/codex-in-claude/SKILL.md",
+    ".claude/skills/agent-headless/SKILL.md",
     ".claude/skills/cursor-cli/SKILL.md",
     ".claude/skills/cursor-cli/scripts/cursor-agent.mjs",
     ".claude/skills/cursor-cli/scripts/cursor-agent.test.mjs",
@@ -311,6 +314,12 @@ try {
     "HANDOFF.md",
     ".agent-foundry.json",
     ".agent-foundry/check-skill-sync.mjs",
+    ".agent-foundry/agent-headless/cli.js",
+    ".agent-foundry/agent-headless/index.js",
+    ".agent-foundry/agent-headless/PROVENANCE.md",
+    ".agent-foundry/agent-headless/LICENSE",
+    ".agent-foundry/agent-headless/cli.test.mjs",
+    ".agent-foundry/agent-headless/COMPATIBILITY.md",
   ];
   for (const relative of required) {
     assert(
@@ -326,7 +335,27 @@ try {
     [path.join(testRoot, ".agent-foundry", "check-skill-sync.mjs")],
     { cwd: testRoot, label: "installed skill-sync check" },
   ).stdout;
-  assert.match(syncOutput, /skill-sync: PASS \(15 shared skills\)/u);
+  assert.match(syncOutput, /skill-sync: PASS \(16 shared skills\)/u);
+
+  const runnerVersion = run(
+    process.execPath,
+    [path.join(testRoot, ".agent-foundry", "agent-headless", "cli.js"), "--version"],
+    { cwd: testRoot, label: "installed agent-headless version" },
+  ).stdout.trim();
+  const installedProvenance = readFileSync(
+    path.join(testRoot, ".agent-foundry", "agent-headless", "PROVENANCE.md"),
+    "utf8",
+  );
+  const installedVersion = installedProvenance.match(/^- Version: `([^`]+)`$/mu)?.[1];
+  assert(installedVersion, "Installed agent-headless provenance version is missing");
+  assert.equal(runnerVersion, installedVersion);
+
+  const installedChecks = run(
+    process.execPath,
+    [path.join(testRoot, ".agent-foundry", "run-checks.mjs")],
+    { cwd: testRoot, label: "installed full Foundry checks" },
+  ).stdout;
+  assert.match(installedChecks, /PASS \(skill-sync \+ \d+ suites\)/u);
 
   const agents = readFileSync(path.join(testRoot, "AGENTS.md"), "utf8");
   assert(agents.includes(projectName));
@@ -362,6 +391,10 @@ try {
     true,
   );
   assert.equal(installManifest.files["docs/SDLC.md"].tier, "mold");
+  assert.equal(
+    installManifest.files[".agent-foundry/agent-headless/cli.js"].tier,
+    "mold",
+  );
   assert.equal(
     installManifest.files[".claude/skills/task-tracker/SKILL.md"].tier,
     "mold",

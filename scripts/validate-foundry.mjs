@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -76,9 +77,9 @@ export function validateFoundry() {
     .filter((file) => path.basename(file) === "SKILL.md");
   const claudeSkillFiles = listFiles(claudeSkillsRoot)
     .filter((file) => path.basename(file) === "SKILL.md");
-  if (agentSkillFiles.length !== 16 || claudeSkillFiles.length !== 16) {
+  if (agentSkillFiles.length !== 17 || claudeSkillFiles.length !== 17) {
     throw new Error(
-      "Expected 16 skills per harness (15 shared + 1 bridge); "
+      "Expected 17 skills per harness (16 shared + 1 compatibility bridge); "
       + `found agents=${agentSkillFiles.length}, `
       + `claude=${claudeSkillFiles.length}.`,
     );
@@ -95,13 +96,27 @@ export function validateFoundry() {
   }
 
   requireFile(".agents/skills/claude-in-codex/SKILL.md");
+  requireFile(".agents/skills/claude-in-codex/scripts/claude-ask.mjs");
+  requireFile(".agents/skills/claude-in-codex/scripts/claude-ask.test.mjs");
+  requireFile(".agents/skills/agent-headless/SKILL.md");
   requireFile(".agents/skills/cursor-cli/SKILL.md");
   requireFile(".agents/skills/cursor-cli/scripts/cursor-agent.mjs");
   requireFile(".agents/skills/cursor-cli/scripts/cursor-agent.test.mjs");
   requireFile(".claude/skills/codex-in-claude/SKILL.md");
+  requireFile(".claude/skills/agent-headless/SKILL.md");
   requireFile(".claude/skills/cursor-cli/SKILL.md");
   requireFile(".claude/skills/cursor-cli/scripts/cursor-agent.mjs");
   requireFile(".claude/skills/cursor-cli/scripts/cursor-agent.test.mjs");
+  requireFile(".agent-foundry/agent-headless/cli.js");
+  requireFile(".agent-foundry/agent-headless/index.js");
+  requireFile(".agent-foundry/agent-headless/PROVENANCE.md");
+  requireFile(".agent-foundry/agent-headless/LICENSE");
+  requireFile(".agent-foundry/agent-headless/cli.test.mjs");
+  requireFile(".agent-foundry/agent-headless/COMPATIBILITY.md");
+  requireFile(".agent-foundry/agent-headless/source/0001-feat-harden-unified-runner-for-Node-20-consumers.patch.b64");
+  requireFile(".agent-foundry/agent-headless/source/0002-fix-tighten-least-privilege-and-cancellation-contrac.patch.b64");
+  requireFile(".agents/skills/execute-task/references/cold-review.md");
+  requireFile(".claude/skills/execute-task/references/cold-review.md");
   if (existsSync(path.join(claudeSkillsRoot, "claude-in-codex"))) {
     throw new Error("claude-in-codex must exist only in the Codex-facing tree.");
   }
@@ -112,6 +127,7 @@ export function validateFoundry() {
   const sharedSkills = [
     "adr",
     "agent-foundry-feedback",
+    "agent-headless",
     "attack-the-board",
     "codebase-audit",
     "cursor-cli",
@@ -126,6 +142,95 @@ export function validateFoundry() {
     "the-fool",
     "upgrade-agent-foundry",
   ];
+
+  const bundledRunner = path.join(starterRoot, ".agent-foundry", "agent-headless", "cli.js");
+  const provenance = readFileSync(
+    path.join(starterRoot, ".agent-foundry", "agent-headless", "PROVENANCE.md"),
+    "utf8",
+  );
+  const versionMatch = provenance.match(/^- Version: `([^`]+)`$/mu);
+  if (!versionMatch) throw new Error("Bundled agent-headless provenance has no version.");
+  const runnerVersion = run(process.execPath, [bundledRunner, "--version"], {
+    label: "bundled agent-headless version",
+  }).stdout.trim();
+  if (runnerVersion !== versionMatch[1]) {
+    throw new Error(`Bundled agent-headless version mismatch: provenance=${versionMatch[1]}, runner=${runnerVersion}`);
+  }
+  const hashedArtifacts = [
+    ["CLI", ".agent-foundry/agent-headless/cli.js"],
+    ["Library", ".agent-foundry/agent-headless/index.js"],
+  ];
+  for (const [label, relative] of hashedArtifacts) {
+    const match = provenance.match(new RegExp("^- " + label + " SHA-256: \\x60([0-9A-Fa-f]{64})\\x60$", "mu"));
+    if (!match) throw new Error(`Bundled agent-headless provenance has no valid ${label} SHA-256.`);
+    const actual = createHash("sha256").update(readFileSync(path.join(starterRoot, ...relative.split("/")))).digest("hex");
+    if (actual !== match[1].toLowerCase()) {
+      throw new Error(`Bundled agent-headless ${label} hash mismatch: provenance=${match[1]}, actual=${actual}`);
+    }
+  }
+  const sourcePatches = [...provenance.matchAll(/^  - `([^`]+\.patch\.b64)`: `([0-9A-Fa-f]{64})`$/gmu)];
+  if (sourcePatches.length === 0) throw new Error("Bundled agent-headless provenance has no source patches.");
+  for (const match of sourcePatches) {
+    const fullPath = path.join(starterRoot, ".agent-foundry", "agent-headless", ...match[1].split("/"));
+    const actual = createHash("sha256").update(readFileSync(fullPath)).digest("hex");
+    if (actual !== match[2].toLowerCase()) throw new Error(`Bundled source patch hash mismatch: ${match[1]}`);
+  }
+  if (!/^- Source commit: `[0-9a-f]{40}`$/mu.test(provenance)) {
+    throw new Error("Bundled agent-headless provenance has no full source commit.");
+  }
+  if (!/^- Public base commit: `[0-9a-f]{40}`$/mu.test(provenance)) {
+    throw new Error("Bundled agent-headless provenance has no public base commit.");
+  }
+  const bundledLicense = readFileSync(
+    path.join(starterRoot, ".agent-foundry", "agent-headless", "LICENSE"),
+    "utf8",
+  );
+  if (!bundledLicense.includes("agent-headless contributors")) {
+    throw new Error("Bundled agent-headless license attribution is missing.");
+  }
+  const runnerText = readFileSync(bundledRunner, "utf8") + "\n" + readFileSync(
+    path.join(starterRoot, ".agent-foundry", "agent-headless", "index.js"),
+    "utf8",
+  );
+  for (const forbidden of [
+    "dangerously-bypass",
+    "dangerously-skip-permissions",
+    "allow-dangerously-skip-permissions",
+    "danger-full-access",
+    "--approve-mcps",
+    "--force",
+    "--yolo",
+  ]) {
+    if (runnerText.includes(forbidden)) {
+      throw new Error(`Bundled agent-headless contains forbidden bypass flag: ${forbidden}`);
+    }
+  }
+
+  const coldReview = readFileSync(
+    path.join(agentSkillsRoot, "execute-task", "references", "cold-review.md"),
+    "utf8",
+  );
+  for (const required of ["git diff --binary HEAD", "git ls-files --others --exclude-standard"]) {
+    if (!coldReview.includes(required)) throw new Error(`Cold-review packet contract lost required command: ${required}`);
+  }
+  for (const [tree, alias] of [
+    [agentSkillsRoot, "claude-in-codex"],
+    [claudeSkillsRoot, "codex-in-claude"],
+    [agentSkillsRoot, "cursor-cli"],
+    [claudeSkillsRoot, "cursor-cli"],
+  ]) {
+    const aliasText = readFileSync(path.join(tree, alias, "SKILL.md"), "utf8");
+    if (!aliasText.includes("../agent-headless/SKILL.md") || !aliasText.includes("compatibility")) {
+      throw new Error(`${alias} must remain a thin agent-headless compatibility alias.`);
+    }
+  }
+  const sharedInvocation = readFileSync(
+    path.join(agentSkillsRoot, "agent-headless", "SKILL.md"),
+    "utf8",
+  );
+  if (!sharedInvocation.includes("docs/SDLC.md") || sharedInvocation.includes("From Codex")) {
+    throw new Error("agent-headless must defer provider routing to docs/SDLC.md.");
+  }
   for (const skill of sharedSkills) {
     const agentRoot = path.join(agentSkillsRoot, skill);
     const claudeRoot = path.join(claudeSkillsRoot, skill);

@@ -42,10 +42,12 @@ even with `--force`.
 
 ## What gets installed
 
-- `.agents/skills/`: shared Codex workflows, including opt-in `cursor-cli`,
-  plus the `claude-in-codex` bridge.
-- `.claude/skills/`: matching Claude workflows plus the `codex-in-claude`
-  bridge and the shared `cursor-cli`.
+- `.agents/skills/` and `.claude/skills/`: matching workflows, including the
+  shared `agent-headless` entry point for Claude, Codex, and operator-selected
+  Cursor calls. The old provider skill names remain compatibility aliases for
+  one release line.
+- `.agent-foundry/agent-headless/`: one bundled Node 20 runner used by both
+  harnesses.
 - `.tasks/`: Git-backed kanban state.
 - `docs/adr/`: ADR process and template.
 - `docs/SDLC.md`: task lifecycle and two-axis cold review.
@@ -121,10 +123,11 @@ agent-foundry/
 ## Maintaining the foundry
 
 1. Edit the canonical files under `starter/`.
-2. Keep the fifteen shared workflow skills semantically synchronized between
+2. Keep the sixteen shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
 3. Keep `claude-in-codex` only under `.agents` and `codex-in-claude` only
-   under `.claude`.
+   under `.claude` while those compatibility aliases exist. Provider mechanics
+   belong in the shared `agent-headless` skill and bundled runner.
 4. Keep `starter/docs/SDLC.md` the single authority for commit authority, the
    cold-review ladder, and mid-task ADR handling; skills reference it rather
    than restating it.

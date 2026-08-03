@@ -19,10 +19,11 @@ agent workflows installed by Agent Foundry.
 | `handoff-writer` | Cold-start session handoff. |
 | `the-fool` | Adversarial review of ideas and plans. |
 | `grill-me` | Deliberate one-question-at-a-time decision interview. |
-| `cursor-cli` | Operator-selected Cursor model for read-only review or isolated work. |
+| `agent-headless` | Unified safe Claude, Codex, and operator-selected Cursor invocation. |
+| `cursor-cli` | Compatibility alias for operator-selected Cursor calls. |
 | `upgrade-agent-foundry` | Guided in-place upgrade of the installed workflow kit. |
 | `agent-foundry-feedback` | Package kit defects and upstream-worthy fixes into feedback packets. |
-| `claude-in-codex` | Read-only calls to Claude Code for cold review and second opinions. |
+| `claude-in-codex` | Compatibility alias for Claude calls from Codex. |
 
 ## Rules
 
@@ -34,10 +35,10 @@ agent workflows installed by Agent Foundry.
 - Shared scripts should remain byte-equivalent where they do not embed a
   harness path.
 - Skills may reference only repository paths that exist, plus external CLIs
-  they document how to verify (the bridge skills do this deliberately).
+  whose verification contract is documented by `agent-headless`.
 - A skill change is reviewed like code: trigger accuracy, instructions,
   repository references, and a real invocation when scripts are involved.
-- `claude-in-codex` is Codex-specific glue and lives only in this tree. Its
-  counterpart bridge lives in the Claude tree.
+- Provider mechanics belong to `agent-headless`; the harness-specific bridge
+  name remains only as a temporary compatibility alias.
 - Do not add orchestration or dashboard skills until a concrete project need
   justifies their maintenance cost.

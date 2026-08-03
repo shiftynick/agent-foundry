@@ -7,6 +7,7 @@ product code and it is not the task board.
 | --- | --- |
 | `manifest.json` | What was installed, at which version, with a hash and tier per managed file. Generated — do not hand-edit. |
 | `run-checks.mjs` | Runs the skill-sync gate plus every test suite the kit owns. |
+| `agent-headless/` | Unified provider runner, library test seam, compatibility matrix, license, provenance, and reconstructable source patches. |
 | `reconcile-seeds.mjs` | Lists or restores every non-preserved project seed after a forced upgrade. |
 | `check-skill-sync.mjs` | Verifies the two harness skill trees still agree. |
 | `check-foundry-drift.mjs` | Reports how installed files differ from what was installed. |
@@ -67,6 +68,10 @@ node .agent-foundry/check-foundry-drift.mjs   # what we have changed
 
 `run-checks` discovers suites rather than listing them, so a skill that ships
 new tests in a future release is covered without touching the project's gate.
+
+`agent-headless/` is Foundry-owned mold shared by both harnesses. Read its
+`PROVENANCE.md` before refreshing artifacts; updates require upstream tests,
+license/dependency/security review, hash refresh, and a Foundry release.
 
 The checks have deliberately different force:
 

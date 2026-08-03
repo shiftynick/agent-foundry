@@ -25,6 +25,62 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.15.0
+
+### Changed
+
+- New shared `agent-headless` skill gives both harnesses one invocation
+  contract for Claude Code, Codex CLI, and operator-selected Cursor Agent.
+  Provider mechanics run through a single Node 20 bundle installed at
+  `.agent-foundry/agent-headless/cli.js`; capability probes explicitly report
+  `available`, `missing`, or `unusable`, including Windows shim resolution.
+- The bundled runner is generated from `shiftynick/agent-headless` 0.2.0. It
+  preserves raw provider events while classifying stable lifecycle kinds,
+  validates capability combinations, sends prompts over stdin, never emits
+  dangerous approval/sandbox bypass flags, preserves partial failure output,
+  and terminates process trees on cancellation or timeout. `PROVENANCE.md`
+  records source/public-base commits, version, license, and artifact hashes;
+  encoded source patches make an unpushed build reconstructable. Validation
+  verifies all of them, executes bundled adapter/permission/cancellation tests,
+  and scans for forbidden bypass flags.
+- `docs/SDLC.md` remains the routing authority: Codex normally selects Claude,
+  Claude Code normally selects Codex, and Cursor plus its exact model remain
+  operator-selected. The old `claude-in-codex`, `codex-in-claude`, and
+  `cursor-cli` skill names are compatibility aliases through 0.15.x. Existing
+  wrapper scripts remain for command compatibility but are no longer the
+  documented entry point.
+- Source-only proposed ADR 0001 records why Foundry vendors one validated
+  bundle instead of requiring a network/global dependency or duplicating
+  provider wrappers; it is not installed into target projects.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade. The shared `agent-headless` skill lands in
+   both harness trees, and `.agent-foundry/agent-headless/cli.js` plus
+   `PROVENANCE.md` land once outside them.
+2. Optionally, when reconciling `AGENTS.md` and `CLAUDE.md`, prefer normal invocation guidance
+   with `.agents/skills/agent-headless/` or
+   `.claude/skills/agent-headless/`. Preserve local model-routing policy, but
+   keep the stock rule that Cursor and its exact model require operator choice.
+3. Gradually update project scripts or documentation that invoke old wrapper
+   paths to `node .agent-foundry/agent-headless/cli.js run`: map
+   `claude-ask --prompt/--context-file` to `--provider claude
+   --access answer-only --prompt-file`, and map `cursor-agent
+   --model/--mode/--allow-write` to `--provider cursor --model` plus
+   `--access answer-only|inspect|edit-isolated`. The old paths still work in
+   0.15.x, so this migration need not be atomic; do not add new callers.
+4. If the project chooses to migrate a locally changed provider skill or wrapper, separate policy
+   from mechanics: move routing/policy into `docs/SDLC.md` or the shared skill,
+   and retain a recorded compatibility divergence only when the new runner
+   cannot express required behavior. Verify with
+   `node .agent-foundry/agent-headless/cli.js capabilities <provider>`.
+
+### Breaking
+
+None. Compatibility skill names and wrapper commands remain functional through
+0.15.x; actions 2-4 are an incremental migration path, not correctness work
+required before upgrading.
+
 ## 0.14.1
 
 ### Changed

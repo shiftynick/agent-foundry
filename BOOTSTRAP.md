@@ -103,10 +103,11 @@ Run:
 
 ```text
 node .agents/skills/task-tracker/scripts/task.mjs board
-node --test .agents/skills/claude-in-codex/scripts/claude-ask.test.mjs .agents/skills/task-tracker/scripts/task.test.mjs .agents/skills/task-tracker/scripts/_lib.test.mjs .agents/skills/task-tracker/scripts/board-html.test.mjs
-node --test .claude/skills/task-tracker/scripts/task.test.mjs .claude/skills/task-tracker/scripts/_lib.test.mjs .claude/skills/task-tracker/scripts/board-html.test.mjs
+node --test .agent-foundry/agent-headless/cli.test.mjs .agents/skills/claude-in-codex/scripts/claude-ask.test.mjs .agents/skills/cursor-cli/scripts/cursor-agent.test.mjs .agents/skills/task-tracker/scripts/task.test.mjs .agents/skills/task-tracker/scripts/_lib.test.mjs .agents/skills/task-tracker/scripts/board-html.test.mjs
+node --test .claude/skills/cursor-cli/scripts/cursor-agent.test.mjs .claude/skills/task-tracker/scripts/task.test.mjs .claude/skills/task-tracker/scripts/_lib.test.mjs .claude/skills/task-tracker/scripts/board-html.test.mjs
 node --test .agent-foundry/check-skill-sync.test.mjs .agent-foundry/check-foundry-drift.test.mjs
 node .agent-foundry/check-skill-sync.mjs
+node .agent-foundry/agent-headless/cli.js --version
 node .agent-foundry/check-foundry-drift.mjs
 ```
 
@@ -120,8 +121,8 @@ Then verify:
   `docs/SDLC.md` default;
 - `AGENTS.md` records a `codebase-audit` cadence;
 - a fresh install reports no drift;
-- `claude-in-codex` and `codex-in-claude` use the currently installed CLI
-  flags;
+- `agent-headless capabilities <provider>` accurately reports each configured
+  CLI as available, missing, or unusable;
 - the board reflects the real implementation front; and
 - no unrelated pre-existing file was modified.
 

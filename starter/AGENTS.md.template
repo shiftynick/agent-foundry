@@ -44,6 +44,10 @@ Execute claimed work with the `execute-task` skill:
 7. Validate real behavior and record exact evidence.
 8. Complete and commit per "Commit authority" below.
 
+When cold review requires another model family, use
+`.agents/skills/agent-headless/` with provider `claude`. The SDLC cold-review
+ladder remains authoritative when that provider is unavailable.
+
 Architecture-significant decisions use the `adr` skill. Agent-authored ADRs
 start as `proposed`. A proposed ADR discovered mid-task does not automatically
 halt the task — apply the reversibility test in `docs/SDLC.md`.
@@ -107,15 +111,16 @@ Never report a planned or unavailable command as passing.
 | `handoff-writer` | Restart-from-cold `HANDOFF.md`. |
 | `the-fool` | Pre-implementation adversarial review. |
 | `grill-me` | One-question-at-a-time decision clarification. |
-| `cursor-cli` | Operator-selected Cursor model for read-only review or isolated work. |
+| `agent-headless` | Unified safe Claude, Codex, and operator-selected Cursor invocation. |
+| `cursor-cli` | Compatibility alias for operator-selected Cursor calls. |
 | `upgrade-agent-foundry` | Guided in-place upgrade of the installed workflow kit. |
 | `agent-foundry-feedback` | Package kit defects and upstream-worthy fixes into feedback packets. |
-| `claude-in-codex` | Invoke Claude Code for cold review from Codex. |
-| `codex-in-claude` | Invoke Codex CLI for cold review from Claude Code. |
+| `claude-in-codex` | Compatibility alias for Claude calls from Codex. |
+| `codex-in-claude` | Compatibility alias for Codex calls from Claude Code. |
 
-The fifteen shared workflows are mirrored between `.agents/skills/` and
+The sixteen shared workflows are mirrored between `.agents/skills/` and
 `.claude/skills/`. Preserve their behavior while retaining harness-specific
-paths and counterpart bridges. Edit both copies in the same commit and verify
+paths and temporary compatibility aliases. Edit both copies in the same commit and verify
 with `node .agent-foundry/check-skill-sync.mjs`.
 
 ## Handling untrusted content

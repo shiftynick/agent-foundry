@@ -194,8 +194,9 @@ Review independence is a ladder, not a single vendor requirement. Use the
 highest rung available in the current environment, and **log which rung was
 used** in the task log — an unrecorded rung is treated as rung 4.
 
-1. **Separate CLI, different model family.** Codex normally uses
-   `claude-in-codex`; Claude Code normally uses `codex-in-claude`. An
+1. **Separate CLI, different model family.** Invoke the shared
+   `agent-headless` skill: Codex normally selects provider `claude`; Claude
+   Code normally selects provider `codex`. An
    operator-selected neutral router such as Cursor also qualifies only when
    the operator explicitly selected its exact model and that model's family
    differs from the implementer. Log the transport, model ID, and family.
@@ -236,8 +237,8 @@ to an unprotected default branch or impose stricter boundaries.
 - **A commit is not the end of the lifecycle.** Committing work to a task
   branch so a cold reviewer can see it is part of the review step, not a claim
   that the task is done — a reviewer in its own process cannot read your index,
-  so an uncommitted packet must be exported instead (the bridge skills show
-  how). Review findings are then addressed in further commits on the same
+  so an uncommitted packet must be exported instead (the `execute-task`
+  cold-review reference shows how). Review findings are then addressed in further commits on the same
   branch. What requires the task to be *complete* is not the first commit; it
   is merging or delivering the branch.
 
