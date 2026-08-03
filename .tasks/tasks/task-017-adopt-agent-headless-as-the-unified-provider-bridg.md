@@ -1,12 +1,12 @@
 ---
 id: task-017
 title: Adopt agent-headless as the unified provider bridge
-status: review
+status: done
 priority: p1
 tags: [area:workflow, area:release]
 blockedBy: []
 createdAt: "2026-08-03T18:30:37Z"
-updatedAt: "2026-08-03T19:20:05Z"
+updatedAt: "2026-08-03T19:23:33Z"
 ---
 
 <!-- task-tracker:description -->
@@ -414,3 +414,42 @@ Harden the standalone agent-headless package for Node 20 and native Windows, bor
   output:
   | (no output)
 - 2026-08-03T19:20:05Z — note: Cold review cap completed: three SPEC and three STANDARDS rounds. All must-fix findings were addressed. Final gates passed: agent-headless 29 tests passed/3 live skipped plus 2 Node tests; Foundry structural validation passed; bundled payload 6/6 tests passed; clean bootstrap and installed full run-checks passed; all three installed CLIs reported available; vendored source patches reconstructed the exact reviewed source tree. Residual adjudicated risks: validator negative-fixture coverage is a possible later hardening task; source-to-artifact binding is verified by hashes and reconstruction evidence rather than an automatic Bun rebuild in the dependency-free Foundry gate. ADR 0001 remains proposed and requires explicit operator acceptance before release finalization.
+- 2026-08-03T19:22:21Z — run: node scripts/validate-foundry.mjs
+  started 2026-08-03T19:22:18Z, exit 0 in 2.3s
+  output:
+  | Agent Foundry structural validation: PASS
+- 2026-08-03T19:23:27Z — run: node scripts/test-bootstrap.mjs
+  started 2026-08-03T19:22:21Z, exit 0 in 65.7s
+  output tail (truncated to last 30 lines):
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | .............
+  | task-001 → in_progress
+  | task-001 noted
+  | Agent Foundry 0.15.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\clean-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\clean-project\.agent-foundry-backups\20260803T192323356Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | The target board already has active tasks; no bootstrap task was created.
+  | Agent Foundry 0.15.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\clean-project
+  | Agent Foundry 0.15.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\seed-upgrade-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\seed-upgrade-project\.agent-foundry-backups\20260803T192325097Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.15.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\seed-upgrade-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\clean-project\.agent-foundry-backups\20260803T192326563Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.15.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-SSa1Zw\clean-project
+  | Agent Foundry clean-project bootstrap: PASS
+- 2026-08-03T19:23:33Z — note: Operator accepted ADR 0001 on 2026-08-03. Re-ran structural validation and the full clean-project bootstrap after acceptance; both passed. Release decision is finalized locally; no repositories were pushed.
+- 2026-08-03T19:23:33Z — moved to done

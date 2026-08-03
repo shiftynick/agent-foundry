@@ -6,4 +6,4 @@ mold.
 
 | ID | Title | Status |
 | --- | --- | --- |
-| [0001](0001-vendor-agent-headless-runner.md) | Vendor the agent-headless runner once | proposed |
+| [0001](0001-vendor-agent-headless-runner.md) | Vendor the agent-headless runner once | accepted |

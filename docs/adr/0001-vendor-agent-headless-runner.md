@@ -1,6 +1,6 @@
 # ADR 0001: Vendor the agent-headless runner once
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-08-03
 - **Task:** task-017
 
@@ -26,7 +26,7 @@ requiring a global or network install would break dependency-free bootstrap.
 
 ## Decision
 
-Proceed provisionally with option 3. The upstream package remains the source
+Adopt option 3. The upstream package remains the source
 for implementation and tests; Foundry stores generated artifacts, encoded
 source patches from a public base, license, and provenance. The shared skill owns invocation mechanics. Installed SDLC policy
 owns model-family selection, permissions, and review acceptance.
@@ -54,5 +54,5 @@ both Foundry suites and the shared-skill synchronization check.
 
 ## Follow-up
 
-- Seek explicit operator acceptance before publishing the Foundry release.
+- Operator acceptance was recorded on 2026-08-03.
 - Retire the compatibility aliases after one documented release.
