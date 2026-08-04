@@ -41,6 +41,11 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
   without repeatedly replaying the full interview.
 - `execute-task` keeps detailed review evidence in durable records while
   reporting only a plain-language operator summary by default.
+- New dependency-free `.agent-foundry/project-status.mjs` produces stable JSON
+  and a terminal briefing capped at twelve lines. It quotes the latest approved
+  milestone goal and finish line, uses the task tracker's own next/blocker
+  logic, reports Git and recorded-check state, labels old or missing direction,
+  and supports an explicit Git-ignored `--mark-seen` comparison point.
 
 ### Upgrade actions
 
@@ -52,6 +57,14 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
 2. Reconcile locally changed `grill-me` and `execute-task` skills by preserving
    project-specific workflow requirements while adopting the plain-language
    interview and review-translation behavior.
+3. Use `node .agent-foundry/project-status.mjs` for the short operator view.
+   Run it once with `--mark-seen` after reading to establish the local baseline;
+   ensure the normal upgrade merged `.agent-foundry/project-status-seen.json`
+   into `.gitignore`, and do not commit that marker.
+4. If `PLANNING-JOURNAL.md` only has free-form milestone notes, reconcile the
+   latest still-accepted direction into the dated `Goal`, `Done when`, and
+   `Approved front` format documented by `plan-milestone`. Until that happens,
+   the status view intentionally labels milestone direction as unknown.
 
 ### Breaking
 

@@ -320,6 +320,8 @@ try {
     ".agent-foundry/agent-headless/LICENSE",
     ".agent-foundry/agent-headless/cli.test.mjs",
     ".agent-foundry/agent-headless/COMPATIBILITY.md",
+    ".agent-foundry/project-status.mjs",
+    ".agent-foundry/project-status.test.mjs",
   ];
   for (const relative of required) {
     assert(
@@ -336,6 +338,16 @@ try {
     { cwd: testRoot, label: "installed skill-sync check" },
   ).stdout;
   assert.match(syncOutput, /skill-sync: PASS \(16 shared skills\)/u);
+
+  const projectStatus = JSON.parse(run(
+    process.execPath,
+    [path.join(testRoot, ".agent-foundry", "project-status.mjs"), "--json"],
+    { cwd: testRoot, label: "installed project status" },
+  ).stdout);
+  assert.equal(projectStatus.schemaVersion, 1);
+  assert.equal(projectStatus.project.name, projectName);
+  assert.equal(projectStatus.work.inProgress[0].id, "task-001");
+  assert.equal(projectStatus.milestone.freshness, "unknown");
 
   const runnerVersion = run(
     process.execPath,
@@ -510,6 +522,12 @@ try {
   assert(ignore.startsWith(ignoreBeforeForce));
   assert.equal(
     ignore.split(/\r?\n/u).filter((line) => line === ".tasks/board.html").length,
+    1,
+  );
+  assert.equal(
+    ignore.split(/\r?\n/u).filter((line) => (
+      line === ".agent-foundry/project-status-seen.json"
+    )).length,
     1,
   );
 

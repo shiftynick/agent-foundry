@@ -7,3 +7,4 @@ mold.
 | ID | Title | Status |
 | --- | --- | --- |
 | [0001](0001-vendor-agent-headless-runner.md) | Vendor the agent-headless runner once | accepted |
+| [0002](0002-derive-operator-status-from-project-truth.md) | Derive operator status from project truth | accepted |

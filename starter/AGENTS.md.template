@@ -28,6 +28,18 @@ node .agents/skills/task-tracker/scripts/task.mjs board
 node .agents/skills/task-tracker/scripts/task.mjs next
 ```
 
+For a short human-facing view of direction, active work, decisions, and the
+latest recorded check, use:
+
+```text
+node .agent-foundry/project-status.mjs
+node .agent-foundry/project-status.mjs --mark-seen
+```
+
+The second command prints the same view and records a local, Git-ignored marker
+for the next "since last look" comparison. Use `--json` for other generated
+views; the board remains the source of task truth.
+
 New fronts of work enter the board through the `plan-milestone` skill with
 operator approval (`docs/SDLC.md` → "Planning above the task"); anything
 waiting on a human carries the `needs:operator` tag.

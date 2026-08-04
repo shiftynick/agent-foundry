@@ -1,6 +1,7 @@
 # Agent Foundry generated/transient state
 .agent-foundry-backups/
 .agent-foundry/feedback/
+.agent-foundry/project-status-seen.json
 .tasks/board.html
 .tasks/.write-lock
 .tasks/tasks/.*.tmp

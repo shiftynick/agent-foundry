@@ -123,6 +123,25 @@ export function validateFoundry() {
   requireFile(".agent-foundry/agent-headless/LICENSE");
   requireFile(".agent-foundry/agent-headless/cli.test.mjs");
   requireFile(".agent-foundry/agent-headless/COMPATIBILITY.md");
+  requireFile(".agent-foundry/project-status.mjs");
+  requireFile(".agent-foundry/project-status.test.mjs");
+  for (const tree of [".agents", ".claude"]) {
+    const milestoneSkill = readFileSync(
+      path.join(starterRoot, tree, "skills", "plan-milestone", "SKILL.md"),
+      "utf8",
+    );
+    for (const anchor of [
+      "## YYYY-MM-DD",
+      "**Goal:**",
+      "**Done when:**",
+      "Approved front:",
+      "milestone:<name>",
+    ]) {
+      if (!milestoneSkill.includes(anchor)) {
+        throw new Error(`${tree} plan-milestone lost project-status contract anchor: ${anchor}`);
+      }
+    }
+  }
   requireFile(".agent-foundry/agent-headless/source/0001-feat-harden-unified-runner-for-Node-20-consumers.patch.b64");
   requireFile(".agent-foundry/agent-headless/source/0002-fix-tighten-least-privilege-and-cancellation-contrac.patch.b64");
   requireFile(".agents/skills/execute-task/references/cold-review.md");

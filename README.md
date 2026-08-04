@@ -48,6 +48,8 @@ even with `--force`.
   one release line.
 - `.agent-foundry/agent-headless/`: one bundled Node 20 runner used by both
   harnesses.
+- `.agent-foundry/project-status.mjs`: a short operator briefing and stable JSON
+  derived from the real board, planning journal, recorded checks, and Git.
 - `.tasks/`: Git-backed kanban state.
 - `docs/adr/`: ADR process and template.
 - `docs/SDLC.md`: task lifecycle and two-axis cold review.
@@ -62,7 +64,8 @@ even with `--force`.
 - `CONTRIBUTING.md`, `HANDOFF.md`, and planning/blocker journals.
 - `.agent-foundry.json`: commit-friendly installation provenance and version.
 - `.agent-foundry/`: install manifest, the skill-sync and drift checks, the
-  local-evolution guide, and the `LOCAL-CHANGES.md` divergence log.
+  project-status view, local-evolution guide, and the `LOCAL-CHANGES.md`
+  divergence log.
 
 Product architecture, stack choices, build commands, deployment rules, and
 domain invariants are deliberately not supplied. The first bootstrap task
