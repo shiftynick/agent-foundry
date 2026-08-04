@@ -27,6 +27,12 @@ Use the lifecycle in `starter/.agents/skills/execute-task/SKILL.md`. Changes to
 agent behavior require separate cold SPEC and STANDARDS reviews from the other
 model family.
 
+## Operator communication
+
+For human-facing questions, updates, explanations, and closeouts, follow
+`starter/docs/SDLC.md` → "Operator communication". It keeps the conversation
+brief and understandable while detailed evidence stays in project records.
+
 ## Invariants
 
 - Starter content remains domain-, language-, and framework-neutral.

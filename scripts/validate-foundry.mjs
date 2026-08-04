@@ -46,6 +46,16 @@ export function validateFoundry() {
     throw new Error(`CHANGELOG.md has no entry for the current version ${version}.`);
   }
 
+  const installedAgents = readFileSync(
+    path.join(starterRoot, "AGENTS.md.template"),
+    "utf8",
+  );
+  for (const required of ["## Operator communication", "docs/SDLC.md"]) {
+    if (!installedAgents.includes(required)) {
+      throw new Error(`Installed operator communication contract lost: ${required}`);
+    }
+  }
+
   const maintainedRoots = [path.join(foundryRoot, "scripts"), starterRoot];
   const maintainedFiles = maintainedRoots.flatMap((root) => listFiles(root));
   const powerShellFiles = maintainedFiles.filter((file) => (
@@ -212,6 +222,29 @@ export function validateFoundry() {
   );
   for (const required of ["git diff --binary HEAD", "git ls-files --others --exclude-standard"]) {
     if (!coldReview.includes(required)) throw new Error(`Cold-review packet contract lost required command: ${required}`);
+  }
+  const operatorSkillContracts = [
+    [
+      "grill-me",
+      readFileSync(path.join(agentSkillsRoot, "grill-me", "SKILL.md"), "utf8"),
+      ["# Grill Me — Decision Interview", "## Question format", "Operator communication"],
+    ],
+    [
+      "execute-task",
+      readFileSync(path.join(agentSkillsRoot, "execute-task", "SKILL.md"), "utf8"),
+      ["### Report review results", "### Report validation results", "Operator communication"],
+    ],
+  ];
+  for (const [skill, content, anchors] of operatorSkillContracts) {
+    for (const anchor of anchors) {
+      if (!content.includes(anchor)) {
+        throw new Error(`${skill} operator-facing structure lost: ${anchor}`);
+      }
+    }
+  }
+  const installedSdlc = readFileSync(path.join(starterRoot, "docs", "SDLC.md"), "utf8");
+  if (!installedSdlc.includes("## Operator communication")) {
+    throw new Error("SDLC operator communication authority is missing.");
   }
   for (const [tree, alias] of [
     [agentSkillsRoot, "claude-in-codex"],

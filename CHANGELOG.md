@@ -25,6 +25,40 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.16.0
+
+### Changed
+
+- `docs/SDLC.md` now gives human-facing conversation one compact authority:
+  lead with the practical outcome, default to brief plain language, define
+  necessary technical terms, and translate raw command, review, and delegated
+  output into the problem, practical effect, and recommendation. Installed
+  `AGENTS.md` points to that authority so the rule is always visible without
+  being duplicated.
+- `grill-me` is presented as a decision interview. It keeps its decision map
+  private, asks one concrete question with a recommendation, explains the
+  cost and ease of undoing a wrong choice, and gives a light progress estimate
+  without repeatedly replaying the full interview.
+- `execute-task` keeps detailed review evidence in durable records while
+  reporting only a plain-language operator summary by default.
+
+### Upgrade actions
+
+1. When reconciling the project-owned `AGENTS.md`, add the stock `Operator
+   communication` pointer unless the project already has an equivalent or
+   stricter plain-language rule. Keep project-specific audience needs. The
+   upgraded mold skills and `docs/SDLC.md` remain self-consistent before this
+   optional seed-file adoption.
+2. Reconcile locally changed `grill-me` and `execute-task` skills by preserving
+   project-specific workflow requirements while adopting the plain-language
+   interview and review-translation behavior.
+
+### Breaking
+
+None. Detailed task, review, and validation records remain available; only the
+default human-facing presentation changes. Skipping the optional seed-file
+pointer leaves the project correct but without the new rule in general chat.
+
 ## 0.15.0
 
 ### Changed

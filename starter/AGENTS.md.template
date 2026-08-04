@@ -52,6 +52,12 @@ Architecture-significant decisions use the `adr` skill. Agent-authored ADRs
 start as `proposed`. A proposed ADR discovered mid-task does not automatically
 halt the task — apply the reversibility test in `docs/SDLC.md`.
 
+## Operator communication
+
+For human-facing questions, updates, explanations, and closeouts, follow
+`docs/SDLC.md` → "Operator communication". It keeps the conversation brief and
+understandable while detailed evidence stays in project records.
+
 ## Commit authority
 
 The default policy is defined in `docs/SDLC.md`: local, task-scoped commits are
