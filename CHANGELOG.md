@@ -46,6 +46,11 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
   milestone goal and finish line, uses the task tracker's own next/blocker
   logic, reports Git and recorded-check state, labels old or missing direction,
   and supports an explicit Git-ignored `--mark-seen` comparison point.
+- New `.agent-foundry/project-overview.mjs` renders that same projection as a
+  self-contained one-screen visual: approved direction, change signals,
+  Now/Next/Later flow, operator decisions, check/Git evidence, and recent
+  outcomes stay prominent while raw tasks and paths remain drill-down detail.
+  Its generated `.agent-foundry/project-overview.html` is local and ignored.
 
 ### Upgrade actions
 
@@ -65,6 +70,9 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
    latest still-accepted direction into the dated `Goal`, `Done when`, and
    `Approved front` format documented by `plan-milestone`. Until that happens,
    the status view intentionally labels milestone direction as unknown.
+5. Run `node .agent-foundry/project-overview.mjs` to generate the local visual
+   and merge `.agent-foundry/project-overview.html` into `.gitignore`. Do not
+   commit the generated snapshot; refresh it when the operator needs it.
 
 ### Breaking
 

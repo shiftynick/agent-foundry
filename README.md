@@ -50,6 +50,8 @@ even with `--force`.
   harnesses.
 - `.agent-foundry/project-status.mjs`: a short operator briefing and stable JSON
   derived from the real board, planning journal, recorded checks, and Git.
+- `.agent-foundry/project-overview.mjs`: a one-screen, self-contained visual
+  generated from the status JSON; its local HTML output is Git-ignored.
 - `.tasks/`: Git-backed kanban state.
 - `docs/adr/`: ADR process and template.
 - `docs/SDLC.md`: task lifecycle and two-axis cold review.
@@ -64,8 +66,8 @@ even with `--force`.
 - `CONTRIBUTING.md`, `HANDOFF.md`, and planning/blocker journals.
 - `.agent-foundry.json`: commit-friendly installation provenance and version.
 - `.agent-foundry/`: install manifest, the skill-sync and drift checks, the
-  project-status view, local-evolution guide, and the `LOCAL-CHANGES.md`
-  divergence log.
+  project-status and operator-overview views, local-evolution guide, and the
+  `LOCAL-CHANGES.md` divergence log.
 
 Product architecture, stack choices, build commands, deployment rules, and
 domain invariants are deliberately not supplied. The first bootstrap task

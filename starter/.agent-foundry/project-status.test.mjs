@@ -119,6 +119,10 @@ function fixture() {
       updatedAt: "2026-08-04T10:00:00Z",
     }),
   );
+  writeFileSync(
+    join(root, ".tasks", "tasks", "task-007-later.md"),
+    task("task-007", "Later eligible work", "backlog", { priority: "p2" }),
+  );
   writeFileSync(join(root, ".gitignore"), ".agent-foundry/project-status-seen.json\n");
   git(root, ["add", "."]);
   git(root, ["commit", "-m", "fixture"]);
@@ -182,6 +186,9 @@ describe("project status", () => {
       assert.equal(status.work.inProgress[0].id, "task-002");
       assert.equal(status.work.next.id, trackerNext.task.frontmatter.id);
       assert.equal(status.work.next.id, "task-004");
+      assert.equal(status.work.later[0].id, "task-007");
+      assert.equal(status.work.laterCount, 1);
+      assert.equal(status.work.laterTruncated, false);
       assert.equal(status.work.needsOperator[0].id, "task-005");
       assert.equal(status.work.blocked.some((row) => row.id === "task-003"), true);
       assert.equal(status.validation.latest.command, "node test.mjs");

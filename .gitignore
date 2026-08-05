@@ -1,5 +1,6 @@
 .agent-foundry-backups/
 .agent-foundry/project-status-seen.json
+.agent-foundry/project-overview.html
 .tasks/board.html
 .tasks/.write-lock
 .tasks/tasks/.*.tmp

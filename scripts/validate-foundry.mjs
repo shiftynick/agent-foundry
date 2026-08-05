@@ -125,6 +125,8 @@ export function validateFoundry() {
   requireFile(".agent-foundry/agent-headless/COMPATIBILITY.md");
   requireFile(".agent-foundry/project-status.mjs");
   requireFile(".agent-foundry/project-status.test.mjs");
+  requireFile(".agent-foundry/project-overview.mjs");
+  requireFile(".agent-foundry/project-overview.test.mjs");
   for (const tree of [".agents", ".claude"]) {
     const milestoneSkill = readFileSync(
       path.join(starterRoot, tree, "skills", "plan-milestone", "SKILL.md"),

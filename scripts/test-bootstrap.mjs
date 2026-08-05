@@ -322,6 +322,8 @@ try {
     ".agent-foundry/agent-headless/COMPATIBILITY.md",
     ".agent-foundry/project-status.mjs",
     ".agent-foundry/project-status.test.mjs",
+    ".agent-foundry/project-overview.mjs",
+    ".agent-foundry/project-overview.test.mjs",
   ];
   for (const relative of required) {
     assert(
@@ -349,6 +351,21 @@ try {
   assert.equal(projectStatus.work.inProgress[0].id, "task-001");
   assert.equal(projectStatus.milestone.freshness, "unknown");
 
+  run(
+    process.execPath,
+    [path.join(testRoot, ".agent-foundry", "project-overview.mjs")],
+    { cwd: testRoot, label: "installed project overview" },
+  );
+  const projectOverviewPath = path.join(
+    testRoot,
+    ".agent-foundry",
+    "project-overview.html",
+  );
+  assert.equal(existsSync(projectOverviewPath), true);
+  const projectOverview = readFileSync(projectOverviewPath, "utf8");
+  assert.match(projectOverview, /Current approved direction/u);
+  assert.match(projectOverview, /Work flow/u);
+
   const runnerVersion = run(
     process.execPath,
     [path.join(testRoot, ".agent-foundry", "agent-headless", "cli.js"), "--version"],
@@ -368,6 +385,11 @@ try {
     { cwd: testRoot, label: "installed full Foundry checks" },
   ).stdout;
   assert.match(installedChecks, /PASS \(skill-sync \+ \d+ suites\)/u);
+  assert.match(
+    installedChecks,
+    /Subtest: project overview/u,
+    "installed run-checks did not discover project-overview.test.mjs",
+  );
 
   const agents = readFileSync(path.join(testRoot, "AGENTS.md"), "utf8");
   assert(agents.includes(projectName));
@@ -527,6 +549,12 @@ try {
   assert.equal(
     ignore.split(/\r?\n/u).filter((line) => (
       line === ".agent-foundry/project-status-seen.json"
+    )).length,
+    1,
+  );
+  assert.equal(
+    ignore.split(/\r?\n/u).filter((line) => (
+      line === ".agent-foundry/project-overview.html"
     )).length,
     1,
   );

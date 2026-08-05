@@ -328,7 +328,8 @@ export function collectProjectStatus(root, options = {}) {
   const head = headResult.ok ? headResult.stdout : null;
   const branch = branchResult.ok ? branchResult.stdout : (head ? "detached" : "unknown");
   const gitChanges = statusResult.ok ? parseGitChanges(statusResult.stdout) : null;
-  const nextEntry = claimableTasks(entries).find((entry) => !entry.archived) ?? null;
+  const claimableEntries = claimableTasks(entries).filter((entry) => !entry.archived);
+  const nextEntry = claimableEntries[0] ?? null;
   const operatorEntries = activeEntries.filter((entry) => (
     entry.task.frontmatter.status !== "done"
     && (entry.task.frontmatter.tags ?? []).includes("needs:operator")
@@ -399,6 +400,9 @@ export function collectProjectStatus(root, options = {}) {
       inProgress: activeEntries.filter((entry) => entry.task.frontmatter.status === "in_progress").map(view),
       review: activeEntries.filter((entry) => entry.task.frontmatter.status === "review").map(view),
       next: nextEntry ? view(nextEntry) : null,
+      later: claimableEntries.slice(1, 4).map(view),
+      laterCount: Math.max(0, claimableEntries.length - 1),
+      laterTruncated: claimableEntries.length > 4,
       blocked: blockedEntries.map(view),
       needsOperator: operatorEntries.map(view),
       recentCompleted: completed.slice(0, 5).map(view),

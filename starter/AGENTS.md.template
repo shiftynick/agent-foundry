@@ -34,11 +34,14 @@ latest recorded check, use:
 ```text
 node .agent-foundry/project-status.mjs
 node .agent-foundry/project-status.mjs --mark-seen
+node .agent-foundry/project-overview.mjs
 ```
 
 The second command prints the same view and records a local, Git-ignored marker
 for the next "since last look" comparison. Use `--json` for other generated
 views; the board remains the source of task truth.
+The overview command refreshes the Git-ignored, self-contained
+`.agent-foundry/project-overview.html` visual from the same status projection.
 
 New fronts of work enter the board through the `plan-milestone` skill with
 operator approval (`docs/SDLC.md` → "Planning above the task"); anything

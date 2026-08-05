@@ -8,6 +8,7 @@ product code and it is not the task board.
 | `manifest.json` | What was installed, at which version, with a hash and tier per managed file. Generated — do not hand-edit. |
 | `run-checks.mjs` | Runs the skill-sync gate plus every test suite the kit owns. |
 | `project-status.mjs` | Derives a short operator status and stable JSON from the board, planning journal, recorded checks, and Git. |
+| `project-overview.mjs` | Refreshes the Git-ignored, self-contained `project-overview.html` visual from project-status schema v1. |
 | `agent-headless/` | Unified provider runner, library test seam, compatibility matrix, license, provenance, and reconstructable source patches. |
 | `reconcile-seeds.mjs` | Lists or restores every non-preserved project seed after a forced upgrade. |
 | `check-skill-sync.mjs` | Verifies the two harness skill trees still agree. |
@@ -27,7 +28,9 @@ state. Important field meanings:
   `journalCovered` says whether every ID in the approved journal front is
   present in that tagged set; it does not mean the milestone is finished.
 - `work.next` comes from the task tracker's claim ordering. Work arrays contain
-  task summaries, not a second board.
+  task summaries, not a second board. `work.later` contains the next three
+  claimable tasks after `work.next`; `laterCount` is the full remainder and
+  `laterTruncated` says the preview is capped. It is not the backlog.
 - `state.taskVersions` is the exact task snapshot used by `--mark-seen`.
 - `since.commits` is `null` when Git cannot compare the marker, otherwise it
   contains the exact `count`, up to 20 `items`, and `truncated`. A missing
@@ -37,6 +40,17 @@ state. Important field meanings:
 
 Presentation code should consume this projection and check `schemaVersion`;
 it must not re-parse the board, journal, or Git independently.
+
+Refresh the visual overview with:
+
+```text
+node .agent-foundry/project-overview.mjs
+```
+
+The generated timestamp makes staleness visible. Regenerate on demand; the
+HTML is a local read-only snapshot, not another maintained project document.
+Use `--stdout` when another local tool needs the complete HTML without writing
+the default snapshot file.
 
 ## The installed workflow is yours to evolve
 
