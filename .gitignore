@@ -7,3 +7,8 @@
 .tasks/tasks/.*.bak
 .tasks/archive/.*.tmp
 .tasks/archive/.*.bak
+
+# Session-audit run output (metrics, evidence packets, caches) must never be
+# committed: it is derived from private transcripts.
+session-audit-out/
+*.session-audit-run/
