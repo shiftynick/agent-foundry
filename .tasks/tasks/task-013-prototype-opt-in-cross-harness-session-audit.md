@@ -1,12 +1,12 @@
 ---
 id: task-013
 title: Prototype opt-in cross-harness session audit
-status: in-progress
+status: done
 priority: p2
 tags: [area:workflow, area:research]
 blockedBy: []
 createdAt: "2026-08-01T22:06:07Z"
-updatedAt: "2026-08-06T00:00:00Z"
+updatedAt: "2026-08-06T14:46:45Z"
 ---
 
 <!-- task-tracker:description -->
@@ -21,3 +21,7 @@ At the revisit threshold defined in docs/research/session-audit-poc.md, prototyp
 - 2026-08-06 — revisit threshold met: ai4c, interra-api-proxy, and project-myriad re-installed to current Foundry on 2026-08-05 with substantive post-upgrade sessions in all three. Run 001 planned in docs/research/session-audit-run-001-plan.md: Claude-only, 2026-08-05 cohort, durable reducer at scripts/session-audit/, adds context-noise measurement as a secondary lens. Status → in-progress, priority → p2.
 - 2026-08-06 — tooling built at scripts/session-audit/ (discover/reduce/correlate + 41 tests) via orchestrated builder → cold-review → evidence-audit → fix cycle. Cold reviewer reproduced the run byte-identically; evidence auditor verified all 145 evidence records at their source offsets and recomputed metrics to 0 delta. Verified run-001b output (8 parent sessions + 12 subagents, 2026-08-05, three repos) now feeding speed/waste and quality analysts. Methodological catch worth keeping: summed per-session figures overstate wall-clock ~2.9x under session concurrency; summary.json carries a concurrency/union block so headline numbers stay honest.
 - 2026-08-06 — analysis complete; findings synthesized in docs/research/session-audit-run-001-findings.md. Headlines: avoidable agent waste is 1.1% of active time (speed is volume — 1.53M output tokens + 3-round review ladder, plus 20% of tool execution blocked waiting on CI/deploys); quality verdict "partially substantiated, direction inverted" — first-pass quality low, cold review absorbing it, with two coverage holes (a zero-review refactor with a replayed board lifecycle, and a review-state loophole). 8 hypotheses handed to the retrospective (H1–H8). Recommendation: adopt; run 002 = wider window + CI-duration join + optional Codex adapter.
+- 2026-08-06T14:46:45Z — note: Review evidence: tooling was cold-reviewed by an independent agent that reproduced the run byte-identically from scratch, and audited by a second that verified all 145 evidence records at their source offsets and recomputed two sessions' metrics to zero delta. Both rounds' findings were fixed and re-verified; a redaction regression introduced during the fix pass was caught by a third adversarial round and closed. Gates: validate-foundry PASS, test-bootstrap PASS, 41/41 unit tests.
+- 2026-08-06T14:46:45Z — note: Outcome: adopt. Findings in docs/research/session-audit-run-001-findings.md. Retrospective applied to the eight hypotheses; four cleared the evidence bar and are filed as task-019 through task-022, four are on the watch list recorded in PLANNING-JOURNAL.md. Follow-on run 002 filed as task-023.
+- 2026-08-06T14:46:45Z — moved to review
+- 2026-08-06T14:46:45Z — moved to done
