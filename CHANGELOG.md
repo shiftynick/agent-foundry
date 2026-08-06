@@ -25,6 +25,69 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.18.0
+
+### Changed
+
+- Bundled `agent-headless` moves to `0.3.0`. It no longer reports a successful
+  delegated run as failed. Previously a single non-JSON line anywhere in a
+  provider's output discarded the entire stream, so a Cursor run that exited 0
+  and wrote roughly twenty files into an isolated worktree came back as
+  `failed` with no events and nothing pointing at the worktree — the finished
+  work was reachable only by running `git worktree list` out of band. Now
+  unparseable lines are skipped as bounded warnings, a stream-level error is
+  reported only when nothing parsed, and the run fails only when the provider
+  itself failed.
+- A new `unparsed` status separates "we could not read the output" from "the
+  provider failed", used only when the process exited 0. The last terminal
+  marker in the stream decides the verdict, so a success followed by an error
+  is a failure and an error followed by a later success is not.
+- Every result now carries a `workspace` descriptor — `cwd`, `access`, and the
+  worktree — on all outcomes including timeout, cancellation, and non-zero
+  exit. Cursor is never invoked with a bare `--worktree`: the runner names the
+  worktree itself, so a finished isolated run is reachable from the result
+  alone even when its output could not be read.
+- Cursor no longer requires `--model`. It falls back to a documented default
+  and reports `modelDefaulted`, derived from what the caller asked for rather
+  than from a string comparison.
+- `agent-headless` documents how to read a result: what each status means, that
+  branching on `failed` alone silently misses `unparsed`, and that a
+  non-empty `warnings` is no longer a failure signal. The skill previously
+  documented no statuses at all, which is why nothing in the mold ever noticed
+  the false failures.
+- The same skill records the model split: delegated implementation may take the
+  default, cold review must name a model, because a defaulted model was chosen
+  by the runner rather than the operator and so does not satisfy the top rung
+  of the ladder in `docs/SDLC.md`. Check `modelDefaulted` rather than assuming.
+
+### Upgrade actions
+
+1. Review any project-local automation that branches on an `agent-headless`
+   result. A caller testing `status === "failed"` to detect trouble will now
+   miss `unparsed` runs; treat anything other than `succeeded` as needing
+   attention, and prefer the CLI's exit code, which is non-zero for both.
+2. Review anything that parses or stores Cursor worktree paths. Isolated runs
+   now land in a runner-named worktree (`agent-headless-…`) rather than one
+   Cursor chose, and the effective name is reported in `workspace`.
+3. Anything asserting that a healthy run has no warnings needs updating:
+   skipped-line notes now appear on successful runs.
+4. Cursor calls for delegated work may drop `--model`. Keep it on cold-review
+   calls; the reviewing model must be operator-chosen.
+5. No action for the bundle itself — `.agent-foundry/agent-headless/` is
+   Foundry-owned and the normal upgrade replaces it along with its provenance.
+
+### Breaking
+
+Yes, for projects with local automation built on the runner's result shape.
+Three observable contracts changed: the status set gained `unparsed`, so
+`failed` is no longer the whole failure surface; the CLI exit code for an
+unreadable-but-clean run is distinct from an ordinary failure; and isolated
+Cursor runs report a runner-named worktree path instead of a provider-named
+one. Projects that only invoke the runner through the `agent-headless` skill
+and read its normalized output need no changes. The version step is `minor`
+because nothing in the mold itself consumes these contracts — the reconciliation
+above applies only to project-local code.
+
 ## 0.17.0
 
 ### Changed

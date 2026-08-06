@@ -6,7 +6,7 @@ priority: p2
 tags: [area:research]
 blockedBy: []
 createdAt: "2026-08-06T14:45:58Z"
-updatedAt: "2026-08-06T15:27:39Z"
+updatedAt: "2026-08-06T16:13:43Z"
 ---
 
 <!-- task-tracker:description -->
@@ -30,3 +30,4 @@ Tooling already exists at scripts/session-audit/ (discover, reduce, correlate; 4
 - 2026-08-06T14:45:58Z — created (status: backlog)
 - 2026-08-06T15:27:39Z — note: Operator directive 2026-08-06: add per-provider outcome tracking to run 002. Required breakdown per provider and model: invocation count, access mode, wall-clock, terminal status, and crucially any DISAGREEMENT between normalized status and process exitCode - that disagreement is the task-018 false-failure signature and is machine-detectable. Also record whether a write-access run produced files, whether its output was reachable (worktree path present in the result), and the downstream fate of its work (committed, reverted, or stranded). Motivation: run 001 measured 36 cursor invocations across 6 of 8 sessions but produced invocation counts only, so cursor/grok cannot currently be compared against codex on success rate, cost, or output quality.
 - 2026-08-06T15:27:39Z — note: Environment fact discovered 2026-08-06 that run 002 must account for: cursor-agent moved from 2026.07.23-e383d2b to 2026.08.04-aaa8809, and cursor-grok-4.5-medium - the model used 62 times in the 08-05 cohort - is no longer in the model list. Available grok IDs are now cursor-grok-4.5-high and cursor-grok-4.5-high-fast. Provider model lineups therefore drift inside an analysis window, so per-provider tracking must record the exact model string observed rather than assuming a stable set.
+- 2026-08-06T16:13:43Z — note: FACTUAL CORRECTION 2026-08-06: the earlier note claiming cursor-grok-4.5-medium is gone from the model list is WRONG and is retracted. The live list from cursor-agent 2026.08.04-aaa8809 contains 193 models including cursor-grok-4.5-low, -low-fast, -medium, -medium-fast, -high and -high-fast. The error came from reading a list truncated to its first 20 entries and inferring absence from it. The upstream default is therefore cursor-grok-4.5-medium, which is what the operator originally asked for; the switch to -high was made only on the strength of the mistaken claim. What remains true and still matters for run 002: cursor-agent moved from 2026.07.23-e383d2b to 2026.08.04-aaa8809 during the analysis window, so per-provider tracking must record the exact model string observed rather than assume a stable set - but do not carry forward the specific claim that a model disappeared.
