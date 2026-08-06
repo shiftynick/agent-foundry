@@ -87,9 +87,9 @@ export function validateFoundry() {
     .filter((file) => path.basename(file) === "SKILL.md");
   const claudeSkillFiles = listFiles(claudeSkillsRoot)
     .filter((file) => path.basename(file) === "SKILL.md");
-  if (agentSkillFiles.length !== 17 || claudeSkillFiles.length !== 17) {
+  if (agentSkillFiles.length !== 15 || claudeSkillFiles.length !== 15) {
     throw new Error(
-      "Expected 17 skills per harness (16 shared + 1 compatibility bridge); "
+      "Expected 15 shared skills per harness; "
       + `found agents=${agentSkillFiles.length}, `
       + `claude=${claudeSkillFiles.length}.`,
     );
@@ -105,18 +105,8 @@ export function validateFoundry() {
     }
   }
 
-  requireFile(".agents/skills/claude-in-codex/SKILL.md");
-  requireFile(".agents/skills/claude-in-codex/scripts/claude-ask.mjs");
-  requireFile(".agents/skills/claude-in-codex/scripts/claude-ask.test.mjs");
   requireFile(".agents/skills/agent-headless/SKILL.md");
-  requireFile(".agents/skills/cursor-cli/SKILL.md");
-  requireFile(".agents/skills/cursor-cli/scripts/cursor-agent.mjs");
-  requireFile(".agents/skills/cursor-cli/scripts/cursor-agent.test.mjs");
-  requireFile(".claude/skills/codex-in-claude/SKILL.md");
   requireFile(".claude/skills/agent-headless/SKILL.md");
-  requireFile(".claude/skills/cursor-cli/SKILL.md");
-  requireFile(".claude/skills/cursor-cli/scripts/cursor-agent.mjs");
-  requireFile(".claude/skills/cursor-cli/scripts/cursor-agent.test.mjs");
   requireFile(".agent-foundry/agent-headless/cli.js");
   requireFile(".agent-foundry/agent-headless/index.js");
   requireFile(".agent-foundry/agent-headless/PROVENANCE.md");
@@ -148,11 +138,14 @@ export function validateFoundry() {
   requireFile(".agent-foundry/agent-headless/source/0002-fix-tighten-least-privilege-and-cancellation-contrac.patch.b64");
   requireFile(".agents/skills/execute-task/references/cold-review.md");
   requireFile(".claude/skills/execute-task/references/cold-review.md");
-  if (existsSync(path.join(claudeSkillsRoot, "claude-in-codex"))) {
-    throw new Error("claude-in-codex must exist only in the Codex-facing tree.");
-  }
-  if (existsSync(path.join(agentSkillsRoot, "codex-in-claude"))) {
-    throw new Error("codex-in-claude must exist only in the Claude-facing tree.");
+  for (const retired of ["claude-in-codex", "codex-in-claude", "cursor-cli"]) {
+    for (const root of [agentSkillsRoot, claudeSkillsRoot]) {
+      if (existsSync(path.join(root, retired))) {
+        throw new Error(
+          `Retired provider alias must not ship: ${path.relative(starterRoot, path.join(root, retired))}`,
+        );
+      }
+    }
   }
 
   const sharedSkills = [
@@ -161,7 +154,6 @@ export function validateFoundry() {
     "agent-headless",
     "attack-the-board",
     "codebase-audit",
-    "cursor-cli",
     "diagnosing-bugs",
     "efficient-orchestration",
     "execute-task",
@@ -266,17 +258,6 @@ export function validateFoundry() {
   const installedSdlc = readFileSync(path.join(starterRoot, "docs", "SDLC.md"), "utf8");
   if (!installedSdlc.includes("## Operator communication")) {
     throw new Error("SDLC operator communication authority is missing.");
-  }
-  for (const [tree, alias] of [
-    [agentSkillsRoot, "claude-in-codex"],
-    [claudeSkillsRoot, "codex-in-claude"],
-    [agentSkillsRoot, "cursor-cli"],
-    [claudeSkillsRoot, "cursor-cli"],
-  ]) {
-    const aliasText = readFileSync(path.join(tree, alias, "SKILL.md"), "utf8");
-    if (!aliasText.includes("../agent-headless/SKILL.md") || !aliasText.includes("compatibility")) {
-      throw new Error(`${alias} must remain a thin agent-headless compatibility alias.`);
-    }
   }
   const sharedInvocation = readFileSync(
     path.join(agentSkillsRoot, "agent-headless", "SKILL.md"),

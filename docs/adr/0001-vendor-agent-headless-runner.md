@@ -55,4 +55,5 @@ both Foundry suites and the shared-skill synchronization check.
 ## Follow-up
 
 - Operator acceptance was recorded on 2026-08-03.
-- Retire the compatibility aliases after one documented release.
+- Compatibility aliases (`claude-in-codex`, `codex-in-claude`, `cursor-cli`)
+  were retired in 0.19.0; `agent-headless` is the sole provider entry point.

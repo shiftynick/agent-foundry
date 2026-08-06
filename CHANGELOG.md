@@ -25,6 +25,56 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.19.0
+
+### Changed
+
+- Retired the post-0.15.x provider compatibility aliases. `claude-in-codex`,
+  `codex-in-claude`, and `cursor-cli` (both harness trees) no longer ship.
+  Shared `agent-headless` plus `.agent-foundry/agent-headless/cli.js` is the
+  only provider entry point for Claude, Codex, and operator-selected Cursor.
+- Each harness now installs exactly fifteen shared skills. Validation rejects
+  the retired alias directories if they reappear in the mold.
+- Skill catalogs, bootstrap smoke commands, and foundry maintenance docs drop
+  the 16+1 bridge invariant and point counterpart-CLI orchestration at
+  `agent-headless`.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade and keep its backup directory.
+2. Map any remaining callers of the old wrappers to
+   `node .agent-foundry/agent-headless/cli.js run`:
+   - `claude-ask --prompt/--context-file` → `--provider claude
+     --access answer-only --prompt-file`
+   - `cursor-agent --model/--mode/--allow-write` → `--provider cursor`
+     plus `--access answer-only|inspect|edit-isolated` and an explicit
+     `--model` when the call is cold review
+   - raw `codex exec` policy stays in `docs/SDLC.md`; invoke Codex through
+     `agent-headless --provider codex` for Foundry-mediated runs
+3. Delete the retired directories from the project (the installer does not
+   remove stale mold paths):
+   - `.agents/skills/claude-in-codex/`
+   - `.agents/skills/cursor-cli/`
+   - `.claude/skills/codex-in-claude/`
+   - `.claude/skills/cursor-cli/`
+   If any of those were locally customized, copy the customization into
+   `docs/SDLC.md` or the shared `agent-headless` skill first, or record the
+   divergence in `.agent-foundry/LOCAL-CHANGES.md` before deleting.
+4. When reconciling seed files (`AGENTS.md`, skill-tree `README.md` files),
+   drop rows and prose for the retired aliases; keep harness-specific paths
+   on the fifteen shared skills.
+5. Run `node .agent-foundry/check-skill-sync.mjs`,
+   `node .agent-foundry/run-checks.mjs`, and the project quality gate. Expect
+   `skill-sync: PASS (15 shared skills)`.
+
+### Breaking
+
+- The skill names `claude-in-codex`, `codex-in-claude`, and `cursor-cli` are
+  gone from fresh installs and from the mold. Old wrapper scripts
+  (`scripts/claude-ask.mjs`, `scripts/cursor-agent.mjs`) no longer ship;
+  callers must use `agent-headless`. Existing projects keep the directories
+  until step 3 of the upgrade actions deletes them.
+
 ## 0.18.0
 
 ### Changed

@@ -39,15 +39,14 @@ brief and understandable while detailed evidence stays in project records.
 - Installation never overwrites an existing managed file without `--force`.
 - Agents never use `--force` without explicit approval after listing collisions.
 - Existing `.gitignore` content is merged, not replaced.
-- The sixteen shared workflows remain semantically synchronized across harnesses;
+- The fifteen shared workflows remain semantically synchronized across harnesses;
   `starter/.agent-foundry/check-skill-sync.mjs` is the check installed projects
   use for the same invariant.
 - `starter/docs/SDLC.md` is the single authority for commit authority, the
   cold-review ladder, and mid-task ADR handling. Skills reference it rather
   than restating a second, divergent rule.
-- `agent-headless` is the shared provider-mechanics skill and bundled runtime;
-  `claude-in-codex`, `codex-in-claude`, and `cursor-cli` are temporary
-  compatibility aliases only.
+- `agent-headless` is the sole provider-mechanics skill and bundled runtime for
+  Claude, Codex, and operator-selected Cursor.
 - A disposable clean-project bootstrap is the acceptance test.
 - Product decisions and task state never leak from a source project.
 - Every change that alters installed behavior bumps `VERSION` and adds a

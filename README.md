@@ -44,8 +44,7 @@ even with `--force`.
 
 - `.agents/skills/` and `.claude/skills/`: matching workflows, including the
   shared `agent-headless` entry point for Claude, Codex, and operator-selected
-  Cursor calls. The old provider skill names remain compatibility aliases for
-  one release line.
+  Cursor calls.
 - `.agent-foundry/agent-headless/`: one bundled Node 20 runner used by both
   harnesses.
 - `.agent-foundry/project-status.mjs`: a short operator briefing and stable JSON
@@ -128,11 +127,10 @@ agent-foundry/
 ## Maintaining the foundry
 
 1. Edit the canonical files under `starter/`.
-2. Keep the sixteen shared workflow skills semantically synchronized between
+2. Keep the fifteen shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
-3. Keep `claude-in-codex` only under `.agents` and `codex-in-claude` only
-   under `.claude` while those compatibility aliases exist. Provider mechanics
-   belong in the shared `agent-headless` skill and bundled runner.
+3. Provider mechanics belong in the shared `agent-headless` skill and bundled
+   runner; do not reintroduce tree-exclusive provider aliases.
 4. Keep `starter/docs/SDLC.md` the single authority for commit authority, the
    cold-review ladder, and mid-task ADR handling; skills reference it rather
    than restating it.
@@ -146,5 +144,5 @@ agent-foundry/
    node scripts/test-bootstrap.mjs
    ```
 
-6. Use a cold reviewer from the opposite model family for changes to process
+7. Use a cold reviewer from the opposite model family for changes to process
    or agent behavior.

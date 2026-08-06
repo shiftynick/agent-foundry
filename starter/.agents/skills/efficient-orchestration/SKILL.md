@@ -7,7 +7,7 @@ description: >-
   orchestration", "save tokens on this big task", "use lesser models",
   "liberal use of subagents", or any codebase-heavy work where cost matters.
   Add "with <counterpart CLI>" to route work slices to the other model family
-  via this harness's bridge skill.
+  via `agent-headless`.
 ---
 
 # Efficient Orchestration
@@ -162,8 +162,8 @@ Diagnose in this order; the knobs fix different failures:
 The inverse also holds: when a cheap worker has been handling its slices
 cleanly, don't reflexively escalate — routine work on a bigger model buys
 verification you didn't need at a higher per-token price. Under the
-counterpart-CLI backend the same ladder applies with that CLI's dials; the
-bridge skill names them.
+counterpart-CLI backend the same ladder applies with that CLI's dials;
+`agent-headless` names them.
 
 ## Common scenarios
 

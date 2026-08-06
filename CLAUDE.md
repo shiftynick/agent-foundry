@@ -51,8 +51,8 @@ node starter/.agent-foundry/check-skill-sync.mjs starter
 ## The dual-tree invariant (most common source of breakage)
 
 `starter/.agents/skills/` (Codex) and `starter/.claude/skills/` (Claude Code)
-contain **the same sixteen shared skills**: `adr`, `agent-foundry-feedback`,
-`agent-headless`, `attack-the-board`, `codebase-audit`, `cursor-cli`, `diagnosing-bugs`,
+contain **the same fifteen shared skills**: `adr`, `agent-foundry-feedback`,
+`agent-headless`, `attack-the-board`, `codebase-audit`, `diagnosing-bugs`,
 `efficient-orchestration`, `execute-task`, `grill-me`, `handoff-writer`,
 `plan-milestone`, `retrospective`, `task-tracker`, `the-fool`,
 `upgrade-agent-foundry`. Editing one copy without the other fails validation.
@@ -68,13 +68,8 @@ Everything else must be byte-identical. Additionally, a shared skill in one
 tree must **never** contain the other tree's path string — `validate-foundry.mjs`
 rejects that even if both copies agree.
 
-The two compatibility bridge aliases are the deliberate exception and are tree-exclusive:
-
-- `claude-in-codex` — only under `.agents/` (calls Claude Code from Codex)
-- `codex-in-claude` — only under `.claude/` (calls Codex CLI from Claude Code)
-
-Each harness ships exactly 17 `SKILL.md` files (16 shared + 1 compatibility bridge); the counts
-and the shared-skill list are hardcoded in `scripts/validate-foundry.mjs`, so
+Each harness ships exactly 15 `SKILL.md` files; the counts and the
+shared-skill list are hardcoded in `scripts/validate-foundry.mjs`, so
 adding or renaming a skill means updating that file too.
 
 ## `starter/` is payload, not this repo's configuration
@@ -138,7 +133,7 @@ ancestor-file collisions are refused even with `--force`.
 
 Changes to process or agent behavior require separate cold **SPEC** and
 **STANDARDS** review passes, ideally from the opposite model family (this repo
-ships both bridge skills for exactly that). Because the payload *is* the
+ships `agent-headless` for exactly that). Because the payload *is* the
 product, a change to a skill is reviewed like code: trigger accuracy,
 instructions, repository references, and a real invocation when scripts are
 involved.

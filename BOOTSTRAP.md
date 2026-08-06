@@ -103,8 +103,8 @@ Run:
 
 ```text
 node .agents/skills/task-tracker/scripts/task.mjs board
-node --test .agent-foundry/agent-headless/cli.test.mjs .agents/skills/claude-in-codex/scripts/claude-ask.test.mjs .agents/skills/cursor-cli/scripts/cursor-agent.test.mjs .agents/skills/task-tracker/scripts/task.test.mjs .agents/skills/task-tracker/scripts/_lib.test.mjs .agents/skills/task-tracker/scripts/board-html.test.mjs
-node --test .claude/skills/cursor-cli/scripts/cursor-agent.test.mjs .claude/skills/task-tracker/scripts/task.test.mjs .claude/skills/task-tracker/scripts/_lib.test.mjs .claude/skills/task-tracker/scripts/board-html.test.mjs
+node --test .agent-foundry/agent-headless/cli.test.mjs .agents/skills/task-tracker/scripts/task.test.mjs .agents/skills/task-tracker/scripts/_lib.test.mjs .agents/skills/task-tracker/scripts/board-html.test.mjs
+node --test .claude/skills/task-tracker/scripts/task.test.mjs .claude/skills/task-tracker/scripts/_lib.test.mjs .claude/skills/task-tracker/scripts/board-html.test.mjs
 node --test .agent-foundry/check-skill-sync.test.mjs .agent-foundry/check-foundry-drift.test.mjs
 node .agent-foundry/check-skill-sync.mjs
 node .agent-foundry/agent-headless/cli.js --version
