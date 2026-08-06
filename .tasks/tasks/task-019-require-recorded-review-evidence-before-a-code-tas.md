@@ -1,12 +1,12 @@
 ---
 id: task-019
 title: Require recorded review evidence before a code task reaches done
-status: review
+status: done
 priority: p1
 tags: [area:workflow]
 blockedBy: []
 createdAt: "2026-08-06T14:45:40Z"
-updatedAt: "2026-08-06T15:40:23Z"
+updatedAt: "2026-08-06T15:51:51Z"
 ---
 
 <!-- task-tracker:description -->
@@ -44,3 +44,4 @@ Evidence: docs/research/session-audit-run-001-findings.md findings Q1 and Q3, ve
 - 2026-08-06T15:32:44Z — note: Operator authorization 2026-08-06: the rubric-after-implementation deviation flagged by SPEC finding 3 and STANDARDS finding 1 is explicitly authorized as a logged override, per SDLC Lifecycle which permits skipping a step only with explicit authorization recorded in the log. The operator was shown both review axes' findings and the two remediation options (authorize, or revert and re-execute compliantly) and chose to authorize. This override covers the missing pre-claim rubric only; it does not waive cold review, which ran twice, nor validation, which is recorded through task.mjs run.
 - 2026-08-06T15:32:44Z — moved to review
 - 2026-08-06T15:40:23Z — note: CORRECTION to the authorization note above, from SPEC round 3 finding 2 - ACCEPTED. That note claimed SDLC Lifecycle permits skipping any step with an authorized logged override. It does not. The live clause covers skipping IMPLEMENTATION OR REVIEW only; the 3-6 item rubric is an unconditional entry criterion with no override path in the policy as written. The operator's authorization is real and recorded, but it authorizes a deviation the policy does not currently provide for, rather than exercising a documented override. Recording it accurately: this task carries a known, operator-accepted deviation from an unconditional entry criterion. Whether entry criteria should become overridable with logged authorization is a policy question filed separately, not something this task may decide for itself.
+- 2026-08-06T15:51:51Z — moved to done

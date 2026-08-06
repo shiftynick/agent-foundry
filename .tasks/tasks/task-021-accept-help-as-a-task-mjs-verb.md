@@ -1,12 +1,12 @@
 ---
 id: task-021
 title: Accept help as a task.mjs verb
-status: review
+status: done
 priority: p3
 tags: [area:tooling]
 blockedBy: []
 createdAt: "2026-08-06T14:45:41Z"
-updatedAt: "2026-08-06T15:42:54Z"
+updatedAt: "2026-08-06T15:51:52Z"
 ---
 
 <!-- task-tracker:description -->
@@ -209,3 +209,78 @@ Evidence: docs/research/session-audit-run-001-findings.md finding S5.
   |   PLANNING-JOURNAL.md
   | Agent Foundry 0.17.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-8OmVIy\clean-project
   | Agent Foundry clean-project bootstrap: PASS
+- 2026-08-06T15:48:39Z — moved to in_progress (claimed by shift@Shiftor)
+- 2026-08-06T15:50:51Z — note: Round 4 STANDARDS finding 1 ACCEPTED (low): the no-argument test asserted only the pre-existing usage line, so a mutation keeping the old no-arg output while updating help, -h and --help would have passed every test - contradicting the CHANGELOG claim that all four forms emit the reference line and the help listing. This is exactly the vacuous-oracle class task-020 adds a check for, found in this release's own tests. The no-arg case now asserts the verb list including help and the reference line, and a new case asserts the referenced cli-reference.md actually exists in this tree, closing the reviewer's second point that the path assertion would accept any nonexistent file with that suffix. 73 to 74 tests, both trees.
+- 2026-08-06T15:50:51Z — moved to review
+- 2026-08-06T15:51:19Z — run: node --test starter/.claude/skills/task-tracker/scripts/task.test.mjs
+  started 2026-08-06T15:50:51Z, exit 0 in 28.0s
+  output tail (truncated to last 30 lines):
+  |       duration_ms: 57.7251
+  |       type: 'test'
+  |       ...
+  |     # Subtest: points at a reference file that exists in this tree
+  |     ok 5 - points at a reference file that exists in this tree
+  |       ---
+  |       duration_ms: 0.3315
+  |       type: 'test'
+  |       ...
+  |     # Subtest: still rejects an unknown verb with exit 2
+  |     ok 6 - still rejects an unknown verb with exit 2
+  |       ---
+  |       duration_ms: 57.1269
+  |       type: 'test'
+  |       ...
+  |     1..6
+  | ok 14 - task help
+  |   ---
+  |   duration_ms: 288.3104
+  |   type: 'suite'
+  |   ...
+  | 1..14
+  | # tests 74
+  | # suites 14
+  | # pass 74
+  | # fail 0
+  | # cancelled 0
+  | # skipped 0
+  | # todo 0
+  | # duration_ms 27966.9112
+- 2026-08-06T15:51:47Z — run: node --test starter/.agents/skills/task-tracker/scripts/task.test.mjs
+  started 2026-08-06T15:51:19Z, exit 0 in 27.9s
+  output tail (truncated to last 30 lines):
+  |       duration_ms: 64.7664
+  |       type: 'test'
+  |       ...
+  |     # Subtest: points at a reference file that exists in this tree
+  |     ok 5 - points at a reference file that exists in this tree
+  |       ---
+  |       duration_ms: 0.4808
+  |       type: 'test'
+  |       ...
+  |     # Subtest: still rejects an unknown verb with exit 2
+  |     ok 6 - still rejects an unknown verb with exit 2
+  |       ---
+  |       duration_ms: 74.2721
+  |       type: 'test'
+  |       ...
+  |     1..6
+  | ok 14 - task help
+  |   ---
+  |   duration_ms: 321.2319
+  |   type: 'suite'
+  |   ...
+  | 1..14
+  | # tests 74
+  | # suites 14
+  | # pass 74
+  | # fail 0
+  | # cancelled 0
+  | # skipped 0
+  | # todo 0
+  | # duration_ms 27844.868
+- 2026-08-06T15:51:51Z — run: node scripts/validate-foundry.mjs
+  started 2026-08-06T15:51:47Z, exit 0 in 3.7s
+  output:
+  | Agent Foundry structural validation: PASS
+- 2026-08-06T15:51:51Z — note: Residual decision, recorded rather than assumed: no fifth review round was run for the finding above. Rationale - the change is test-only, alters no production behavior, strengthens rather than relaxes assertions, and both suites plus structural validation are recorded green afterward. SPEC round 4 returned PASS and STANDARDS round 4 raised only this low finding, now closed.
+- 2026-08-06T15:51:52Z — moved to done

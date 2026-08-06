@@ -1,12 +1,12 @@
 ---
 id: task-020
 title: Add an oracle-vacuity self-check before requesting cold review
-status: review
+status: done
 priority: p2
 tags: [area:workflow]
 blockedBy: []
 createdAt: "2026-08-06T14:45:40Z"
-updatedAt: "2026-08-06T15:40:38Z"
+updatedAt: "2026-08-06T15:51:51Z"
 ---
 
 <!-- task-tracker:description -->
@@ -56,3 +56,4 @@ Evidence: docs/research/session-audit-run-001-findings.md finding Q2, verified a
   started 2026-08-06T15:40:35Z, exit 0 in 2.9s
   output:
   | Agent Foundry structural validation: PASS
+- 2026-08-06T15:51:51Z — moved to done

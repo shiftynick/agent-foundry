@@ -1219,9 +1219,15 @@ describe("task help", () => {
       const res = await runAsync(repo, []);
       assert.equal(res.code, 0);
       assert.match(res.stdout, /usage: task\.mjs <verb> \[args\.\.\.\]/);
+      assert.match(res.stdout, /verbs: board, list, show, next, add, archive, move, note, edit, rm, run, help/);
+      assert.match(res.stdout, /references\/cli-reference\.md/);
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
+  });
+
+  it("points at a reference file that exists in this tree", () => {
+    assert.ok(existsSync(resolve(HERE, "..", "references", "cli-reference.md")));
   });
 
   it("still rejects an unknown verb with exit 2", async () => {
