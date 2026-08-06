@@ -25,6 +25,84 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.17.0
+
+### Changed
+
+Four corrections from the first cross-project session audit, which analyzed a
+day of real agent transcripts across three installed projects. The first
+correction spans two documents, so five edits follow. Each names the
+failure it prevents at the point in the document where the failure happens,
+rather than adding a rule somewhere a reader would have to go looking for it.
+
+- `docs/SDLC.md` "Lifecycle" now states what happens when a task already in
+  `review` receives new implementation work: it returns to `in_progress` and
+  takes a fresh pass, because the pass that already ran reviewed a different
+  change. Observed failure: a task parked in `review` for an unrelated
+  proposal absorbed a 23-file change and exited to `done` with the code never
+  reviewed. This does not duplicate "Definition of done", which requires the
+  rung to be *recorded*; the new rule requires the recorded rung to belong to
+  the change being closed.
+- `task-tracker` names the corresponding failure where `review → done` is
+  documented: recording a transition is not evidence that it happened, because
+  a lifecycle written after the work reads exactly like one written as the work
+  proceeded. Observed failure: a refactor deleting 78 lines shipped with no
+  review pass, its four lifecycle transitions written in the same second
+  afterwards, leaving an audit trail that reads compliant. What the log must
+  contain remains stated once, in `docs/SDLC.md`.
+- `execute-task` adds one pre-review check: list the behaviors a change adds or
+  alters, and for each name a change that leaves the code compiling and running
+  but removes that behavior, then confirm a test fails on it. A behavior with
+  no such test is untested, and a test that only fails when the code is deleted
+  or no longer compiles proves execution rather than behavior. Observed
+  failure: four tests across three projects that executed the code but would
+  not have failed if the behavior under test were removed — every one caught by
+  cold review rather than by the implementer.
+- `efficient-orchestration` gains "Waiting on external work": do not hold a
+  shell open for a long external wait, do not re-read an unchanged artifact,
+  scale the interval to what is being waited on, and fill the wait with
+  independent work. Observed failure: blocking waits on CI and deploys
+  accounted for a fifth of all tool execution, while the alternative in use —
+  polling an output file — returned nothing on half its reads. The guidance
+  deliberately names no harness-specific primitive, because harnesses differ
+  in what they permit.
+- `task-tracker`'s `task.mjs` accepts `help` as a verb, and its usage output
+  now points at `references/cli-reference.md` for flags, statuses, and
+  transitions. `-h`, `--help`, and the no-argument form already printed usage
+  and exited 0; their behavior is unchanged except that all four forms now emit
+  the added reference line. Observed failure: agents discovering the CLI surface
+  by trial and error, including failures on flags and transitions that a verb
+  list alone would not have prevented.
+
+### Upgrade actions
+
+1. Adopt the new `docs/SDLC.md` "Lifecycle" paragraph about re-entering
+   `in_progress` from `review`. If the project rewrote that section, add the
+   rule in the project's own words; the requirement is that the state machine
+   forbids closing a task on a review that examined a different change.
+2. Reconcile locally changed `execute-task`, `task-tracker`, and
+   `efficient-orchestration` skills by preserving project-specific steps and
+   adopting the three skill additions above: a checklist bullet in
+   `execute-task`, a sentence in `task-tracker`, and one new subsection in
+   `efficient-orchestration`. Each is additive, so a locally modified skill
+   keeps its own content.
+3. If `task.mjs` was modified locally, re-apply all three parts: the `help` verb
+   alias, `help` in the printed verb list (the list is built from the verb
+   table, which the alias is handled outside of, so it must be appended
+   explicitly), and the usage pointer with the reference path matching this
+   harness tree. Projects that did not modify it get all three from the normal
+   upgrade.
+4. No action is required for the audit tooling itself: it lives in the Foundry
+   repository, not in the payload, and is not installed into projects.
+
+### Breaking
+
+None. Every change is additive guidance or a new CLI alias; no existing verb,
+transition, flag, or exit code changes behavior. `task.mjs` usage text gains a
+reference line and lists `help`, as the Changed section records; help output is
+diagnostic, not a declared stable-output contract, so no reconciliation is
+required.
+
 ## 0.16.0
 
 ### Changed
