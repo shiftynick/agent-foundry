@@ -25,6 +25,55 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.24.0
+
+### Changed
+
+- `plan-milestone` (both harness trees) gains three planning lenses adapted
+  from the "Software Factory" 4-gate workflow: a 3-6 sentence user
+  announcement for user-facing milestones (step 1 and the proposal
+  template), a tracer-bullet-first decomposition rule that bans by-layer
+  task fronts (step 3), and a "Least confident decisions" line in the
+  step-4 proposal template so silent low-confidence calls reach the
+  operator before code exists.
+- `execute-task` (both harness trees): when a task creates a new interface,
+  public signature set, or module boundary, the agent outlines types and
+  signatures without bodies and logs the outline plus least-confident
+  choices as a task note before implementing.
+- `docs/SDLC.md` gains an "External facts" section: facts outside the
+  repository that agents need to know exist (env var names, dashboards,
+  test accounts, webhooks) are recorded in `docs/external/` as discovered.
+- Shift-left review guidance in `execute-task` (both harness trees): each
+  rubric line must be checkable by a cold reviewer without interpretation;
+  the implementer reads `docs/REVIEW-STANDARDS.md` and applicable
+  `docs/ENGINEERING-STANDARDS.md` sections before writing code; and a warm
+  self-pass over the frozen diff (rubric, then standards lenses) runs before
+  the task enters review.
+- Re-review is now severity-gated. `docs/SDLC.md` → "Review" is the
+  authority: only confirmed `high`/`medium` findings trigger a fresh full
+  two-axis round; confirmed `low`-severity fixes get a single scoped delta
+  check or become follow-up tasks; `low`-severity `low`-confidence findings
+  never block or trigger a round. Findings that cite no rubric line, written
+  standard, or invariant are discarded at adjudication without a response.
+  `execute-task` `references/cold-review.md` (both trees) mirrors the rule.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade so both skill trees and `docs/SDLC.md`
+   land. If `plan-milestone`, `execute-task`, or `docs/SDLC.md` was locally
+   modified, merge these additions by meaning; none of them changes an
+   existing gate, path, or CLI contract.
+2. `docs/external/` is created lazily on first use; no directory needs to be
+   added during the upgrade.
+3. If the project's `docs/SDLC.md` review section was locally modified,
+   merge the severity-gated re-review rule by meaning; the three-round cap
+   and the two-axis structure are unchanged. Tasks already mid-review keep
+   the rule under which their current round started.
+
+### Breaking
+
+None.
+
 ## 0.23.0
 
 ### Changed
