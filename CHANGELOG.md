@@ -25,6 +25,27 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.22.1
+
+### Changed
+
+- `task-tracker` escape-sanitization fixture no longer embeds a dense mix of
+  CSI/OSC/C1 escape generators in the `task.mjs run` CreateProcess command
+  line. On some Windows hosts that pattern made `spawnSync` fail with
+  `cmd.exe`/`node` `EPERM` before the child could write, breaking
+  `test-bootstrap`. The test now writes the payload to a temp `.mjs` under the
+  fixture repo and runs `node` against that absolute path, so coverage of
+  non-SGR scrubbing is unchanged while the spawn command line stays clean.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade so the mold `task-tracker` test lands.
+2. No reconciliation step: this is a test-only fixture change.
+
+### Breaking
+
+None.
+
 ## 0.22.0
 
 ### Changed
