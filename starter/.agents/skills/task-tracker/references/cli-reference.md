@@ -63,8 +63,9 @@ remove `<!-- task-tracker:... -->` markers because they delimit those sections.
 ## Tags
 
 Use `key:value`. Common tags include `area:core`, `area:architecture`,
-`area:tooling`, `area:process`, `milestone:<name>`, `phase:<name>`, and
-`needs:operator`.
+`area:tooling`, `area:process`, `milestone:<name>`, `phase:<name>`,
+`needs:operator`, and `needs:deploy-acceptance` (see `docs/SDLC.md` →
+"Deploy-dependent acceptance").
 
 `milestone:` identifies an operator-approved work front and is queried by
 `plan-milestone`. `phase:` describes kind or provenance, such as

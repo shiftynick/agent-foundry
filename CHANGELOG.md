@@ -25,6 +25,36 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.21.0
+
+### Changed
+
+- `docs/SDLC.md` gains **Deploy-dependent acceptance**: when a task needs an
+  authorized post-merge deploy as acceptance proof, tag
+  `needs:deploy-acceptance`, deliver the branch under existing commit
+  authority, then wait in `blocked` (or on a split acceptance card) until
+  deploy evidence is recorded. Ordinary definition of done now requires that
+  evidence for tagged cards. Split implementation vs acceptance cards when
+  other work depends only on the code landing.
+- `execute-task` points at that section before moving a card to `done`.
+- `task-tracker` CLI reference lists the `needs:deploy-acceptance` tag.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade so mold `docs/SDLC.md`, `execute-task`, and
+   `task-tracker` references land.
+2. When reconciling a locally modified `docs/SDLC.md`, keep or merge the
+   Deploy-dependent acceptance section by meaning. Do not recreate a second
+   done-definition elsewhere.
+3. Existing open cards that already wait on deploy should gain the
+   `needs:deploy-acceptance` tag and move to `blocked` (or a split acceptance
+   card) rather than sitting in `review`/`in_progress`.
+
+### Breaking
+
+None for installer mechanics. Projects that treated "merged" as "done" for
+deploy-gated work must adopt the blocked-or-split path above.
+
 ## 0.20.0
 
 ### Changed

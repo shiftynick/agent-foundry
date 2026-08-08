@@ -262,6 +262,12 @@ export function validateFoundry() {
   if (!installedSdlc.includes("ASD-STE100")) {
     throw new Error("SDLC operator communication must require ASD-STE100.");
   }
+  if (!installedSdlc.includes("## Deploy-dependent acceptance")) {
+    throw new Error("SDLC deploy-dependent acceptance section is missing.");
+  }
+  if (!installedSdlc.includes("needs:deploy-acceptance")) {
+    throw new Error("SDLC deploy-dependent acceptance must name needs:deploy-acceptance.");
+  }
   const sharedInvocation = readFileSync(
     path.join(agentSkillsRoot, "agent-headless", "SKILL.md"),
     "utf8",

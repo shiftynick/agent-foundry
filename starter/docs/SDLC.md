@@ -330,6 +330,58 @@ A task is done only when:
 - Out-of-scope discoveries are filed separately.
 - The change packet contains only task-scoped changes.
 - The task log contains validation evidence.
+- If the task carries `needs:deploy-acceptance`, deploy-acceptance evidence is
+  recorded per "Deploy-dependent acceptance" below.
+
+## Deploy-dependent acceptance
+
+Some work is not accepted until an authorized deployment proves the change in
+a real environment. Local validation and a merged branch are not that proof.
+
+### Identify early
+
+When acceptance needs a post-merge deploy, say so in the task description and
+in the pre-claim rubric. Tag the card `needs:deploy-acceptance`.
+
+### Deliver the change without closing acceptance
+
+Run the normal implement → review → validate path. Commit on the task branch.
+Push or merge only with the authorization in "Commit authority". Delivery of
+the branch is allowed and expected. Delivery is not `done`.
+
+After the change is delivered (merged or otherwise integrated as the project
+requires), move the task to `blocked` with a note that names:
+
+- what was delivered (merge commit, PR, or release candidate),
+- which environment must receive the deploy,
+- which observable check will count as acceptance.
+
+Do not leave the task in `review` or `in_progress` while waiting on deploy.
+Those states mean active agent work on the change.
+
+### Close only on acceptance evidence
+
+When the operator authorizes the deploy and it completes, record evidence in
+the task log (`task.mjs run` when a command can express it; otherwise a note
+with environment, version or URL, time, and the observed check). Then move
+`blocked` → `review` → `done`. The short `review` confirms the acceptance
+evidence; it does not reopen implementation unless the evidence fails.
+
+A card tagged `needs:deploy-acceptance` reaches `done` only when that evidence
+exists in addition to the ordinary definition of done.
+
+### Dependency safety
+
+If other tasks need only the *code* to land, do not make them `blockedBy` a
+card that is waiting on deploy. Split:
+
+1. **Implementation task** — `done` after merge or other required delivery of
+   the change (no deploy wait).
+2. **Acceptance task** — tagged `needs:deploy-acceptance`, `blockedBy` the
+   implementation task, closed only with deploy-acceptance evidence.
+
+Never mark the acceptance task `done` without that evidence. Never hold an
+implementation branch undeliverable solely because deploy has not run.
 
 ## Blockers
 

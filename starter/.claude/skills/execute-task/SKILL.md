@@ -123,7 +123,13 @@ Before completion, verify:
 - any changed shared skill has its counterpart copy in the same commit, with
   `node .agent-foundry/check-skill-sync.mjs` recorded.
 
-Then:
+If acceptance needs an authorized post-merge deploy, follow
+`docs/SDLC.md` → "Deploy-dependent acceptance": deliver the branch, move the
+card to `blocked` (or close an implementation card and keep a separate
+acceptance card), and do not mark the acceptance card `done` without deploy
+evidence.
+
+Then, when the task may reach `done`:
 
 ```bash
 node .claude/skills/task-tracker/scripts/task.mjs move task-NNN done
