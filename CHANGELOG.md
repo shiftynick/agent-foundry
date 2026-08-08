@@ -25,6 +25,30 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.23.0
+
+### Changed
+
+- Shared skill guidance (`SKILL.md` and skill `references/*.md` in both
+  harness trees) is rewritten in ASD-STE100 Simplified Technical English.
+  Behavior, gates, ladder rungs, safety rules, paths, and CLI contracts are
+  unchanged. Frontmatter trigger text stays accurate.
+- `docs/SDLC.md` → Operator communication now states that shared skill
+  guidance uses STE. Operator chat remains STE. Task logs, ADRs, and
+  CHANGELOG stay in normal technical English.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade so mold skills and `docs/SDLC.md` land.
+2. When reconciling locally modified shared skills, merge by meaning into the
+   STE wording. Do not reintroduce verbose pre-STE prose.
+3. Keep operator-chat STE scope distinct from skill-body STE: chat is still
+   governed by `docs/SDLC.md`; skill bodies are the installed guidance text.
+
+### Breaking
+
+None. Installed behavior of scripts and CLI contracts is unchanged.
+
 ## 0.22.1
 
 ### Changed

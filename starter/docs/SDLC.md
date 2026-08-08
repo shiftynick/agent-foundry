@@ -7,9 +7,10 @@ working from the same durable state.
 
 Write operator chat in **ASD-STE100 Simplified Technical English (STE)**.
 Operator chat means questions, updates, explanations, review results,
-validation results, and closeouts to the human operator. Task logs, ADRs,
-skill bodies, CHANGELOG entries, and other durable project records stay in
-normal technical English unless a later task changes that rule.
+validation results, and closeouts to the human operator. Shared skill
+guidance (`SKILL.md` and skill `references/*.md`) also uses STE. Task logs,
+ADRs, CHANGELOG entries, and other durable project records stay in normal
+technical English unless a later task changes that rule.
 
 Operator chat is a translation of the work. It is not the evidence store.
 Start with the result and the practical effect. Use STE. Define a technical
