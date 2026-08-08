@@ -25,6 +25,39 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.20.0
+
+### Changed
+
+- `docs/SDLC.md` → "Operator communication" now requires **ASD-STE100
+  Simplified Technical English (STE)** for operator chat: questions, updates,
+  explanations, review results, validation results, and closeouts. Durable
+  records (task logs, ADRs, skill bodies, CHANGELOG) stay in normal technical
+  English unless a later task changes that rule. The section keeps the existing
+  outcome-first, evidence-separation, and one-question contracts.
+- Installed and foundry `AGENTS.md` pointers name STE while still deferring to
+  SDLC as the single authority (pointer only; no duplicated conversation rules).
+- `grill-me` and `execute-task` operator-facing wording cite SDLC/STE instead
+  of a second "plain language" standard. Skill bodies are not rewritten in STE
+  in this release.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade so mold `docs/SDLC.md` and the shared
+   `grill-me` / `execute-task` skills land.
+2. When reconciling project-owned `AGENTS.md`, keep or add the stock Operator
+   communication pointer that names ASD-STE100 and points at
+   `docs/SDLC.md` → "Operator communication". Preserve any stricter local
+   audience rules.
+3. No action required for skill-body STE conversion; that work is not in this
+   release.
+
+### Breaking
+
+None for installed mechanics. Operator-facing chat style is stricter
+(ASD-STE100). Projects that customized the Operator communication section
+must merge the STE requirement by meaning when reconciling `docs/SDLC.md`.
+
 ## 0.19.0
 
 ### Changed

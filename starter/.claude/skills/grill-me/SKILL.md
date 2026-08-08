@@ -10,11 +10,12 @@ description: >-
 # Grill Me — Decision Interview
 
 Help the user make the decisions that would materially change the result.
-Keep the reasoning map private; the human experience is a short, plain-language
+Keep the reasoning map private; the human experience is a short STE
 conversation, not a display of the agent's decision tree.
 
-`docs/SDLC.md` → "Operator communication" is the authority for human-facing
-language. The rules below apply that contract to a decision interview.
+`docs/SDLC.md` → "Operator communication" (ASD-STE100) is the authority for
+human-facing language. The rules below apply that contract to a decision
+interview.
 
 ## Ground rules
 

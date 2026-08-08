@@ -259,6 +259,9 @@ export function validateFoundry() {
   if (!installedSdlc.includes("## Operator communication")) {
     throw new Error("SDLC operator communication authority is missing.");
   }
+  if (!installedSdlc.includes("ASD-STE100")) {
+    throw new Error("SDLC operator communication must require ASD-STE100.");
+  }
   const sharedInvocation = readFileSync(
     path.join(agentSkillsRoot, "agent-headless", "SKILL.md"),
     "utf8",

@@ -30,8 +30,8 @@ model family.
 ## Operator communication
 
 For human-facing questions, updates, explanations, and closeouts, follow
-`starter/docs/SDLC.md` → "Operator communication". It keeps the conversation
-brief and understandable while detailed evidence stays in project records.
+`starter/docs/SDLC.md` → "Operator communication" (ASD-STE100 Simplified
+Technical English).
 
 ## Invariants
 

@@ -82,11 +82,11 @@ task-scoped changes made after the latest review.
 
 ### Report review results
 
-Apply `docs/SDLC.md` → "Operator communication" when reporting review results.
-Record each finding and its adjudication in the task log; the operator receives
-the result and a plain-language account of each material problem, its practical
-effect, and the recommendation. Provide the technical record only when it
-helps a decision or the operator asks for it.
+Apply `docs/SDLC.md` → "Operator communication" (ASD-STE100) when reporting
+review results. Record each finding and its adjudication in the task log; the
+operator receives the result and an STE summary of each material problem, its
+practical effect, and the recommendation. Provide the technical record only
+when it helps a decision or the operator asks for it.
 
 ## Validate
 
@@ -105,9 +105,9 @@ validation.
 
 ### Report validation results
 
-Apply `docs/SDLC.md` → "Operator communication" to validation results too. State
-what passed or failed and what that means; keep raw output in the task log
-unless the operator needs it to decide or asks to see it.
+Apply `docs/SDLC.md` → "Operator communication" (ASD-STE100) to validation
+results too. State what passed or failed and what that means; keep raw output
+in the task log unless the operator needs it to decide or asks to see it.
 
 ## Complete and commit
 

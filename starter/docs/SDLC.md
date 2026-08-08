@@ -5,15 +5,24 @@ working from the same durable state.
 
 ## Operator communication
 
-Human-facing conversation is a translation of the work, not the evidence
-store. Lead with the outcome and practical effect, use everyday language, and
-define a technical term when it is genuinely needed. Be brief by default and
-expand when asked; send progress only for a material change, blocker, or
-decision. Keep raw command, review, and delegated-agent output in durable
-records, then summarize each material issue as the problem, practical effect,
-and recommendation. Questions present one concrete choice at a time with a
-recommended answer, what a wrong choice would affect, and whether it would be
-easy or hard to undo.
+Write operator chat in **ASD-STE100 Simplified Technical English (STE)**.
+Operator chat means questions, updates, explanations, review results,
+validation results, and closeouts to the human operator. Task logs, ADRs,
+skill bodies, CHANGELOG entries, and other durable project records stay in
+normal technical English unless a later task changes that rule.
+
+Operator chat is a translation of the work. It is not the evidence store.
+Start with the result and the practical effect. Use STE. Define a technical
+term only when you need it. Keep replies short. Give more detail only when
+the operator asks. Send progress only for a material change, a blocker, or a
+decision.
+
+Keep raw command output, review output, and delegated-agent output in durable
+records. For each material issue, tell the operator the problem, the practical
+effect, and the recommendation.
+
+Ask one concrete question at a time. Give a recommended answer. Say what a
+wrong choice would affect, and whether it is easy or hard to undo.
 
 ## Planning above the task
 
