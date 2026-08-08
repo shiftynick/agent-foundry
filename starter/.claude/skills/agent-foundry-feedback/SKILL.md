@@ -32,7 +32,9 @@ Feedback is collected, not invented. Draw from where it already lives:
   than re-deciding it here.
 - `.agent-foundry/LOCAL-CHANGES.md` entries marked `Upstream: yes` — each is
   a divergence the project already judged generic, and its entry already
-  states what changed and why.
+  states what changed and why. Prefer `Upstream status: unsent`. Skip
+  `landed` and `dropped`. Mention `packeted` or `filed` entries only when
+  the operator asks to refresh or re-deliver them.
 
 One packet per coherent concern. A batch of unrelated complaints is harder
 to act on than three small packets; split rather than pile.
@@ -93,11 +95,20 @@ Delivery is two-tier, and the second tier is never automatic:
    the issue is later deleted. No CLI, no approval, or no network: stop at
    tier 1 and say so.
 
+When the packet file is written for an `Upstream: yes` LOCAL-CHANGES entry,
+set that entry's **Upstream status** to `packeted` and **Upstream ref** to
+the packet path in the same edit.
+
 When a packet is delivered — filed upstream, or handed over however the
-operator chooses — record the outcome: note the reference on the originating
-task or `LOCAL-CHANGES.md` entry, and delete the packet file once nothing
-references it. Do not let `.agent-foundry/feedback/` become a second
+operator chooses — set **Upstream status** to `filed` and **Upstream ref** to
+the maintainer reference (issue URL, PR, or foundry task/commit). Note the
+same reference on any originating board task. Delete the packet file once
+nothing references it. Do not let `.agent-foundry/feedback/` become a second
 journal.
+
+When the Foundry absorbs the change and the local divergence is retired,
+set status to `landed` only long enough to delete the LOCAL-CHANGES entry in
+the same commit (live records do not keep history).
 
 ## Related
 

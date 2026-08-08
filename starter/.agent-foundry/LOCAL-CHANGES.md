@@ -32,7 +32,19 @@ diverged, then make sure every `mold` entry it reports appears below.
 - **Why:** the project-specific reason. "Cleaner" is not a reason.
 - **On upgrade:** re-apply / re-evaluate / drop once <condition>.
 - **Upstream:** yes (generic — propose to Agent Foundry) | no (project-specific).
+- **Upstream status:** (required when Upstream is yes)
+  unsent | packeted | filed | landed | dropped
+- **Upstream ref:** (when status is packeted or filed) feedback packet path,
+  issue URL, PR, or foundry commit/task. Empty while unsent.
 ```
+
+`Upstream status` is the lightweight delivery state. It lives on this entry —
+do not invent a second tracker. Move it with `agent-foundry-feedback`:
+`unsent` → `packeted` when a packet is written under `.agent-foundry/feedback/`,
+`packeted` → `filed` when the operator publishes it, `filed` → `landed` when
+the Foundry absorbs the change (then delete this entry in the same commit that
+drops the local divergence). Use `dropped` when the project abandons
+upstreaming but keeps the local divergence.
 
 <!-- Add entries below. Delete this line once the first one exists. -->
 

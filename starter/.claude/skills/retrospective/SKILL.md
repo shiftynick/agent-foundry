@@ -120,12 +120,23 @@ two retro windows is a maintenance cost — merge it, sharpen it, or delete it,
 per that file's own "retire rules that stop earning their cost" policy.
 **A retro that only adds is doing half the job.**
 
-### 6. Record
+### 6. Surface unsent upstream
+
+Read `.agent-foundry/LOCAL-CHANGES.md` for `Upstream: yes` entries whose
+**Upstream status** is `unsent` or `packeted`, or whose status field is
+missing (treat missing as `unsent`). Report that list to the operator (path,
+status, ref). For each `unsent` entry, offer or run `agent-foundry-feedback`
+so a packet and status update happen in the existing channel — do not invent
+a second queue. `packeted` entries need operator decision on filing, not a
+new packet by default.
+
+### 7. Record
 
 Append to `PLANNING-JOURNAL.md`: the window, patterns confirmed (with task
-IDs), corrections filed, guidance pruned, and patterns *watched* (one or two
-occurrences — next retro checks whether they matured into patterns). The
-watch list is what makes the next retro cheaper than this one.
+IDs), corrections filed, guidance pruned, unsent/packeted upstream entries
+surfaced, and patterns *watched* (one or two occurrences — next retro checks
+whether they matured into patterns). The watch list is what makes the next
+retro cheaper than this one.
 
 ## Anti-slop rules
 

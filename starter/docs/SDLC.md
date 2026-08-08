@@ -427,7 +427,9 @@ Both loops share one constraint: corrections land in existing documents at
 the point of use, never in a separate lessons file, and the corpus must grow
 in quality rather than length. Skill corrections that are generic rather than
 project-specific are flagged for upstreaming to the Foundry via
-`.agent-foundry/LOCAL-CHANGES.md`.
+`.agent-foundry/LOCAL-CHANGES.md` (`Upstream: yes` plus **Upstream status** /
+**Upstream ref**). Package and advance them with `agent-foundry-feedback`;
+retrospectives and upgrades only surface unsent or packeted entries.
 
 ## Session close
 

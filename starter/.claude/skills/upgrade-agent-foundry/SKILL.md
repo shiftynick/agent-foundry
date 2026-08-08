@@ -29,6 +29,16 @@ with, and this skill cannot verify a safe upgrade. A present
 install predates manifests — say so explicitly; `UPGRADING.md` defines the
 extra care that case needs.
 
+## Surface unsent upstream before changing mold
+
+Before acquiring a new foundry, read `.agent-foundry/LOCAL-CHANGES.md` for
+`Upstream: yes` entries with **Upstream status** `unsent` or `packeted`, or
+with status missing (treat missing as `unsent`). Report them to the operator
+(path, status, ref). An upgrade may overwrite the mold those entries protect;
+unsent generic fixes should go through `agent-foundry-feedback` first when
+the operator wants them proposed upstream. Do not create a parallel delivery
+tracker — status and ref live on the LOCAL-CHANGES entry.
+
 ## Acquire the new foundry
 
 The operator names the source; if none was given, ask rather than guessing:

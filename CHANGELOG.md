@@ -25,6 +25,39 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.22.0
+
+### Changed
+
+- `.agent-foundry/LOCAL-CHANGES.md` gives every `Upstream: yes` entry a
+  lightweight delivery state: **Upstream status**
+  (`unsent` | `packeted` | `filed` | `landed` | `dropped`) and **Upstream
+  ref** (packet path, issue URL, PR, or foundry commit/task). No second
+  coordination system — status lives on the entry.
+- `agent-foundry-feedback` updates those fields when a packet is written
+  (`packeted`) and when it is published (`filed`), and prefers unsent entries
+  when gathering.
+- `retrospective` surfaces unsent/packeted upstream entries and routes unsent
+  ones through `agent-foundry-feedback`.
+- `upgrade-agent-foundry` reports the same list before acquiring a new foundry
+  so mold overwrites do not strand unsent generic fixes.
+- `docs/SDLC.md` and `.agent-foundry/README.md` point at this path.
+
+### Upgrade actions
+
+1. Apply the normal forced upgrade for mold skills and docs.
+2. When reconciling project-owned `LOCAL-CHANGES.md`, add **Upstream status**
+   and **Upstream ref** to every existing `Upstream: yes` entry. Default
+   status to `unsent` unless a feedback packet or filed issue already exists
+   (then `packeted`/`filed` with that ref). Keep `Upstream: no` entries
+   unchanged.
+3. No new tracker or board column is required.
+
+### Breaking
+
+None. Until seed reconciliation adds the fields, skills treat a missing
+**Upstream status** on an `Upstream: yes` entry as `unsent`.
+
 ## 0.21.0
 
 ### Changed
