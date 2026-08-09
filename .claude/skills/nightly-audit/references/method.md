@@ -24,8 +24,8 @@ a scratch file outside Git; the report carries only counts and citations.
 
 Rules:
 
-- Every entry cites the exact line that evidences it, and only log entries
-  timestamped inside the audit day are counted.
+- Every entry cites the exact line that evidences it, and only transcript
+  or log entries timestamped inside the audit day are counted.
 - A batch log line is exploded into per-member entries when the day is small
   enough; otherwise it becomes one entry counted as a floor. Say which was
   done.

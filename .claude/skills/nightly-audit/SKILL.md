@@ -26,11 +26,11 @@ payload's `retrospective` loop in the affected repo.
 - **Day-scoped.** Audit exactly one operator-local calendar day (default:
   today). When the operator names a range, produce one report per day.
 - **Cross-repo.** Default repo set — confirm with the operator and extend as
-  repos are added:
-  - `N:\agent-foundry` (this repo)
+  repos are added (this repo itself is not audited):
   - `N:\ai4c`
   - `N:\interra-api-proxy`
   - `N:\project-myriad`
+  - `N:\synoptic`
 - **Both harnesses.** Attribute findings to the provider and model recorded
   in the log, not to an assumption.
 - **Read-only outside this repo.** Never modify a target repo. The report
@@ -38,20 +38,34 @@ payload's `retrospective` loop in the affected repo.
 
 ## Sources, in order
 
-1. **Task logs** (each repo's `.tasks/tasks/` and `.tasks/archive/`): the
-   primary, harness-neutral record. Select tasks whose log entries carry
-   timestamps inside the audit day; count only entries dated inside the day.
-   Read their review rounds, adjudications, recorded runs, and friction
-   notes. Parallel read-only subagents (one per repo) work well here.
-2. **Lead-finder (optional).** Each installed repo ships
+1. **Session transcripts — the primary source.** Read the day's complete
+   Claude Code and Codex sessions for each audited repo, from the harness
+   session stores in the user profile:
+   - Claude Code: `C:\Users\shift\.claude\projects\<encoded-repo-dir>\`
+     (`*.jsonl` parent sessions plus their `subagents\` transcripts; a
+     session is in the day when its first timestamped record falls inside
+     the audit day).
+   - Codex CLI: `C:\Users\shift\.codex\sessions\<YYYY>\<MM>\<DD>\` — the
+     date tree makes day selection direct; match sessions to a repo by the
+     cwd recorded inside each session file.
+
+   Transcripts show what actually happened — wasted calls, blocked waits,
+   retries, review dispatches and their raw findings, harness errors, dead
+   ends the task log never mentions. Transcripts are large: grep for
+   markers, read surrounding lines, stay surgical. Parallel read-only
+   subagents (one per repo) work well here. Never copy transcript content
+   into the report or into Git; cite file and line offset.
+2. **Task logs** (each repo's `.tasks/tasks/` and `.tasks/archive/`): the
+   durable record of adjudications, recorded runs, and friction notes. Use
+   them to corroborate what the transcripts show and to carry citations a
+   reader can resolve without transcript access. Count only entries dated
+   inside the audit day.
+3. **Lead-finder (optional).** Each installed repo ships
    `.claude/skills/retrospective/scripts/process-signals.mjs`. Its `--since`
    flag selects task files by their latest timestamp and then emits that
    file's historical signals without dates — so its output is a lead list,
    never a count. Use it to find tasks worth reading; take every number from
-   the dated log entries themselves.
-3. **Session transcripts (optional).** Use only to verify a claim from a
-   task log. Never copy transcript content into the report or into Git. Cite
-   the file and line offset instead.
+   the dated transcript or log entries themselves.
 
 ## Extraction
 
