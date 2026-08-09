@@ -1,12 +1,12 @@
 ---
 id: task-043
 title: "Harden task ID namespace: worktree key and silent-scheme-flip diagnostic"
-status: review
+status: done
 priority: p2
 tags: [area:core]
 blockedBy: []
 createdAt: "2026-08-09T02:58:15Z"
-updatedAt: "2026-08-09T22:29:50Z"
+updatedAt: "2026-08-09T22:30:16Z"
 ---
 
 <!-- task-tracker:description -->
@@ -141,3 +141,4 @@ Acceptance: red-capable tests per behavior; dual-tree mirror; zero-dep Node; gat
   | Agent Foundry 0.28.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-okRSaP\clean-project
   | Agent Foundry clean-project bootstrap: PASS
 - 2026-08-09T22:29:50Z — note: cold review: Codex CLI 0.145.0, answer-only, ephemeral, both axes, three rounds plus one scoped delta check. Round 1 and 2 both axes: trimming defaultBranch before validating it accepted a padded value such as '  integration  ' as configuration. First adjudicated as harmless normalization, then accepted on round 2: a padded value that names a task branch would classify that branch as the default and mint compact IDs on it, which contradicts the module's own fail-safe direction. The value is no longer trimmed. Round 2 also found the warning test permitted several stderr lines and the remote-HEAD test never asserted stderr; both accepted and fixed. Round 3: SPEC PASS; STANDARDS found isUsableBranchName applied the component rules to the whole string, so 'foo.lock/bar' and 'feature/.hidden' passed and produced a silent scheme flip, plus two missing test cases. Both accepted and fixed at the round cap, then verified by one scoped delta check: PASS.
+- 2026-08-09T22:30:16Z — moved to done

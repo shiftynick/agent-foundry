@@ -1,12 +1,12 @@
 ---
 id: task-044
 title: Make seed restore preflight-then-mutate and reject link-traversing paths
-status: review
+status: done
 priority: p2
 tags: [area:core]
 blockedBy: []
 createdAt: "2026-08-09T02:58:15Z"
-updatedAt: "2026-08-09T22:29:41Z"
+updatedAt: "2026-08-09T22:30:16Z"
 ---
 
 <!-- task-tracker:description -->
@@ -98,3 +98,4 @@ Acceptance: red-capable tests (a mid-list hash mismatch must leave every file un
   | Agent Foundry 0.28.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-JkLniL\clean-project
   | Agent Foundry clean-project bootstrap: PASS
 - 2026-08-09T22:29:41Z — note: cold review: Codex CLI 0.145.0, answer-only, ephemeral, both axes. Round 1: SPEC PASS; STANDARDS found the link test placed the linked path first, so a per-path check-then-mutate regression could still pass. Accepted: the test now puts a cleanly restorable tracked path first and asserts it was NOT restored. Declined the related suggestion to assert git invocation count, which needs an injected git runner this payload script does not have; the reordered test pins the behavior that matters. Round 2: PASS on both axes.
+- 2026-08-09T22:30:16Z — moved to done

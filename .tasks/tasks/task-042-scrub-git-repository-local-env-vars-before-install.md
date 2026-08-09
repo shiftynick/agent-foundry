@@ -1,12 +1,12 @@
 ---
 id: task-042
 title: Scrub Git repository-local env vars before installed test runs
-status: review
+status: done
 priority: p2
 tags: [area:core]
 blockedBy: []
 createdAt: "2026-08-09T02:58:15Z"
-updatedAt: "2026-08-09T22:29:41Z"
+updatedAt: "2026-08-09T22:30:16Z"
 ---
 
 <!-- task-tracker:description -->
@@ -133,3 +133,4 @@ Acceptance: red-capable test (a seeded GIT_INDEX_FILE in the parent env must mak
   | Agent Foundry 0.28.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-amzvHY\clean-project
   | Agent Foundry clean-project bootstrap: PASS
 - 2026-08-09T22:29:41Z — note: cold review: Codex CLI 0.145.0, answer-only, ephemeral, SPEC and STANDARDS dispatched separately and concurrently. Round 1: both axes raised only that VERSION and CHANGELOG were not in the packet - a packet-completeness gap, not a code defect; the release files are shared across all three tasks in this release and were attached to the round-2 packet. Round 2: SPEC found GIT_INTERNAL_SUPER_PREFIX missing from the offline fallback snapshot; accepted and added (Git 2.52 on this host no longer reports it, older versions did, and it matters only when the live probe cannot run). STANDARDS PASS. Round 3: PASS on both axes.
+- 2026-08-09T22:30:16Z — moved to done
