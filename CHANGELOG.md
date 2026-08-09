@@ -25,6 +25,64 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.28.0
+
+### Changed
+
+- `starter/.agent-foundry/run-checks.mjs` now removes every repository-local
+  Git variable (`GIT_INDEX_FILE`, `GIT_DIR`, `GIT_WORK_TREE`, `GIT_PREFIX`
+  and the rest of `git rev-parse --local-env-vars`) from the environment it
+  gives the installed-test step. Git exports those to hook processes, so a
+  `run-checks` invoked from a `pre-commit` hook previously let fixture `git`
+  commands inside installed suites retarget and lock the caller's real index.
+  The scrub list is a pinned snapshot unioned with a live `git rev-parse
+  --local-env-vars` probe, so a newer Git needs no Foundry release and a
+  machine without Git still gets the snapshot. Only the installed-test step
+  is scrubbed; skill-sync and project gates keep the inherited environment.
+  Reported by an installed project.
+- `task-tracker` `scripts/task.mjs` (both harness trees) keys the detached-HEAD
+  task-ID namespace on the worktree root as well as the commit. Two worktrees
+  detached at the same commit — the ordinary shape of parallel agent work —
+  previously shared one namespace and could mint the same durable task ID for
+  two different cards. The path is hashed into the namespace; nothing
+  path-shaped is written to a card or printed.
+- `task-tracker` `scripts/task.mjs` (both harness trees) writes one
+  `task-tracker: warning` line to stderr when it cannot identify the default
+  branch — `.agent-foundry.json` absent, malformed, or carrying a
+  `defaultBranch` that can never name a branch — and `refs/remotes/origin/HEAD`
+  is also missing. Allocation still falls back to a namespaced ID and still
+  exits 0; the fallback is no longer silent. A `defaultBranch` value that
+  fails a git-check-ref-format subset is now treated as unusable rather than
+  as configuration. Both reported by an installed project.
+- `starter/.agent-foundry/reconcile-seeds.mjs` `restoreSeedsFromHead()`
+  preflights every seed path before it mutates any of them, then restores
+  them in one batched `git checkout HEAD --` call. Validating and checking
+  out in a single loop meant a late hash mismatch threw "seed changed after
+  installation; refusing to overwrite" *after* earlier seeds had already been
+  overwritten — the message stated the opposite of what happened. The
+  function also now refuses a seed path that reaches its target through a
+  symlink or junction, or that is itself a link. Reported by an installed
+  project.
+
+### Upgrade actions
+
+- Replace `.agent-foundry/run-checks.mjs`, `.agent-foundry/run-checks.test.mjs`,
+  and `.agent-foundry/reconcile-seeds.mjs`,
+  `.agent-foundry/reconcile-seeds.test.mjs` with the 0.28.0 copies.
+- Replace both trees' `task-tracker/scripts/task.mjs`,
+  `task-tracker/scripts/task.test.mjs`, and
+  `task-tracker/references/concurrency.md` with the 0.28.0 copies.
+- If any copy was locally modified, merge by meaning and update the entry in
+  `.agent-foundry/LOCAL-CHANGES.md`. A project carrying its own version of
+  any of these four fixes can retire that divergence once its content matches
+  stock.
+- Existing task IDs are not rewritten. A project that allocated IDs from a
+  detached worktree before this release keeps them; only new allocations use
+  the worktree-keyed namespace.
+- After upgrading, run `node .agent-foundry/run-checks.mjs`. A project that
+  wires that command into a Git hook should re-run the hook path once to
+  confirm the suite now passes there.
+
 ## 0.27.0
 
 ### Changed
