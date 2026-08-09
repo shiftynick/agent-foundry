@@ -25,6 +25,42 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.25.0
+
+### Changed
+
+- Review-packet discipline in `execute-task` `references/cold-review.md`
+  (both harness trees), from the adversarial-review findings audit
+  (`docs/research/review-findings-audit-001.md`): the packet is rebuilt
+  fresh each round — diff and in-scope file list regenerated from the
+  current tree, never reused from a prior round; it includes the recorded
+  gate evidence for each rubric claim and every recorded decision the change
+  relies on (accepted ADRs, rubric amendments, operator rulings); and it is
+  exported as UTF-8. Findings that contradict a decision recorded in the
+  packet are answered by citation, not re-litigated.
+- Fix-applied verification between review rounds (`cold-review.md`, both
+  trees): before dispatching the next round, each previous-round fix is
+  diff-verified against the working tree; a fix the log claims but the tree
+  lacks is itself a high-severity finding, and review-round fixes get the
+  same failing-test check as the original change.
+- The red-capable-oracle requirement in `execute-task` (both trees) is now
+  demonstrated, not asserted: a change that adds a gate, probe, or check
+  records one run where it rejects a seeded defect; a check that cannot be
+  made to fail is declared unsound in the review packet instead of being
+  hardened for another round.
+- Evidence follows the edit (`execute-task` → Validate, both trees): after
+  the last edit of any round, gates are re-recorded on the final tree before
+  review is requested or re-entered; earlier evidence does not count.
+
+### Upgrade actions
+
+- Replace `.claude/skills/execute-task/SKILL.md`,
+  `.agents/skills/execute-task/SKILL.md`, and both trees'
+  `execute-task/references/cold-review.md` with the 0.25.0 copies. If a copy
+  was locally modified, merge the four guidance additions (packet-per-round,
+  fix-applied verification, demonstrated oracle, evidence-follows-the-edit)
+  into the local version and record the divergence in `LOCAL-CHANGES.md`.
+
 ## 0.24.0
 
 ### Changed
