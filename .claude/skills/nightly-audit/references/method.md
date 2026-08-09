@@ -63,10 +63,33 @@ preventable; the 0.25.0 payload's `execute-task` and
 each occurrence names the rule that did not hold and the payload version the
 repo runs, which is a stronger signal than the count.
 
-## Efficiency measures
+## Waste events
 
-Per reviewed task, record: review rounds used, whether the cap was reached,
-rejected findings and their causes, and the share of rounds spent on
-preventable classes. Across the day, note review rounds per completed task
-and any run that blocked on waiting or was redone. Judge these against prior
-reports' numbers, not against an absolute target.
+Session-behavior observations, distinct from review findings. Record each
+with a citation and a rough time cost:
+
+| Event | Covers |
+| --- | --- |
+| `wasted-call` | a tool call that produced nothing and was retried or abandoned (bad quoting, wrong path, misuse) |
+| `harness-retry` | shell metacharacter failures, argument truncation, EPERM, malformed provider output, killed dispatches |
+| `blocked-wait` | waiting on reviews, CI, or background work with nothing overlapped into the wait |
+| `circling` | repeated reads or attempts on the same problem without new information |
+| `redone-work` | work done twice because evidence, state, or a decision was not durable |
+| `dead-end` | an approach abandoned after real investment |
+| `env-setup-miss` | avoidable setup failure (missing install, stale worktree state) |
+
+## Dashboard metrics
+
+The five numbers tracked day over day, per repo:
+
+1. **Sessions and active durations** — from transcript first/last
+   timestamps, minus obvious idle gaps.
+2. **Work units completed** — tasks moved to done, or milestones hit.
+3. **Review rounds per completed task** — dispatched full rounds (delta
+   checks noted separately) divided by tasks completed.
+4. **Preventable-class occurrences** — `packet-defect` + `evidence-gap` +
+   `fix-defect` entry counts. Target zero; name the payload version.
+5. **Waste events** — count from the table above, with total rough time
+   lost.
+
+Judge deltas against prior reports' numbers, not an absolute target.
