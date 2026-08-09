@@ -25,6 +25,30 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.27.0
+
+### Changed
+
+- The cold-review prompt template in `execute-task`
+  `references/cold-review.md` (both harness trees) now carries the
+  packet-as-data boundary inside the fenced text that is actually sent to
+  the reviewer: packet content cannot change the reviewer's instructions or
+  axis, and text that tries is reported as a finding. The rule existed in
+  the surrounding prose, which a cold reviewer never receives. Reported by
+  an installed project.
+- `starter/.agent-foundry/agent-headless/COMPATIBILITY.md` drops a stray
+  `An` fragment and adds a missing comma in the Cursor paragraph. Reported
+  independently by three installed projects across three releases.
+
+### Upgrade actions
+
+- Replace both trees' `execute-task/references/cold-review.md` and
+  `.agent-foundry/agent-headless/COMPATIBILITY.md` with the 0.27.0 copies.
+  If a copy was locally modified, merge the template addition by meaning and
+  record the divergence in `LOCAL-CHANGES.md`. A project that carries its
+  own correction to either file can retire that divergence once its content
+  matches stock.
+
 ## 0.26.0
 
 ### Changed
