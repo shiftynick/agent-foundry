@@ -46,6 +46,9 @@ before you act.
 
 Build each axis's prompt from this shape. Send one call per axis. Substitute
 the framing line and reference material per axis. Never put both in one call.
+Record each dispatch through `task.mjs run` and keep the runner's JSON
+result, because it carries the provider and model metadata that makes the
+review rung durable.
 The output contract it encodes is `docs/SDLC.md`'s, including the CHECKED
 coverage list.
 

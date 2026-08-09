@@ -25,6 +25,43 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.26.0
+
+### Changed
+
+- Installer default-branch resolution
+  (`scripts/bootstrap-project.mjs` → `resolveDefaultBranch`): when the
+  target repository has no remote HEAD, the installer no longer records the
+  active branch blindly. It now prefers, in order, a local branch named by
+  `git config init.defaultBranch`, an existing local `main`, an existing
+  local `master`, and only then the current HEAD. Fixes an installed
+  project's report of a task branch being recorded as `defaultBranch` when
+  bootstrapping mid-task in a remoteless repository. Covered by a bootstrap
+  test fixture on a task branch.
+- `execute-task` → Validate (both harness trees): recorded commands that
+  need quoting or shell metacharacters are written to a script file and the
+  script's run is recorded, instead of an inline one-liner — inline
+  metacharacters failed or truncated records seven times across three
+  installed repos in one audited day, once costing a full extra review
+  round.
+- `execute-task` `references/cold-review.md` (both trees): each review-axis
+  dispatch is recorded through `task.mjs run` keeping the runner's JSON
+  result, so provider and model metadata stay durable; unrecorded
+  invocations lost review provenance and forced repair work in one
+  installed repo.
+
+### Upgrade actions
+
+- Replace both trees' `execute-task/SKILL.md` and
+  `execute-task/references/cold-review.md` with the 0.26.0 copies. If a copy
+  was locally modified, merge the two additions (script-file rule in
+  Validate; recorded-dispatch rule in the prompt-template section) and
+  record the divergence in `LOCAL-CHANGES.md`.
+- No action for the installer change: it affects future installs and
+  upgrades. A project whose `.agent-foundry.json` `defaultBranch` already
+  records a task branch should correct that field manually to the real
+  default branch.
+
 ## 0.25.0
 
 ### Changed

@@ -26,6 +26,7 @@ const testRoot = path.join(tempRoot, "clean-project");
 const collisionRoot = path.join(tempRoot, "collision-project");
 const missingRoot = path.join(tempRoot, "missing-project");
 const seedUpgradeRoot = path.join(tempRoot, "seed-upgrade-project");
+const taskBranchRoot = path.join(tempRoot, "task-branch-project");
 const projectName = String.raw`Foundry "Test" \ Project $& $' $1 {{PROJECT_DESCRIPTION}}`;
 const projectDescription = String.raw`A disposable "quoted" $& project fixture.`;
 
@@ -637,6 +638,48 @@ try {
   ).stdout;
   assert.match(seedRestore, /restored: CLAUDE\.md/u);
   assert.equal(readFileSync(claudePath, "utf8"), customizedClaude);
+
+  // With no remote HEAD, an install running from a task branch must not
+  // record that branch as defaultBranch when a conventional local default
+  // exists (synoptic upstream report, 2026-08-08).
+  mkdirSync(taskBranchRoot, { recursive: true });
+  run("git", ["init", taskBranchRoot], { label: "init task-branch fixture" });
+  for (const [key, value] of [
+    ["user.email", "foundry-test@example.invalid"],
+    ["user.name", "Foundry Test"],
+    ["commit.gpgsign", "false"],
+    ["core.hooksPath", ".no-hooks"],
+  ]) {
+    run("git", ["config", key, value], {
+      cwd: taskBranchRoot,
+      label: `configure task-branch fixture ${key}`,
+    });
+  }
+  writeFileSync(path.join(taskBranchRoot, "seed.txt"), "seed\n", "utf8");
+  run("git", ["add", "."], { cwd: taskBranchRoot, label: "stage task-branch fixture" });
+  run("git", ["commit", "-m", "baseline"], {
+    cwd: taskBranchRoot,
+    label: "commit task-branch fixture baseline",
+  });
+  run("git", ["branch", "-M", "main"], {
+    cwd: taskBranchRoot,
+    label: "name task-branch fixture default branch",
+  });
+  run("git", ["checkout", "-b", "task/branch-under-test"], {
+    cwd: taskBranchRoot,
+    label: "switch task-branch fixture to a task branch",
+  });
+  invokeBootstrap(
+    bootstrapArgs(taskBranchRoot, [
+      "--skip-validation",
+      "--skip-bootstrap-task",
+    ]),
+  );
+  const taskBranchManifest = JSON.parse(readFileSync(
+    path.join(taskBranchRoot, ".agent-foundry.json"),
+    "utf8",
+  ));
+  assert.equal(taskBranchManifest.defaultBranch, "main");
 
   invokeBootstrap(
     bootstrapArgs(testRoot, [

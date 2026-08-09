@@ -127,6 +127,10 @@ Use `task.mjs note` only for evidence a command cannot express, such as a
 browser observation. A hand-written claim that a runnable check passed is not
 validation.
 
+When a recorded command needs quoting or shell metacharacters, write it to
+a temporary script file and record the run of that file, because inline
+one-liners with metacharacters fail or truncate at shell boundaries.
+
 Evidence follows the edit. After the last edit of any round, re-record the
 applicable gates on the final tree before you request or re-enter review.
 Evidence recorded before that edit does not count.

@@ -309,6 +309,21 @@ function resolveDefaultBranch(targetRoot) {
   if (remoteHeads.length === 1) {
     return remoteHeads[0].replace(/^[^/]+\//u, "");
   }
+  // No remote HEAD at all: the active branch may be a task branch (the
+  // installer often runs mid-task), so prefer the configured or
+  // conventional default when such a local branch exists before trusting
+  // HEAD. Ambiguous multi-remote-HEAD repositories keep the prior
+  // active-HEAD fallback.
+  if (remoteHeads.length === 0) {
+    const configured = optionalGitText(targetRoot, ["config", "--get", "init.defaultBranch"]);
+    for (const candidate of [configured, "main", "master"].filter(Boolean)) {
+      const exists = optionalGitText(
+        targetRoot,
+        ["rev-parse", "--verify", "--quiet", `refs/heads/${candidate}`],
+      );
+      if (exists) return candidate;
+    }
+  }
   return optionalGitText(
     targetRoot,
     ["symbolic-ref", "--quiet", "--short", "HEAD"],
