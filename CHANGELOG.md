@@ -25,6 +25,46 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.30.0
+
+### Changed
+
+- Speed and token-efficiency package from the 2026-08-10 workflow review:
+  - `task-tracker` `run` default timeout is **25 minutes** (was 15). New
+    `--timeout-ms <ms>` flag. Wrapping `agent-headless/cli.js`,
+    `cold-review.mjs`, or `delegate-work.mjs` with a timeout below 20 minutes
+    is refused so Cursor/provider budgets are not killed by the tracker.
+  - New Foundry presets beside the vendored runner (not a cli.js fork):
+    `review-packet.mjs` (init/check), `cold-review.mjs` (packet gate +
+    concurrent SPEC/STANDARDS via agent-headless with `--json`), and
+    `delegate-work.mjs` (write-access wrap that requires an Environment facts
+    section). Covered by `review-workflows.test.mjs`.
+  - `execute-task` amortizes standards / cold-review / Validation reads to
+    first-use per session, then a checklist. STE operator reporting is one
+    shared block. Cold-review dispatch prefers the new presets.
+  - `docs/SDLC.md` adds a narrow **trivial-diff fast path** (docs/comments/
+    non-executable config only) and points rung 1 at `cold-review.mjs`.
+  - `agent-headless`, `efficient-orchestration`, and `attack-the-board` point
+    at the presets; capability probes and dial announcements are once per
+    session unless something changes. `upgrade-agent-foundry` defers the
+    LOCAL-CHANGES upstream sweep to `retrospective`.
+
+### Upgrade actions
+
+- Replace both trees' `task-tracker/scripts/task.mjs`, `task.test.mjs`, and
+  `references/cli-reference.md` with the 0.30.0 copies.
+- Replace both trees' `execute-task/SKILL.md` and
+  `execute-task/references/cold-review.md`.
+- Replace both trees' `agent-headless/SKILL.md`,
+  `efficient-orchestration/SKILL.md`, `attack-the-board/SKILL.md`, and
+  `upgrade-agent-foundry/SKILL.md`.
+- Replace `docs/SDLC.md`.
+- Add `.agent-foundry/review-packet.mjs`, `cold-review.mjs`,
+  `delegate-work.mjs`, and `review-workflows.test.mjs`. Update
+  `.agent-foundry/README.md`.
+- If any copy was locally modified, merge by meaning and update
+  `.agent-foundry/LOCAL-CHANGES.md`.
+
 ## 0.29.0
 
 ### Changed

@@ -1,12 +1,12 @@
 ---
 id: task-045
 title: Align task.mjs run timeout with Cursor provider budget
-status: backlog
+status: done
 priority: p2
 tags: [area:tooling, phase:audit, source:nightly-audit]
 blockedBy: []
 createdAt: "2026-08-10T12:47:09Z"
-updatedAt: "2026-08-10T12:47:09Z"
+updatedAt: "2026-08-10T20:30:55Z"
 ---
 
 <!-- task-tracker:description -->
@@ -18,3 +18,12 @@ From nightly audit 2026-08-09 (docs/research/run-audits/2026-08-09.md, candidate
 ## Log
 
 - 2026-08-10T12:47:09Z — created (status: backlog)
+- 2026-08-10T20:10:37Z — edited (+blockedBy task-046)
+- 2026-08-10T20:10:37Z — note: Superseded in scope by task-046 (timeout stack is item 1 of the speed recommendations package).
+- 2026-08-10T20:30:47Z — moved to ready
+- 2026-08-10T20:30:47Z — note: Delivered inside task-046 (25m default, --timeout-ms, provider-wrap floor). Closing as done.
+- 2026-08-10T20:30:47Z — note: fast-path: trivial — docs/process timeout alignment only, covered by task-046 review evidence.
+- 2026-08-10T20:30:55Z — edited (-blockedBy task-046)
+- 2026-08-10T20:30:55Z — moved to in_progress (claimed by shift@Shiftor)
+- 2026-08-10T20:30:55Z — moved to review
+- 2026-08-10T20:30:55Z — moved to done

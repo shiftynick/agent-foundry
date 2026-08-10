@@ -117,6 +117,10 @@ export function validateFoundry() {
   requireFile(".agent-foundry/project-status.test.mjs");
   requireFile(".agent-foundry/project-overview.mjs");
   requireFile(".agent-foundry/project-overview.test.mjs");
+  requireFile(".agent-foundry/review-packet.mjs");
+  requireFile(".agent-foundry/cold-review.mjs");
+  requireFile(".agent-foundry/delegate-work.mjs");
+  requireFile(".agent-foundry/review-workflows.test.mjs");
   for (const tree of [".agents", ".claude"]) {
     const milestoneSkill = readFileSync(
       path.join(starterRoot, tree, "skills", "plan-milestone", "SKILL.md"),
@@ -245,7 +249,7 @@ export function validateFoundry() {
     [
       "execute-task",
       readFileSync(path.join(agentSkillsRoot, "execute-task", "SKILL.md"), "utf8"),
-      ["### Report review results", "### Report validation results", "Operator communication"],
+      ["### Report results to the operator", "Operator communication"],
     ],
   ];
   for (const [skill, content, anchors] of operatorSkillContracts) {
@@ -264,6 +268,12 @@ export function validateFoundry() {
   }
   if (!installedSdlc.includes("## Deploy-dependent acceptance")) {
     throw new Error("SDLC deploy-dependent acceptance section is missing.");
+  }
+  if (!installedSdlc.includes("### Trivial-diff fast path")) {
+    throw new Error("SDLC trivial-diff fast path is missing.");
+  }
+  if (!installedSdlc.includes("cold-review.mjs")) {
+    throw new Error("SDLC cold-review ladder must name cold-review.mjs.");
   }
   if (!installedSdlc.includes("needs:deploy-acceptance")) {
     throw new Error("SDLC deploy-dependent acceptance must name needs:deploy-acceptance.");
