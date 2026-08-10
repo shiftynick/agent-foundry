@@ -33,8 +33,15 @@ Probe the selected provider before constructing a costly call:
 node .agent-foundry/agent-headless/cli.js capabilities claude
 node .agent-foundry/agent-headless/cli.js capabilities codex
 node .agent-foundry/agent-headless/cli.js capabilities cursor
+node .agent-foundry/agent-headless/cli.js models claude
+node .agent-foundry/agent-headless/cli.js models codex
 node .agent-foundry/agent-headless/cli.js models cursor
 ```
+
+`models` prints the Foundry allowlist for that provider — not the full Cursor
+catalog. Exact IDs, defaults (Cursor Grok medium; Claude Fable effort low), and
+shorthand mapping live in `references/models.md`. Do not invent IDs or cross
+provider spellings.
 
 Require `availability: "available"`. Report a `missing` or `unusable` reason.
 Do not silently substitute another model. Set `CLAUDE_BIN`, `CODEX_BIN`, or

@@ -6,7 +6,7 @@ priority: p2
 tags: [area:workflow]
 blockedBy: [task-023]
 createdAt: "2026-08-06T14:45:41Z"
-updatedAt: "2026-08-09T01:49:00Z"
+updatedAt: "2026-08-10T12:47:10Z"
 ---
 
 <!-- task-tracker:description -->
@@ -50,3 +50,4 @@ Evidence: docs/research/session-audit-run-001-findings.md findings S1 and S2.
 - 2026-08-06T15:40:24Z — note: CORRECTION to the authorization note above, from SPEC round 3 finding 2 - ACCEPTED. That note claimed SDLC Lifecycle permits skipping any step with an authorized logged override. It does not. The live clause covers skipping IMPLEMENTATION OR REVIEW only; the 3-6 item rubric is an unconditional entry criterion with no override path in the policy as written. The operator's authorization is real and recorded, but it authorizes a deviation the policy does not currently provide for, rather than exercising a documented override. Recording it accurately: this task carries a known, operator-accepted deviation from an unconditional entry criterion. Whether entry criteria should become overridable with logged authorization is a policy question filed separately, not something this task may decide for itself.
 - 2026-08-06T15:40:24Z — note: Round 3 SPEC finding 4 ACCEPTED (medium): the section opened by claiming a blocked shell buys nothing but a held tool slot, which overstates the evidence - a foreground watcher does deliver a completion signal - and contradicted the section's own closing exception permitting one deliberate wait. Reworded to say that waiting badly costs turns and tool slots without making the work finish sooner, which is what run-001 actually showed.
 - 2026-08-09T01:49:00Z — note: Nightly audit 2026-08-08 adds evidence for the wait pattern: ~20 min of review-wait heartbeats with nothing overlapped (interra rollout-...T13-17-18, lines 333-375 and neighbors) and ~10 min in synoptic; CI waits ~9 min were inherent and correctly not bypassed. See docs/research/run-audits/2026-08-08.md candidate 3.
+- 2026-08-10T12:47:10Z — note: Nightly audit 2026-08-09 adds wait-pattern evidence: project-myriad serial Opus dual-axis waits with dense status pings and little overlapped work across 046/034/048 (Codex copy rollout-2026-08-09T19-01-38, e.g. :2424-:2476); aigent-place Cursor waits folded into timeout waste (primary rollout-2026-08-09T20-51-17). See docs/research/run-audits/2026-08-09.md candidate 2.

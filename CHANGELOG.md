@@ -25,6 +25,32 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.29.0
+
+### Changed
+
+- `agent-headless` (bundled **0.4.0** from upstream
+  `eaa32c49734d55af94e31ac769f383a2a03a7706`) prints a curated model allowlist
+  from `models <claude|codex|cursor>` and rejects off-list `--model` values
+  at run time. Claude: `claude-fable-5`, `claude-opus-5`, `claude-sonnet-5`
+  (Fable defaults `--effort low` unless set). Codex: `gpt-5.6-sol`,
+  `gpt-5.6-terra`, `gpt-5.6-luna`. Cursor: Grok 4.5 low/medium/high plus
+  Composer (`composer-2.5`, `composer-2.5-fast`); default remains
+  `cursor-grok-4.5-medium`; Grok `*-fast` variants are refused. The full
+  Cursor live catalog is no longer what `models cursor` prints.
+- `agent-headless` skill (both trees) points at `references/models.md` for
+  exact IDs and operator shorthand. `COMPATIBILITY.md` marks model listing
+  as the Foundry allowlist for all three providers.
+
+### Upgrade actions
+
+- Replace `.agent-foundry/agent-headless/cli.js`, `index.js`, `cli.test.mjs`,
+  `COMPATIBILITY.md`, and `PROVENANCE.md` with the 0.29.0 copies.
+- Replace both trees' `agent-headless/SKILL.md` and add
+  `agent-headless/references/models.md` from the 0.29.0 payload.
+- If any copy was locally modified, merge by meaning and update
+  `.agent-foundry/LOCAL-CHANGES.md`.
+
 ## 0.28.0
 
 ### Changed
