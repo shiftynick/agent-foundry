@@ -120,6 +120,7 @@ export function validateFoundry() {
   requireFile(".agent-foundry/review-packet.mjs");
   requireFile(".agent-foundry/cold-review.mjs");
   requireFile(".agent-foundry/delegate-work.mjs");
+  requireFile(".agent-foundry/process-tree.mjs");
   requireFile(".agent-foundry/review-workflows.test.mjs");
   for (const tree of [".agents", ".claude"]) {
     const milestoneSkill = readFileSync(

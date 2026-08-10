@@ -15,7 +15,6 @@
 // Does not replace docs/SDLC.md adjudication. It only removes hand-assembled
 // invocation boilerplate and incomplete-packet dispatches.
 
-import { spawn } from "node:child_process";
 import {
   mkdtempSync,
   writeFileSync,
@@ -25,10 +24,13 @@ import { dirname, join, resolve } from "node:path";
 import { argv, exit, stderr, stdout } from "node:process";
 import { fileURLToPath } from "node:url";
 import { buildAxisPrompt, checkPacket } from "./review-packet.mjs";
+import { runManagedNode } from "./process-tree.mjs";
 
 const DEFAULT_TIMEOUT_MS = 20 * 60 * 1000;
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_RUNNER = join(HERE, "agent-headless", "cli.js");
+// Extra grace so agent-headless can apply its own --timeout-ms before we reap.
+const PROVIDER_GRACE_MS = 5_000;
 
 function usage() {
   return [
@@ -118,71 +120,8 @@ function parseArgs(args) {
   return out;
 }
 
-function runHeadless(runnerArgs, { timeoutMs }) {
-  return new Promise((resolvePromise) => {
-    const child = spawn(process.execPath, runnerArgs, {
-      stdio: ["ignore", "pipe", "pipe"],
-      windowsHide: true,
-    });
-    let stdoutBuf = "";
-    let stderrBuf = "";
-    let settled = false;
-    const timer = setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      child.kill("SIGTERM");
-      resolvePromise({
-        status: "timed-out",
-        exitCode: null,
-        stdout: stdoutBuf,
-        stderr: stderrBuf,
-        result: null,
-        error: `axis timed out after ${timeoutMs}ms`,
-      });
-    }, timeoutMs + 5_000);
-
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (chunk) => {
-      stdoutBuf += chunk;
-    });
-    child.stderr.on("data", (chunk) => {
-      stderrBuf += chunk;
-    });
-    child.on("error", (err) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      resolvePromise({
-        status: "failed",
-        exitCode: null,
-        stdout: stdoutBuf,
-        stderr: stderrBuf,
-        result: null,
-        error: err.message,
-      });
-    });
-    child.on("close", (code) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      let result = null;
-      let parseError = null;
-      try {
-        result = JSON.parse(stdoutBuf);
-      } catch (err) {
-        parseError = err.message;
-      }
-      resolvePromise({
-        status: result?.status ?? (code === 0 ? "unparsed" : "failed"),
-        exitCode: code,
-        stdout: stdoutBuf,
-        stderr: stderrBuf,
-        result,
-        error: parseError,
-      });
-    });
-  });
+function runHeadless(runnerArgs, { timeoutMs, graceMs = PROVIDER_GRACE_MS }) {
+  return runManagedNode(runnerArgs, { timeoutMs, graceMs });
 }
 
 export function buildRunnerArgs({
@@ -294,7 +233,10 @@ export async function runColdReview(options) {
         maxBudgetUsd: options.maxBudgetUsd,
         trustWorkspace: options.trustWorkspace,
       });
-      const outcome = await runHeadless(runnerArgs, { timeoutMs: options.timeoutMs });
+      const outcome = await runHeadless(runnerArgs, {
+        timeoutMs: options.timeoutMs,
+        graceMs: options.graceMs ?? PROVIDER_GRACE_MS,
+      });
       return [axis, outcome];
     }),
   );

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -10,6 +10,7 @@ import {
 } from "./review-packet.mjs";
 import { buildRunnerArgs, runColdReview } from "./cold-review.mjs";
 import { buildDelegateArgs, checkEnvironmentFacts, runDelegate } from "./delegate-work.mjs";
+import { isPidAlive, runManagedNode } from "./process-tree.mjs";
 
 function fillPacket(dir) {
   writeFileSync(join(dir, "objective.txt"), "Ship the timeout fix.\n");
@@ -277,5 +278,89 @@ describe("delegate-work", () => {
     assert.equal(live.ok, true);
     assert.equal(live.status, "succeeded");
     assert.equal(live.access, "edit-isolated");
+  });
+});
+
+describe("process-tree timeout reap", () => {
+  it("runManagedNode kills a hung child and its descendant", async () => {
+    const repo = mkdtempSync(join(tmpdir(), "reap-"));
+    const marker = join(repo, "pids.json");
+    const hang = join(repo, "hang.js");
+    writeFileSync(
+      hang,
+      [
+        "const { spawn } = require('node:child_process');",
+        "const { writeFileSync } = require('node:fs');",
+        "const marker = process.argv[2];",
+        "const child = spawn(process.execPath, ['-e', 'Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,120000)'], { stdio: 'ignore', windowsHide: true });",
+        "writeFileSync(marker, JSON.stringify({ parent: process.pid, child: child.pid }));",
+        "Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,120000);",
+        "",
+      ].join("\n"),
+    );
+    const outcome = await runManagedNode([hang, marker], { timeoutMs: 400, graceMs: 0 });
+    assert.equal(outcome.status, "timed-out");
+    assert.ok(existsSync(marker), "hang script should have written pids");
+    const pids = JSON.parse(readFileSync(marker, "utf8"));
+    // Brief settle for taskkill / process group teardown.
+    await new Promise((r) => setTimeout(r, 500));
+    assert.equal(isPidAlive(pids.parent), false, `parent ${pids.parent} still alive`);
+    assert.equal(isPidAlive(pids.child), false, `child ${pids.child} still alive`);
+  });
+
+  it("cold-review reports timed-out and reaps a hung fake runner", async () => {
+    const repo = mkdtempSync(join(tmpdir(), "cold-reap-"));
+    const dir = join(repo, "packet");
+    initPacket(dir, { taskId: "task-047", repoRoot: repo });
+    fillPacket(dir);
+    const hang = join(repo, "hang-runner.js");
+    writeFileSync(
+      hang,
+      [
+        "Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,120000);",
+        "",
+      ].join("\n"),
+    );
+    const result = await runColdReview({
+      provider: "codex",
+      packet: dir,
+      cwd: repo,
+      timeoutMs: 400,
+      graceMs: 0,
+      dryRun: false,
+      axis: "SPEC",
+      runner: hang,
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.axes.SPEC.status, "timed-out");
+  });
+
+  it("delegate-work reports timed-out for a hung fake runner", async () => {
+    const repo = mkdtempSync(join(tmpdir(), "del-reap-"));
+    const prompt = join(repo, "task.md");
+    writeFileSync(
+      prompt,
+      "# Task\n\n## Environment facts\n\n- Repo slug: example/foundry\n\n## Objective\n\nHang.\n",
+    );
+    const hang = join(repo, "hang-runner.js");
+    writeFileSync(
+      hang,
+      ["Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,120000);", ""].join("\n"),
+    );
+    const result = await runDelegate({
+      provider: "claude",
+      promptFile: prompt,
+      cwd: repo,
+      timeoutMs: 400,
+      graceMs: 0,
+      dryRun: false,
+      runner: hang,
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.status, "timed-out");
+    if (result.pid) {
+      await new Promise((r) => setTimeout(r, 500));
+      assert.equal(isPidAlive(result.pid), false, `delegate pid ${result.pid} still alive`);
+    }
   });
 });

@@ -12,15 +12,16 @@
 //     [--access edit-isolated|edit-workspace] \
 //     [--trust-workspace] [--dry-run]
 
-import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { argv, exit, stderr, stdout } from "node:process";
 import { fileURLToPath } from "node:url";
+import { runManagedNode } from "./process-tree.mjs";
 
 const DEFAULT_TIMEOUT_MS = 20 * 60 * 1000;
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_RUNNER = join(HERE, "agent-headless", "cli.js");
+const PROVIDER_GRACE_MS = 5_000;
 
 const ACCESS_BY_PROVIDER = {
   claude: "edit-isolated",
@@ -168,61 +169,8 @@ export function buildDelegateArgs(options) {
   return { args, access };
 }
 
-function runHeadless(runnerArgs, timeoutMs) {
-  return new Promise((resolvePromise) => {
-    const child = spawn(process.execPath, runnerArgs, {
-      stdio: ["ignore", "pipe", "pipe"],
-      windowsHide: true,
-    });
-    let stdoutBuf = "";
-    let stderrBuf = "";
-    let settled = false;
-    const timer = setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      child.kill("SIGTERM");
-      resolvePromise({ status: "timed-out", exitCode: null, stdout: stdoutBuf, stderr: stderrBuf, result: null });
-    }, timeoutMs + 5_000);
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (c) => {
-      stdoutBuf += c;
-    });
-    child.stderr.on("data", (c) => {
-      stderrBuf += c;
-    });
-    child.on("error", (err) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      resolvePromise({
-        status: "failed",
-        exitCode: null,
-        stdout: stdoutBuf,
-        stderr: stderrBuf,
-        result: null,
-        error: err.message,
-      });
-    });
-    child.on("close", (code) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      let result = null;
-      try {
-        result = JSON.parse(stdoutBuf);
-      } catch {
-        /* leave null */
-      }
-      resolvePromise({
-        status: result?.status ?? (code === 0 ? "unparsed" : "failed"),
-        exitCode: code,
-        stdout: stdoutBuf,
-        stderr: stderrBuf,
-        result,
-      });
-    });
-  });
+function runHeadless(runnerArgs, timeoutMs, graceMs = PROVIDER_GRACE_MS) {
+  return runManagedNode(runnerArgs, { timeoutMs, graceMs });
 }
 
 export async function runDelegate(options) {
@@ -248,13 +196,18 @@ export async function runDelegate(options) {
       environmentFacts: facts.bullets.length,
     };
   }
-  const outcome = await runHeadless(args, options.timeoutMs);
+  const outcome = await runHeadless(
+    args,
+    options.timeoutMs,
+    options.graceMs ?? PROVIDER_GRACE_MS,
+  );
   return {
     ok: outcome.result?.status === "succeeded",
     access,
     status: outcome.status,
     exitCode: outcome.exitCode,
     result: outcome.result,
+    pid: outcome.pid,
     stderrTail: (outcome.stderr || "").slice(-2000),
   };
 }

@@ -25,6 +25,22 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.30.1
+
+### Changed
+
+- `cold-review.mjs` and `delegate-work.mjs` now reap the provider process tree
+  on timeout (Windows `taskkill /t /f`; Unix SIGTERM then SIGKILL), shared via
+  new `.agent-foundry/process-tree.mjs`. Behavioral tests prove a hung fake
+  runner and its child are dead after `timed-out`.
+
+### Upgrade actions
+
+- Replace `.agent-foundry/cold-review.mjs`, `delegate-work.mjs`, and
+  `review-workflows.test.mjs` with the 0.30.1 copies.
+- Add `.agent-foundry/process-tree.mjs`.
+- Update `.agent-foundry/README.md` if locally modified.
+
 ## 0.30.0
 
 ### Changed
