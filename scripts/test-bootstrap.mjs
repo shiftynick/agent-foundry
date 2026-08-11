@@ -15,7 +15,7 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { run, samePath } from "./foundry-lib.mjs";
+import { run, runChecksMentionsSuite, samePath } from "./foundry-lib.mjs";
 
 const scriptsRoot = path.dirname(fileURLToPath(import.meta.url));
 const foundryRoot = path.resolve(scriptsRoot, "..");
@@ -376,9 +376,8 @@ try {
     { cwd: testRoot, label: "installed full Foundry checks" },
   ).stdout;
   assert.match(installedChecks, /PASS \(skill-sync \+ \d+ suites\)/u);
-  assert.match(
-    installedChecks,
-    /Subtest: project overview/u,
+  assert.ok(
+    runChecksMentionsSuite(installedChecks, "project overview"),
     "installed run-checks did not discover project-overview.test.mjs",
   );
 

@@ -171,3 +171,15 @@ export function run(command, args, options = {}) {
 export function readUtf8(filePath) {
   return readFileSync(filePath, "utf8");
 }
+
+// Node's test runner prints TAP (`# Subtest: name`) when the reporter is tap,
+// and a spec banner (`▶ name`) otherwise. Either means the suite ran.
+export function runChecksMentionsSuite(stdout, suiteName) {
+  const name = String(suiteName ?? "");
+  if (name === "") return false;
+  const text = String(stdout ?? "");
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const tap = new RegExp(`(?:^|\\n)#?\\s*Subtest:\\s*${escaped}\\b`, "u");
+  const spec = new RegExp(`(?:^|\\n)▶\\s*${escaped}\\b`, "u");
+  return tap.test(text) || spec.test(text);
+}
