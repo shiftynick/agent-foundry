@@ -1,12 +1,12 @@
 ---
 id: task-035
 title: Plan strategy for a controlled visual-artifact review capability
-status: backlog
+status: done
 priority: p3
 tags: [area:process]
 blockedBy: []
 createdAt: "2026-08-09T01:04:39Z"
-updatedAt: "2026-08-09T01:31:04Z"
+updatedAt: "2026-08-11T23:06:56Z"
 ---
 
 <!-- task-tracker:description -->
@@ -26,3 +26,7 @@ Operator wants lavish-axi's capability (agent renders an HTML artifact, human re
 - 2026-08-09T01:30:57Z — note: Operator direction 2026-08-08 after evaluation: do NOT drop the goal. The operator wants the capability - human-visual HTML artifact review in the loop - via either (a) a fork of lavish-axi under our control, or (b) a similar tool with the same features built/chosen by us. Task repurposed to strategy planning; incorporation-as-is remains rejected per the evaluation (docs/research/skills-repo-evaluations-2026-08-08.md).
 - 2026-08-09T01:30:57Z — edited (title "Evaluate and incorporate kunchenguid/lavish-axi skill into Foundry"→"Plan strategy for a controlled visual-artifact review capability"; -tag needs:operator; description updated)
 - 2026-08-09T01:31:04Z — moved to backlog (note: Unblocked: operator direction received (fork-we-control or equivalent capability); repurposed as strategy-planning task)
+- 2026-08-11T23:05:02Z — moved to in_progress (claimed by shift@Shiftor; note: Operator approved strategy option (b): minimal zero-dep in-house rebuild of the core review loop. Writing strategy doc and filing follow-ups.)
+- 2026-08-11T23:06:37Z — note: Strategy comparison complete and operator-approved 2026-08-11: option (b) minimal zero-dep in-house rebuild of the core review loop (serve artifact on loopback + annotation UI + long-poll API), shipped as a payload shared skill. Fork (a) rejected: Node 22+/pnpm/esbuild/8-dep fast-moving upstream incompatible with the mold; wrapper (c) rejected: runtime playbook channel and network install fail the control requirement. Accepted trade-off: no whiteboard, no layout audit. Written deliverable: docs/research/visual-artifact-review-strategy-2026-08-11.md. Follow-ups filed: task-6246861934000001 (ADR), task-6246861934000002 (build tool+skill), task-6246861934000003 (validation/release wiring).
+- 2026-08-11T23:06:44Z — moved to review (note: Deliverable is the strategy doc (docs/research/visual-artifact-review-strategy-2026-08-11.md); operator approved the recommendation in-session.)
+- 2026-08-11T23:06:56Z — moved to done (note: Planning task: deliverable was a written comparison plus an operator decision, not code. Operator approval of option (b) is the review; no agent-behavior change ships from this task itself (that lands in the follow-up tasks, which will go through the normal cold-review ladder).)
