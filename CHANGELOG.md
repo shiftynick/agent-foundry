@@ -25,6 +25,24 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.30.2
+
+### Changed
+
+- Cold-review session checklist item 5 now names the P4 failing-test check
+  before re-dispatch (the body rule already existed; attack-the-board sessions
+  were following the checklist and skipping it).
+- `review-packet.mjs check` refuses `manifest.round >= 2` when
+  `fix-verification.md` is missing, empty, or only `none`. Round 1 may still
+  use `none`. Prompts include the section.
+
+### Upgrade actions
+
+- Replace both trees' `execute-task/references/cold-review.md` with the
+  0.30.2 copies.
+- Replace `.agent-foundry/review-packet.mjs` and
+  `review-workflows.test.mjs` with the 0.30.2 copies.
+
 ## 0.30.1
 
 ### Changed
