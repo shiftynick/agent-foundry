@@ -25,6 +25,20 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.30.3
+
+### Changed
+
+- `efficient-orchestration` wait section: do not ping an unfinished cold
+  review or delegated worker with nothing overlapped — same waste class as
+  re-reading an unchanged file. No cadence or timeout added. Completes the
+  0.17.0 wait-pattern delivery after the CI-duration study was dropped.
+
+### Upgrade actions
+
+- Replace both trees' `efficient-orchestration/SKILL.md` with the 0.30.3
+  copies.
+
 ## 0.30.2
 
 ### Changed

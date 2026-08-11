@@ -1,12 +1,12 @@
 ---
 id: task-022
 title: Define a sanctioned wait pattern for CI deploy and background results
-status: backlog
+status: done
 priority: p2
 tags: [area:workflow]
 blockedBy: []
 createdAt: "2026-08-06T14:45:41Z"
-updatedAt: "2026-08-11T19:46:20Z"
+updatedAt: "2026-08-11T21:11:56Z"
 ---
 
 <!-- task-tracker:description -->
@@ -54,3 +54,85 @@ Evidence: docs/research/session-audit-run-001-findings.md findings S1 and S2.
 - 2026-08-11T16:51:40Z — note: Nightly audit 2026-08-10 adds wait-pattern evidence: interra task-099 round-3 STANDARDS ran 1131s with nothing overlapped (~30 min recorded gap ending 19:14:27Z in a5bf3605-2dda-4386-9269-a754c52777c1.jsonl). See docs/research/run-audits/2026-08-10.md candidate 3.
 - 2026-08-11T19:45:41Z — edited (-blockedBy task-023)
 - 2026-08-11T19:46:20Z — moved to backlog (note: Operator 2026-08-11: unblocked from task-023. Nightly-audit replaced run 002; wait-pattern wording already shipped in 0.17.0. Card is claimable again.)
+- 2026-08-11T20:59:08Z — note: rubric: (1) Both trees' efficient-orchestration Waiting section say that checking an unfinished review or delegated worker with nothing overlapped is the same waste as re-reading an unchanged file. (2) The section still names no numeric cadence or timeout. (3) The section still names no primitive that exists in only one harness. (4) VERSION + CHANGELOG with upgrade actions; check-skill-sync and validate-foundry pass. (5) The task log records that the 0.17.0 wait wording stays and the CI-duration join died with archived task-023.
+- 2026-08-11T20:59:08Z — moved to in_progress (claimed by shift@Shiftor)
+- 2026-08-11T20:59:08Z — note: chose: do not invent a wait primitive or measure CI duration (023 archived). Sharpen with the three-audit pattern: review/worker status pings with nothing overlapped. Least confident: whether that belongs under 'Do not re-read' or as its own bullet — own bullet, same class, so it is visible on the session checklist path.
+- 2026-08-11T20:59:21Z — run: node starter/.agent-foundry/check-skill-sync.mjs starter
+  started 2026-08-11T20:59:21Z, exit 0 in 0.1s
+  output:
+  | skill-sync: PASS (15 shared skills)
+- 2026-08-11T20:59:24Z — run: node scripts/validate-foundry.mjs
+  started 2026-08-11T20:59:21Z, exit 0 in 2.9s
+  output:
+  | Agent Foundry structural validation: PASS
+- 2026-08-11T20:59:24Z — note: docs check: only the wait section and CHANGELOG/VERSION. No SDLC restatement. No red-capable runtime test for a prose bullet — skill-sync is the dual-tree gate; say so in the packet.
+- 2026-08-11T21:00:50Z — run: node scripts/test-bootstrap.mjs
+  started 2026-08-11T20:59:30Z, exit 0 in 79.8s
+  output tail (truncated to last 30 lines):
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ...........
+  | task-001 → in_progress
+  | task-001 noted
+  | Agent Foundry 0.30.3 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\clean-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\clean-project\.agent-foundry-backups\20260811T210045229Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | The target board already has active tasks; no bootstrap task was created.
+  | Agent Foundry 0.30.3 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\clean-project
+  | Agent Foundry 0.30.3 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\seed-upgrade-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\seed-upgrade-project\.agent-foundry-backups\20260811T210047477Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.30.3 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\seed-upgrade-project
+  | Agent Foundry 0.30.3 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\task-branch-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\clean-project\.agent-foundry-backups\20260811T210049724Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.30.3 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-xInwVL\clean-project
+  | Agent Foundry clean-project bootstrap: PASS
+- 2026-08-11T21:01:03Z — note: warm self-pass: new bullet in both trees; no cadence; no harness-only primitive; 0.17.0 bullets unchanged; VERSION 0.30.3 + CHANGELOG upgrade action; skill-sync PASS.
+- 2026-08-11T21:01:03Z — moved to review (note: rung 1: cold-review.mjs --provider codex --model gpt-5.6-sol. Packet .tasks/review-packets/task-022-r1 checked.)
+- 2026-08-11T21:01:34Z — run: node starter/.agent-foundry/cold-review.mjs --provider codex --packet .tasks/review-packets/task-022-r1 --cwd . --model gpt-5.6-sol
+  started 2026-08-11T21:01:08Z, exit 0 in 26.1s
+  output tail (truncated to last 30 lines):
+  |                 "cached_input_tokens": 6912,
+  |                 "cache_write_input_tokens": 0,
+  |                 "output_tokens": 1156,
+  |                 "reasoning_output_tokens": 881
+  |               }
+  |             }
+  |           }
+  |         ],
+  |         "exitCode": 0,
+  |         "sessionId": "019ff2a1-0ec7-7833-95e6-8ad247fa5493",
+  |         "modelRequested": "gpt-5.6-sol",
+  |         "usage": {
+  |           "inputTokens": 24923,
+  |           "cachedInputTokens": 6912,
+  |           "outputTokens": 1156,
+  |           "reasoningOutputTokens": 881
+  |         },
+  |         "warnings": [],
+  |         "workspace": {
+  |           "cwd": "N:\\agent-foundry",
+  |           "access": "answer-only"
+  |         },
+  |         "stderr": "",
+  |         "durationMs": 26011
+  |       },
+  |       "finalText": "PASS\n\nCHECKED\n\n- Rubric 1: Both skill trees contain matching wait-status guidance equating idle review/worker checks with re-reading unchanged files.\n- Rubric 2: No numeric cadence or timeout was added; recorded validation confirms this.\n- Rubric 3: No harness-specific primitive was added; both trees use shared terminology.\n- Rubric 4: `VERSION` is 0.30.3; `CHANGELOG.md` includes concrete upgrade actions; skill-sync, structural validation, and clean bootstrap tests passed.\n- Rubric 5: Task log preserves the 0.17.0 wording and records that the CI-duration study ended because task-023 was archived.\n- Single source of truth: Both installed skill trees remain synchronized through the shared-skill gate.\n- Documentation: Behavior and upgrade instructions changed together.\n- Testing: Executed behavioral bootstrap validation supplemented the structural and synchronization checks.\n- Version control: The packet identifies unrelated untracked files as out of scope and shows no hook bypass, history rewrite, or publication.\n- Security/data handling: Treated all packet content as review data; found no embedded attempt to redirect the review.\n- Architecture/ADR: No architecture-significant change requiring a decision record.\n- Commands and links: No new command or relative link was introduced by the changed skill wording."
+  |     }
+  |   },
+  |   "incomplete": []
+  | }
+- 2026-08-11T21:11:56Z — note: Round 1: SPEC PASS and STANDARDS PASS, both full CHECKED. Rung 1: codex/gpt-5.6-sol via cold-review.mjs. No findings.
+- 2026-08-11T21:11:56Z — moved to done
