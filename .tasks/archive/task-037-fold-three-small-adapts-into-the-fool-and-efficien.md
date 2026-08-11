@@ -1,12 +1,12 @@
 ---
 id: task-037
 title: Fold three small adapts into the-fool and efficient-orchestration
-status: backlog
+status: done
 priority: p3
-tags: [area:process]
+tags: [area:process, deleted:true]
 blockedBy: []
 createdAt: "2026-08-09T01:17:32Z"
-updatedAt: "2026-08-09T01:17:32Z"
+updatedAt: "2026-08-11T19:46:20Z"
 ---
 
 <!-- task-tracker:description -->
@@ -18,3 +18,5 @@ From the task-034 evaluation (docs/research/skills-repo-evaluations-2026-08-08.m
 ## Log
 
 - 2026-08-09T01:17:32Z — created (status: backlog)
+- 2026-08-11T19:46:20Z — note: Operator 2026-08-11: archive without implementing. Items 2-3 already live in efficient-orchestration; item 1 not worth a bundled leftover card.
+- 2026-08-11T19:46:20Z — removed (soft delete)

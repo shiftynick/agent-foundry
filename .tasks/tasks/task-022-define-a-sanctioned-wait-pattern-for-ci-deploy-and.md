@@ -1,12 +1,12 @@
 ---
 id: task-022
 title: Define a sanctioned wait pattern for CI deploy and background results
-status: blocked
+status: backlog
 priority: p2
 tags: [area:workflow]
-blockedBy: [task-023]
+blockedBy: []
 createdAt: "2026-08-06T14:45:41Z"
-updatedAt: "2026-08-10T12:47:10Z"
+updatedAt: "2026-08-11T19:46:20Z"
 ---
 
 <!-- task-tracker:description -->
@@ -51,3 +51,6 @@ Evidence: docs/research/session-audit-run-001-findings.md findings S1 and S2.
 - 2026-08-06T15:40:24Z — note: Round 3 SPEC finding 4 ACCEPTED (medium): the section opened by claiming a blocked shell buys nothing but a held tool slot, which overstates the evidence - a foreground watcher does deliver a completion signal - and contradicted the section's own closing exception permitting one deliberate wait. Reworded to say that waiting badly costs turns and tool slots without making the work finish sooner, which is what run-001 actually showed.
 - 2026-08-09T01:49:00Z — note: Nightly audit 2026-08-08 adds evidence for the wait pattern: ~20 min of review-wait heartbeats with nothing overlapped (interra rollout-...T13-17-18, lines 333-375 and neighbors) and ~10 min in synoptic; CI waits ~9 min were inherent and correctly not bypassed. See docs/research/run-audits/2026-08-08.md candidate 3.
 - 2026-08-10T12:47:10Z — note: Nightly audit 2026-08-09 adds wait-pattern evidence: project-myriad serial Opus dual-axis waits with dense status pings and little overlapped work across 046/034/048 (Codex copy rollout-2026-08-09T19-01-38, e.g. :2424-:2476); aigent-place Cursor waits folded into timeout waste (primary rollout-2026-08-09T20-51-17). See docs/research/run-audits/2026-08-09.md candidate 2.
+- 2026-08-11T16:51:40Z — note: Nightly audit 2026-08-10 adds wait-pattern evidence: interra task-099 round-3 STANDARDS ran 1131s with nothing overlapped (~30 min recorded gap ending 19:14:27Z in a5bf3605-2dda-4386-9269-a754c52777c1.jsonl). See docs/research/run-audits/2026-08-10.md candidate 3.
+- 2026-08-11T19:45:41Z — edited (-blockedBy task-023)
+- 2026-08-11T19:46:20Z — moved to backlog (note: Operator 2026-08-11: unblocked from task-023. Nightly-audit replaced run 002; wait-pattern wording already shipped in 0.17.0. Card is claimable again.)

@@ -1,12 +1,12 @@
 ---
 id: task-036
 title: Add pre-review low-confidence decisions disclosure to execute-task
-status: backlog
+status: done
 priority: p2
-tags: [area:process]
+tags: [area:process, deleted:true]
 blockedBy: []
 createdAt: "2026-08-09T01:17:32Z"
-updatedAt: "2026-08-09T01:17:32Z"
+updatedAt: "2026-08-11T19:46:20Z"
 ---
 
 <!-- task-tracker:description -->
@@ -18,3 +18,5 @@ Adapt the 'decisions' pattern from davidondrej/skills (MIT; concept only, rewrit
 ## Log
 
 - 2026-08-09T01:17:32Z — created (status: backlog)
+- 2026-08-11T19:46:20Z — note: Operator 2026-08-11: archive without implementing. Pre-review low-confidence disclosure is another prose step agents can skip; not earned relative to task-048.
+- 2026-08-11T19:46:20Z — removed (soft delete)
