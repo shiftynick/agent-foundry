@@ -23,6 +23,7 @@ agent workflows installed by Agent Foundry.
 | `upgrade-agent-foundry` | Guided in-place upgrade of the installed workflow kit. |
 | `agent-foundry-feedback` | Package kit defects and upstream-worthy fixes into feedback packets. |
 | `visual-review` | Loopback operator annotation loop on a rendered HTML artifact. |
+| `browser-use` | Evidence-driven testing of a local web app through the browser-use CLI. |
 
 ## Rules
 

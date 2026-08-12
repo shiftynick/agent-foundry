@@ -51,10 +51,10 @@ node starter/.agent-foundry/check-skill-sync.mjs starter
 ## The dual-tree invariant (most common source of breakage)
 
 `starter/.agents/skills/` (Codex) and `starter/.claude/skills/` (Claude Code)
-contain **the same sixteen shared skills**: `adr`, `agent-foundry-feedback`,
-`agent-headless`, `attack-the-board`, `codebase-audit`, `diagnosing-bugs`,
-`efficient-orchestration`, `execute-task`, `grill-me`, `handoff-writer`,
-`plan-milestone`, `retrospective`, `task-tracker`, `the-fool`,
+contain **the same seventeen shared skills**: `adr`, `agent-foundry-feedback`,
+`agent-headless`, `attack-the-board`, `browser-use`, `codebase-audit`,
+`diagnosing-bugs`, `efficient-orchestration`, `execute-task`, `grill-me`,
+`handoff-writer`, `plan-milestone`, `retrospective`, `task-tracker`, `the-fool`,
 `upgrade-agent-foundry`, `visual-review`. Editing one copy without the other
 fails validation.
 
@@ -69,7 +69,7 @@ Everything else must be byte-identical. Additionally, a shared skill in one
 tree must **never** contain the other tree's path string — `validate-foundry.mjs`
 rejects that even if both copies agree.
 
-Each harness ships exactly 16 `SKILL.md` files; the counts and the
+Each harness ships exactly 17 `SKILL.md` files; the counts and the
 shared-skill list are hardcoded in `scripts/validate-foundry.mjs`, so
 adding or renaming a skill means updating that file too.
 

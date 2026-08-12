@@ -25,11 +25,11 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
-## 0.31.0
+## 0.32.0
 
 ### Changed
 
-- New sixteenth shared skill `visual-review` in both harness trees: a
+- New seventeenth shared skill `visual-review` in both harness trees: a
   zero-dependency loopback server (`scripts/visual-review.mjs`) that serves
   one HTML artifact for operator annotation in a browser (element click and
   text selection, page notes, a completion event) and delivers the feedback
@@ -47,7 +47,7 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
   auto-open. Ships `visual-review.test.mjs` in the payload, so installed
   projects' `run-checks.mjs` exercises those boundaries.
 - `scripts/validate-foundry.mjs` and `scripts/test-bootstrap.mjs` now expect
-  sixteen shared skills; prose counts and skill tables updated in
+  seventeen shared skills; prose counts and skill tables updated in
   `CLAUDE.md`, `README.md`, `AGENTS.md`, `AGENTS.md.template`, and both
   skill-tree `README.md` files.
 
@@ -60,9 +60,45 @@ capability that lands cleanly, `patch` for fixes with no upgrade action.
   skill, reconcile names before copying.
 - Add the `visual-review` row to both skill-tree `README.md` tables and to
   the project-local skills table in the installed `AGENTS.md`, and update
-  its "fifteen shared workflows" sentence to sixteen.
+  its "shared workflows" count sentence to seventeen.
+- If upgrading from 0.30.x, this release and 0.31.0 each add one skill: apply
+  0.31.0's `browser-use` actions as well, and expect seventeen in total rather
+  than sixteen.
 - Verify with `node .agent-foundry/check-skill-sync.mjs` (expect
-  `PASS (16 shared skills)`) and `node .agent-foundry/run-checks.mjs`.
+  `PASS (17 shared skills)`) and `node .agent-foundry/run-checks.mjs`.
+
+## 0.31.0
+
+### Changed
+
+- Added the shared `browser-use` skill for evidence-driven testing and
+  debugging of local web apps through the browser-use CLI. It covers current
+  install and health checks, local or explicit-CDP browser connection,
+  cross-shell invocation, navigation and interaction helpers, screenshots,
+  bounded edit-test-retest loops, and browser-state safety boundaries.
+- The starter now installs and validates 16 synchronized shared skills per
+  harness.
+
+### Upgrade actions
+
+- Add `browser-use/SKILL.md` to both skill trees from the 0.31.0 starter.
+- If either target path already exists, reconcile the local copy with the
+  Foundry version; do not overwrite it silently.
+
+## 0.30.4
+
+### Changed
+
+- `efficient-orchestration` now asks the operator to confirm available
+  provider, model, and effort choices by orchestration tier before delegation
+  when those choices were not already supplied. The question includes a
+  complete recommended plan that can be accepted unchanged and asks only for
+  missing tiers when the operator supplied partial routing.
+
+### Upgrade actions
+
+- Replace both trees' `efficient-orchestration/SKILL.md` with the 0.30.4
+  copies.
 
 ## 0.30.3
 

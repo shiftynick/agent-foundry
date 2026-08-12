@@ -1,12 +1,12 @@
 ---
 id: task-6246861934000008
 title: Make the visual-review shell-page UI behavior a repeatable gate
-status: backlog
+status: done
 priority: p3
-tags: [area:tooling]
+tags: [area:tooling, deleted:true]
 blockedBy: []
 createdAt: "2026-08-12T00:56:52Z"
-updatedAt: "2026-08-12T00:56:52Z"
+updatedAt: "2026-08-12T01:03:33Z"
 ---
 
 <!-- task-tracker:description -->
@@ -18,3 +18,4 @@ Two consecutive cold-review rounds on task-6246861934000004 flagged the same str
 ## Log
 
 - 2026-08-12T00:56:52Z — created (status: backlog)
+- 2026-08-12T01:03:33Z — removed (soft delete)

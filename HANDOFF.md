@@ -1,40 +1,45 @@
-# HANDOFF — Agent Foundry, 2026-08-02
+# HANDOFF — Agent Foundry, 2026-08-11
 
 You are picking up the Agent Foundry bootstrap kit itself (not a project that
-installed it). Four releases shipped this session; the tree is clean and every
-gate passes.
+installed it). Work front in flight: controlled visual-artifact review under
+Foundry control. Strategy and ADR are done; the tool has not been built yet.
 
 ---
 
 ## TL;DR
 
-This session added three shared skills — `attack-the-board`,
-`upgrade-agent-foundry`, `agent-foundry-feedback` — plus a dial-announcement
-rule in `efficient-orchestration` and a correctness fix to recorded task
-evidence. Four releases landed (0.12.0 → 0.14.1), each with its own two-axis
-cold review. Nothing is in progress, nothing is blocked, and **nothing is
-pushed** — all commits are local on `master`. The backlog holds three
-untouched p2/p3 cards from before this session.
+Operator wants human-in-the-loop HTML artifact review (agent renders HTML →
+human annotates in browser → agent polls feedback). Upstream lavish-axi was
+rejected as-is. Strategy option **(b)** is approved: a minimal zero-dependency
+in-house rebuild shipped as a new shared skill. ADR-0003 records that as
+accepted. Current release on this tree is **0.30.3**. Branch
+`t3code/deep-review-task-035` has two local commits for this front; nothing
+pushed from this session. Next claimable work is
+`task-6246861934000002` (build the tool + dual-tree skill).
 
 ---
 
 ## To pick up tomorrow
 
-Confirm the tree is still green before doing anything else:
+Confirm the tree is green, then claim the build task:
 
 ```bash
-node scripts/validate-foundry.mjs && node starter/.agent-foundry/check-skill-sync.mjs starter && node scripts/test-bootstrap.mjs
+node scripts/validate-foundry.mjs
+node starter/.agent-foundry/check-skill-sync.mjs starter
+node starter/.agents/skills/task-tracker/scripts/task.mjs show task-6246861934000002
+node starter/.agents/skills/task-tracker/scripts/task.mjs move task-6246861934000002 in_progress
 ```
 
-Then look at what's left:
+Read these before writing code (in this order):
 
-```bash
-node starter/.claude/skills/task-tracker/scripts/task.mjs board
-```
+1. `docs/adr/0003-in-house-visual-artifact-review.md` — decision, scope, security requirements, SDLC position
+2. `docs/research/visual-artifact-review-strategy-2026-08-11.md` — option comparison and accepted trade-offs
+3. `docs/research/skills-repo-evaluations-2026-08-08.md` — why lavish-axi must not be incorporated as-is
 
-The immediate decision is whether to push the four local commits — that was
-deliberately left to the operator and is the only thing standing between this
-work and a published release.
+Then follow `execute-task`: rubric note → implement → warm self-pass → cold
+review → `validate-foundry` + `test-bootstrap` → commit. The release-wiring
+task (`task-6246861934000003`) is blocked until the build lands; it owns the
+15→16 skill-list updates, VERSION bump, and CHANGELOG.
 
 ## What's where
 
@@ -44,12 +49,17 @@ work and a published release.
 | Payload installed into other projects | `starter/**` |
 | Claude-facing skills (canonical) | `starter/.claude/skills/` |
 | Codex-facing mirror | `starter/.agents/skills/` |
+| Foundry-repo ADRs (not installed) | `docs/adr/` |
+| Installed-project ADR mold | `starter/docs/adr/` |
+| Visual-review strategy (approved) | `docs/research/visual-artifact-review-strategy-2026-08-11.md` |
+| Lavish-axi evaluation (rejected as-is) | `docs/research/skills-repo-evaluations-2026-08-08.md` |
+| ADR-0003 (accepted) | `docs/adr/0003-in-house-visual-artifact-review.md` |
 | Validation (counts, neutrality, fences) | `scripts/validate-foundry.mjs` |
 | End-to-end install test | `scripts/test-bootstrap.mjs` |
-| Mirror check (also runs in installed projects) | `starter/.agent-foundry/check-skill-sync.mjs` |
-| Release number (single source of truth) | `VERSION` |
-| Upgrade procedure agents follow | `UPGRADING.md` |
-| Board / archive | `.tasks/tasks/`, `.tasks/archive/` |
+| Mirror check | `starter/.agent-foundry/check-skill-sync.mjs` |
+| Release number | `VERSION` (currently `0.30.3`) |
+| Board | `.tasks/tasks/` |
+| Review packets (gitignored / untracked) | `.tasks/review-packets/` |
 
 ## Mental model (don't lose this)
 
@@ -57,84 +67,125 @@ work and a published release.
 trigger accuracy, instructions, repository references, and a real invocation
 when scripts are involved.
 
-**Adding one shared skill touches seven count-bearing places.** The hardcoded
-per-harness file count *and* the shared-skill list in
-`scripts/validate-foundry.mjs`, the assertion in `scripts/test-bootstrap.mjs`,
-and the prose counts in `CLAUDE.md`, `README.md`, `AGENTS.md`,
-`starter/AGENTS.md.template`, plus the tables in both skill-tree
-`README.md` files. The template one is easy to miss — a cold reviewer caught
-it this session, not the validator.
+**Visual artifact review is not a cold-review rung.** ADR-0003 places it as
+an *operator feedback loop during implementation*. It complements
+`starter/docs/SDLC.md`'s cold-review ladder; it must never substitute for
+SPEC or STANDARDS. Do not restating a second review model inside the skill —
+point at SDLC + the ADR.
+
+**Option (b) scope is deliberately thin.** Core loop only: `node:http` on
+127.0.0.1, string-level SDK injection, element + text-selection annotations,
+prompt queue, long-poll for the agent, `fs.watch` live reload, print URL (no
+`open`). Out of scope: Mermaid whiteboard, layout audit, sharing, telemetry,
+playbooks. Security non-negotiables: loopback-only, Host-header validation,
+zero outbound network, artifact-directory confinement, sandboxed iframe
+without `allow-same-origin`. If whiteboard/layout-audit later matter, the
+documented fallback is a separate-repo fork of lavish-axi — new ADR, not a
+quiet scope creep.
+
+**Adding one shared skill touches many count-bearing places.** Hardcoded
+per-harness file count *and* shared-skill list in
+`scripts/validate-foundry.mjs`, assertions in `scripts/test-bootstrap.mjs`,
+and prose counts in `CLAUDE.md`, `README.md`, `AGENTS.md`,
+`starter/AGENTS.md.template`, plus both skill-tree `README.md` tables. The
+template prose is easy to miss — `validate-foundry.mjs` will not catch it.
+That wiring is explicitly owned by `task-6246861934000003`, not the build
+task, but do not invent a seventeenth skill name that the wiring task cannot
+find.
 
 **Single-authority discipline is enforced socially, not mechanically.**
 `starter/docs/SDLC.md` owns commit authority, the cold-review ladder, and
-mid-task ADRs; `UPGRADING.md` owns the upgrade procedure. Skills must
-*reference* them. Every skill written this session drew a review finding for
-restating one of those authorities — expect it and write the reference form
-first.
+mid-task ADRs. Skills must *reference* them, not restate them.
 
-**`upgrade-agent-foundry` defers to the acquired foundry's `UPGRADING.md`** —
-the version being upgraded *to*, not the copy shipped with the installed
-version. That's what keeps the procedure from going stale, and it's the one
-design point to preserve if that skill is edited.
+**Repo-level ADRs vs payload ADRs.** `docs/adr/` describes the Foundry
+source. `starter/docs/adr/` is the empty mold installed into targets.
+ADR-0003 correctly lives only in `docs/adr/`.
 
 ## What was finished this session
 
-- **0.12.0** (`0eac9ae`) — `attack-the-board`: scope the remaining in-filter
-  work, plan a path, harvest every operator-only question in one batch, then
-  run tasks through the normal `execute-task` lifecycle, routing around real
-  blockers (a closed four-item list) until nothing claimable remains. Also
-  added "Announce the dials" to `efficient-orchestration`: state backend,
-  family, specific model, and effort per slice class (work vs.
-  review/verification), and announce mid-run changes.
-- **0.13.0** (`102112d`) — `upgrade-agent-foundry`: establishes the installed
-  version, acquires the new foundry from a local path or an operator-approved
-  clone, verifies it is foundry-shaped and strictly newer, then follows the
-  acquired `UPGRADING.md`.
-- **0.14.0** (`01d3de5`) — `agent-foundry-feedback`: packages defects and
-  upstream-worthy fixes into self-contained packets under
-  `.agent-foundry/feedback/` (now git-ignored and documented as unmanaged);
-  local file always, hosted issue only with `gh auth status` passing and
-  explicit operator approval of destination and full sanitized body.
-- **0.14.1** (`f8629d1`) — `task.mjs run` no longer writes terminal escapes or
-  trailing whitespace into recorded evidence, for both the output tail and the
-  recorded command line. 68 tests pass in each tree.
-- Archived task-014, task-015, task-016 to `.tasks/archive/`.
+- **task-035** (`b01171e`) — strategy comparison written and operator-approved
+  for option (b). Follow-up tasks filed. Card `done`.
+- **task-6246861934000001** (`e92afa9`) — ADR-0003 accepted (operator had
+  already decided; skill rule allows `accepted` with citation). Index row in
+  `docs/adr/README.md`. Trivial-diff cold review via
+  `cold-review.mjs --provider codex --axis COMBINED` → PASS, zero findings.
+  `validate-foundry.mjs` recorded exit 0.
+- Unblocked the build task; release-wiring task remains blocked on the build.
 
 ## What's in progress / half-done
 
-Nothing. No task is claimed, no work is staged, and the worktree is clean.
+Nothing claimed. Ready next:
+
+| ID | Title | Notes |
+| --- | --- | --- |
+| `task-6246861934000002` | Build zero-dep visual-review tool and shared skill pair | backlog, unblocked, p2 |
+| `task-6246861934000003` | Wire visual-review skill into validation and release | backlog, blocked by 0002 |
+
+Untracked only: `.tasks/review-packets/` (ADR r1 packet; leave uncommitted
+unless someone wants it archived).
+
+Branch: `t3code/deep-review-task-035` — two commits ahead of whatever this
+worktree was cut from; **not pushed** this session.
 
 ## Open questions for the human
 
-1. **Push or not.** Four commits sit local on `master`. Pushing is outside
-   autonomous commit authority under `starter/docs/SDLC.md`.
-2. **Backlog direction.** Three cards remain (`task-010` deploy-dependent
-   acceptance lifecycle, `task-011` routing upstream-worthy local changes,
-   `task-013` cross-harness session audit POC). `task-011` now overlaps
-   `agent-foundry-feedback`, which is a candidate delivery mechanism for its
-   `Upstream: yes` entries — decide whether to fold them together before
-   picking `task-011` up.
+None required before starting `task-6246861934000002`. Scope and trade-offs
+were locked in the plan approval and ADR-0003.
+
+Optional later: whether to push this branch / open a PR — outside autonomous
+authority unless asked.
+
+## Validation state
+
+- `node scripts/validate-foundry.mjs` — PASS (recorded on the ADR task after
+  final edits).
+- `node scripts/test-bootstrap.mjs` — not re-run this session (no `starter/`
+  changes). Re-run after the build task touches the payload.
+- Cold review rung for ADR: ladder rung 1 (Codex COMBINED fast-path), PASS.
+
+## Worktree and operational state
+
+- Branch: `t3code/deep-review-task-035`
+- HEAD: `e92afa9` (ADR-0003)
+- Working tree: clean except untracked `.tasks/review-packets/`
+- VERSION: `0.30.3` (no bump yet; bump lands with task-6246861934000003)
 
 ## Known blockers and risks
 
-- **One unreviewed-at-cap change.** In task-016 the last two fixes (8-bit SOS
-  introducer; splitting the control-string terminator rule so BEL ends OSC
-  only, with CAN/SUB cancelling) landed after the third review round, which is
-  the ladder's cap. They are covered by a 24-case local harness over the
-  extracted helpers and a CLI-level regression test, but not by a fourth cold
-  round. Recorded in the archived task log.
+- **No product risk on the ADR path.** The expensive-to-reverse decision is
+  already accepted; implementation can proceed.
+- **Build task will add a 16th shared skill.** Expect dual-tree sync and the
+  wiring task's count updates to be the main validation surface. Do not ship
+  the skill without a payload `*.test.mjs` that `test-bootstrap` will run.
+- **Cold-reviewer sandbox EPERM on Windows.** During ADR review, Codex's
+  sandboxed `node scripts/validate-foundry.mjs` failed with
+  `spawnSync ... node.exe EPERM`. Treat that as environmental, not a gate
+  failure; keep `task.mjs run` evidence from the implementer environment as
+  authority.
 
-## Recent commit history
+## Recent commit history (last 20)
 
 ```text
-f8629d1 task-016 / release 0.14.1: strip terminal escapes from recorded evidence
-01d3de5 task-015 / release 0.14.0: add shared agent-foundry-feedback skill
-102112d task-014 / release 0.13.0: add shared upgrade-agent-foundry skill
-c9873ab tasks: file upgrade-agent-foundry and agent-foundry-feedback skills
-0eac9ae release 0.12.0: add attack-the-board skill and orchestration dial announcements
-47a6d78 docs: normalize session audit note
-793f633 tasks: defer cross-harness session audit POC
-154807d release 0.11.1: fix a truncated failure summary and four stale claims
+e92afa9 task-6246861934000001: accept ADR-0003, in-house visual-artifact review capability
+b01171e task-035: record approved visual-review strategy (option b) and file follow-ups
+6665817 audit results
+9c4b4b2 task-022: treat review/worker pings as wait-pattern waste (0.30.3)
+b2e9a26 task-049: accept TAP and spec suite banners in test-bootstrap
+c43d813 board: file task-049 for test-bootstrap TAP vs spec assertion
+44f9c22 task-048: require fix-verification on cold-review re-rounds (0.30.2)
+7825dba board: drop 023/036/037, unblock 022, archive done sweep
+f767368 task-047: reap provider process trees on cold-review/delegate timeout (0.30.1)
+88cb36d task-046: ship speed presets, packet gate, and timeout stack as 0.30.0
+7ef927a Release 0.29.0: curated agent-headless model allowlists
+89f0120 docs: notices to reporting projects for 0.28.0 and 0.27.0
+f05c5bd board: close tasks 042-044
+3360239 task-044: make seed restore preflight-then-mutate, reject link-traversing paths; release 0.28.0
+1ff5e34 task-043: key detached task-ID namespaces on the worktree, and report an unknown default branch
+2e965a8 task-042: scrub repository-local Git variables before installed test runs
+e35383c board: archive completed tasks 031-034, 038-041
+b2781fd release 0.27.0: adopt upstream packet fixes from installed projects
+3268141 receive upstream feedback packets from installed projects
+28fa4be release 0.26.0: fixes from the first nightly audit
 ```
 
 ## Frequently-needed commands
@@ -143,44 +194,43 @@ c9873ab tasks: file upgrade-agent-foundry and agent-foundry-feedback skills
 node scripts/validate-foundry.mjs
 node scripts/test-bootstrap.mjs
 node starter/.agent-foundry/check-skill-sync.mjs starter
-node --test starter/.claude/skills/task-tracker/scripts/task.mjs
-node starter/.claude/skills/task-tracker/scripts/task.mjs board
+node starter/.agents/skills/task-tracker/scripts/task.mjs board
+node starter/.agents/skills/task-tracker/scripts/task.mjs show task-6246861934000002
+node starter/.agents/skills/task-tracker/scripts/task.mjs next
 ```
 
-Mirror the canonical Claude copy to the Codex tree after editing a shared
-skill (the only permitted transform is the path string):
+Review packet + cold review (prefer Foundry wrappers):
 
 ```bash
-sed 's|\.claude/skills/|.agents/skills/|g' starter/.claude/skills/<name>/SKILL.md > starter/.agents/skills/<name>/SKILL.md
+node starter/.agent-foundry/review-packet.mjs init .tasks/review-packets/task-NNN-r1 --task-id task-NNN --round 1
+node starter/.agent-foundry/review-packet.mjs check .tasks/review-packets/task-NNN-r1
+node starter/.agents/skills/task-tracker/scripts/task.mjs run task-NNN -- node starter/.agent-foundry/cold-review.mjs --provider codex --packet .tasks/review-packets/task-NNN-r1 --cwd . --axis COMBINED
 ```
 
-Cold review, one call per axis, run concurrently:
-
-```bash
-codex exec -C "N:/agent-foundry" -s read-only --ephemeral -o result.md - < prompt.txt
-```
+On Windows PowerShell, do **not** chain with `&&` on older hosts; run
+commands sequentially. Prefer `Out-File -Encoding utf8` (or Node) when
+writing review-packet files — bare `>` can emit UTF-16 and break
+`review-packet.mjs check`.
 
 ## Common pitfalls
 
-- **Editing payload source through a tool that processes escapes will corrupt
-  it.** `task.mjs` contains regex literals like `\u001b`; an edit that passes
-  them through shell *and* JS string layers silently turns them into real
-  control bytes or drops a backslash. This cost several attempts this session.
-  Build such edits with `String.fromCharCode(92)` in a script file, and verify
-  after with a scan for raw C0/C1 bytes before committing.
-- **`validate-foundry.mjs` will not catch a stale prose count.** It checks the
-  file count and shared list it hardcodes; `starter/AGENTS.md.template`'s
+- **`validate-foundry.mjs` will not catch a stale prose count.** It checks
+  the file count and shared list it hardcodes; `starter/AGENTS.md.template`'s
   skill table and "N shared workflows" sentence are prose it never reads.
-- **A payload test that shells out must not rely on backslash survival.** The
-  test fixture for an ST-terminated escape passed on Windows and would have
-  broken under POSIX `sh`, where `\\` inside double quotes reduces. Payload
-  tests run during installation on every platform — build byte-exact fixtures
-  with `String.fromCharCode`.
 - **`git diff` omits staged work when building a review packet.** Use
   `git diff --binary HEAD` and separately list untracked files with
   `git ls-files --others --exclude-standard`; a new skill's `SKILL.md` is
-  untracked and would otherwise be reviewed as if it didn't exist.
-- **Expect the first review round to find real defects, not nits.** Every
-  skill this session drew findings on restated authority or an unhandled edge
-  case; the evidence fix drew concrete failing inputs in all three rounds.
-  Budget for three rounds rather than treating round one as a formality.
+  untracked and would otherwise be reviewed as if it did not exist.
+- **Packet files must be UTF-8.** On Windows PowerShell 5, `>` redirection
+  writes UTF-16. Use `Out-File -Encoding utf8` or write via Node.
+- **Do not pull lavish-axi into the payload.** Evaluation and ADR forbid
+  as-is adoption and the thin wrapper. Rebuild core loop only; borrow
+  security *requirements*, not their express/chokidar/parse5 stack.
+- **Do not restate SDLC review rules inside the new skill.** Point at
+  `docs/SDLC.md` and ADR-0003 for modality placement.
+- **Expect the first review round to find real defects on skill text.**
+  Restated authority and unhandled Windows/path edges are recurring
+  findings; budget for rounds rather than treating round one as a formality.
+- **Editing payload source through a tool that processes escapes can corrupt
+  it.** Regex literals like `\u001b` in tracker scripts have been mangled
+  before; verify with a raw C0/C1 scan when touching escape-heavy code.
