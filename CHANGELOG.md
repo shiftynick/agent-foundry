@@ -25,6 +25,21 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.30.4
+
+### Changed
+
+- `efficient-orchestration` now asks the operator to confirm available
+  provider, model, and effort choices by orchestration tier before delegation
+  when those choices were not already supplied. The question includes a
+  complete recommended plan that can be accepted unchanged and asks only for
+  missing tiers when the operator supplied partial routing.
+
+### Upgrade actions
+
+- Replace both trees' `efficient-orchestration/SKILL.md` with the 0.30.4
+  copies.
+
 ## 0.30.3
 
 ### Changed
