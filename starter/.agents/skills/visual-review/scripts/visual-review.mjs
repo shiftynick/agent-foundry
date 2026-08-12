@@ -232,6 +232,7 @@ function readBody(req) {
 // so it cannot reach the parent DOM; it reports selections via postMessage.
 const SDK_SOURCE = String.raw`(() => {
   "use strict";
+  const MAX_COMMENT = 8000;
   let marked = null;
   const OUTLINE = "2px solid #e4572e";
   function cssPath(el) {
@@ -264,6 +265,23 @@ const SDK_SOURCE = String.raw`(() => {
   function report(payload) {
     window.parent.postMessage(Object.assign({ source: "visual-review" }, payload), "*");
   }
+  // Opt-in choice affordance (ADR-0004). An artifact author marks an element
+  // with data-vr-choice; a click on it sends that choice with no typing and no
+  // Send press. The attribute's value is the label when present, otherwise the
+  // element's own text. Unmarked artifacts never reach this path.
+  function choiceFor(target) {
+    let node = target instanceof Element ? target : null;
+    while (node && node.nodeType === 1) {
+      if (node.hasAttribute("data-vr-choice")) {
+        const attr = (node.getAttribute("data-vr-choice") || "").trim();
+        const label = attr.length > 0 ? attr : (node.textContent || "").trim();
+        if (label.length > 0) return { node: node, label: label };
+        return null;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
   document.addEventListener("click", (event) => {
     const selection = String(window.getSelection() || "");
     if (selection.trim().length > 0) return;
@@ -271,6 +289,17 @@ const SDK_SOURCE = String.raw`(() => {
     event.stopPropagation();
     const el = event.target instanceof Element ? event.target : null;
     if (!el) return;
+    const choice = choiceFor(el);
+    if (choice) {
+      mark(choice.node);
+      report({
+        kind: "choice",
+        selector: cssPath(choice.node),
+        text: (choice.node.textContent || "").trim().slice(0, 400),
+        comment: choice.label.slice(0, MAX_COMMENT),
+      });
+      return;
+    }
     mark(el);
     report({
       kind: "element",
@@ -377,9 +406,21 @@ function shellPage(artifactName) {
   // next tick overwrites the failure message and the operator never sees it.
   let sendFailed = false;
 
-  window.addEventListener("message", (event) => {
+  window.addEventListener("message", async (event) => {
+    // Only the artifact frame may report selections. Without this any window
+    // that can reach this page could forge annotations — and a choice posts
+    // with no operator keystroke, so it is the message worth forging.
+    if (event.source !== frame.contentWindow) return;
     const data = event.data;
     if (!data || data.source !== "visual-review") return;
+    // A marked choice is already a complete annotation: send it now rather
+    // than making the operator retype what they just clicked (ADR-0004).
+    if (data.kind === "choice") {
+      const sent = await post({ kind: "choice", selector: data.selector,
+                                text: data.text, comment: data.comment });
+      if (sent) record("choice", data.comment);
+      return;
+    }
     selection = { kind: data.kind, selector: data.selector, text: data.text };
     targetEl.textContent = "[" + data.kind + "] " + (data.selector || "(document)")
       + (data.text ? " — “" + data.text.slice(0, 120) + "”" : "");
@@ -717,7 +758,7 @@ export function startServer(options) {
           sendJson(res, 400, { error: "invalid JSON body" });
           return;
         }
-        const kinds = new Set(["element", "text", "note", "complete"]);
+        const kinds = new Set(["element", "text", "choice", "note", "complete"]);
         if (
           payload === null
           || typeof payload !== "object"

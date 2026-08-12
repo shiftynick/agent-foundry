@@ -242,6 +242,8 @@ function runShellScript(html, fetchImpl) {
       setAttribute(name, value) { node[name] = value; },
       getAttribute(name) { return node[name]; },
     };
+    // The shell verifies message provenance against the artifact frame.
+    if (id === "artifact") node.contentWindow = { name: "artifact-frame" };
     return node;
   };
   const document = {
@@ -267,6 +269,96 @@ function runShellScript(html, fetchImpl) {
   return { el: (id) => document.getElementById(id), windowHandlers };
 }
 
+// The injected SDK runs inside the sandboxed iframe, so nothing in the server
+// tests exercises its click logic. This shim executes the real SDK source
+// against a fake element tree and captures what it posts to the parent.
+function runSdk(source) {
+  class FakeElement {
+    constructor(tag, id, attrs, text) {
+      this.tagName = tag.toUpperCase();
+      this.id = id;
+      this.attrs = attrs;
+      this.textContent = text;
+      this.nodeType = 1;
+      this.parentElement = null;
+      this.previousElementSibling = null;
+      this.style = {};
+    }
+    hasAttribute(name) { return Object.hasOwn(this.attrs, name); }
+    getAttribute(name) { return this.attrs[name]; }
+  }
+  const listeners = {};
+  const document = { addEventListener(type, fn) { listeners[type] = fn; } };
+  const posted = [];
+  const win = {
+    getSelection: () => "",
+    parent: { postMessage: (payload) => posted.push(payload) },
+  };
+  // eslint-disable-next-line no-new-func
+  new Function("document", "window", "Element", source)(document, win, FakeElement);
+  return {
+    posted,
+    click(target) {
+      listeners.click({ target, preventDefault() {}, stopPropagation() {} });
+    },
+    make: (tag, id, attrs, text) => new FakeElement(tag, id, attrs, text),
+  };
+}
+
+describe("injected SDK choice marker", () => {
+  let source;
+
+  before(async () => {
+    const fixture = makeFixture();
+    const handle = await startServer({ artifactPath: fixture.artifactPath });
+    source = await (await fetch(`${handle.url}__vr_sdk.js`)).text();
+    await handle.close();
+    rmSync(fixture.root, { recursive: true, force: true });
+  });
+
+  it("posts a choice using the marker's value as the label", () => {
+    const sdk = runSdk(source);
+    const opt = sdk.make("div", "q1-a", { "data-vr-choice": "Q1: ship it" }, "Yes, ship it");
+    sdk.click(opt);
+    assert.equal(sdk.posted.length, 1);
+    assert.equal(sdk.posted[0].kind, "choice");
+    assert.equal(sdk.posted[0].comment, "Q1: ship it");
+    assert.equal(sdk.posted[0].selector, "#q1-a");
+  });
+
+  it("finds the marker on an ancestor when an inner node is clicked", () => {
+    const sdk = runSdk(source);
+    const opt = sdk.make("div", "q2-b", { "data-vr-choice": "Q2: both" }, "Both");
+    const inner = sdk.make("strong", "", {}, "Both");
+    inner.parentElement = opt;
+    sdk.click(inner);
+    assert.equal(sdk.posted[0].kind, "choice");
+    assert.equal(sdk.posted[0].comment, "Q2: both");
+  });
+
+  it("falls back to the element's own text when the marker is empty", () => {
+    const sdk = runSdk(source);
+    sdk.click(sdk.make("div", "q3", { "data-vr-choice": "" }, "  Use the text  "));
+    assert.equal(sdk.posted[0].comment, "Use the text");
+  });
+
+  it("leaves unmarked elements on the ordinary annotation path", () => {
+    const sdk = runSdk(source);
+    sdk.click(sdk.make("p", "plain", {}, "no marker here"));
+    assert.equal(sdk.posted[0].kind, "element");
+    assert.equal(sdk.posted[0].comment, undefined);
+  });
+
+  it("caps a marker label at the annotation comment cap, not the text cap", () => {
+    const sdk = runSdk(source);
+    sdk.click(sdk.make("div", "mid", { "data-vr-choice": "L".repeat(900) }, "x"));
+    assert.equal(sdk.posted[0].comment.length, 900, "a 900-char label must survive");
+    const long = runSdk(source);
+    long.click(long.make("div", "long", { "data-vr-choice": "L".repeat(9000) }, "x"));
+    assert.equal(long.posted[0].comment.length, 8000);
+  });
+});
+
 describe("shell page behavior (executed, not pattern-matched)", () => {
   let html;
 
@@ -286,6 +378,7 @@ describe("shell page behavior (executed, not pattern-matched)", () => {
       return Promise.reject(new Error("server gone"));
     });
     dom.windowHandlers.message({
+      source: dom.el("artifact").contentWindow,
       data: { source: "visual-review", kind: "element", selector: "#x", text: "T" },
     });
     dom.el("comment").value = "must survive";
@@ -304,6 +397,7 @@ describe("shell page behavior (executed, not pattern-matched)", () => {
       return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
     });
     dom.windowHandlers.message({
+      source: dom.el("artifact").contentWindow,
       data: { source: "visual-review", kind: "element", selector: "#x", text: "T" },
     });
     dom.el("comment").value = "applied";
@@ -312,6 +406,121 @@ describe("shell page behavior (executed, not pattern-matched)", () => {
     assert.equal(dom.el("comment").value, "");
     assert.equal(dom.el("sent").children.length, 1);
     assert.equal(dom.el("send").disabled, true);
+  });
+
+  it("sends a marked choice immediately, with no typing and no Send press", async () => {
+    const posted = [];
+    const dom = runShellScript(html, (url, init) => {
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      posted.push(JSON.parse(init.body));
+      return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
+    });
+    await dom.windowHandlers.message({
+      source: dom.el("artifact").contentWindow,
+      data: {
+        source: "visual-review",
+        kind: "choice",
+        selector: "#q1-a",
+        text: "A. One scoped delta review",
+        comment: "A. One scoped delta review",
+      },
+    });
+    assert.equal(posted.length, 1);
+    assert.equal(posted[0].kind, "choice");
+    assert.equal(posted[0].comment, "A. One scoped delta review");
+    assert.equal(posted[0].selector, "#q1-a");
+    assert.equal(dom.el("sent").children.length, 1);
+    // The comment box is never involved: nothing typed, nothing cleared.
+    assert.equal(dom.el("comment").value, "");
+    assert.equal(dom.el("send").disabled, false);
+  });
+
+  it("ignores a forged choice from any window other than the artifact frame", async () => {
+    const posted = [];
+    const dom = runShellScript(html, (url, init) => {
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      posted.push(JSON.parse(init.body));
+      return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
+    });
+    await dom.windowHandlers.message({
+      source: { name: "some-other-window" },
+      data: {
+        source: "visual-review",
+        kind: "choice",
+        selector: "#q1-a",
+        text: "forged",
+        comment: "Q1: forged by another window",
+      },
+    });
+    assert.equal(posted.length, 0, "a message from a foreign window was accepted");
+    assert.equal(dom.el("sent").children.length, 0);
+  });
+
+  it("carries a long choice label up to the annotation comment cap", async () => {
+    const posted = [];
+    const dom = runShellScript(html, (url, init) => {
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      posted.push(JSON.parse(init.body));
+      return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
+    });
+    await dom.windowHandlers.message({
+      source: dom.el("artifact").contentWindow,
+      data: {
+        source: "visual-review",
+        kind: "choice",
+        selector: "#long",
+        text: "x",
+        comment: "L".repeat(5000),
+      },
+    });
+    assert.equal(posted.length, 1);
+    assert.equal(posted[0].comment.length, 5000, "label must not be cut below the 8000 cap");
+  });
+
+  it("keeps a failed choice out of the sent list, then retries without duplicating", async () => {
+    const attempts = [];
+    let failNext = true;
+    const dom = runShellScript(html, (url, init) => {
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      attempts.push(JSON.parse(init.body));
+      if (failNext) {
+        failNext = false;
+        return Promise.reject(new Error("server gone"));
+      }
+      return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
+    });
+    const message = {
+      source: dom.el("artifact").contentWindow,
+      data: {
+        source: "visual-review",
+        kind: "choice",
+        selector: "#q1-a",
+        text: "A",
+        comment: "Q1: option A",
+      },
+    };
+    await dom.windowHandlers.message(message);
+    assert.equal(dom.el("sent").children.length, 0, "a failed choice was logged as sent");
+    assert.match(dom.el("status").textContent, /send failed/u);
+
+    await dom.windowHandlers.message(message);
+    assert.equal(attempts.length, 2, "the retry did not reach the server");
+    assert.equal(dom.el("sent").children.length, 1, "the retry duplicated the entry");
+  });
+
+  it("leaves an ordinary element selection needing a typed comment", async () => {
+    const posted = [];
+    const dom = runShellScript(html, (url, init) => {
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      posted.push(JSON.parse(init.body));
+      return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
+    });
+    await dom.windowHandlers.message({
+      source: dom.el("artifact").contentWindow,
+      data: { source: "visual-review", kind: "element", selector: "#x", text: "T" },
+    });
+    assert.equal(posted.length, 0, "an unmarked element must not auto-send");
+    assert.equal(dom.el("send").disabled, false);
   });
 
   it("does not send an empty comment", async () => {
@@ -468,6 +677,63 @@ describe("visual-review server", () => {
       body: JSON.stringify({ kind: "note", comment: "same-origin ok" }),
     });
     assert.equal(loopback.status, 201);
+  });
+
+  it("accepts a choice annotation and caps its comment", async () => {
+    const drained = await (await fetch(`${handle.url}api/poll?after=0&timeout=0`)).json();
+    const lastSeq = drained.events.at(-1)?.seq ?? 0;
+    const posted = await fetch(`${handle.url}api/annotations`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        kind: "choice",
+        selector: "#q2-b",
+        text: "Option B",
+        comment: "B".repeat(9000),
+      }),
+    });
+    assert.equal(posted.status, 201);
+    const { events } = await (
+      await fetch(`${handle.url}api/poll?after=${lastSeq}&timeout=0`)
+    ).json();
+    const choice = events.find((e) => e.kind === "choice");
+    assert.ok(choice, "choice annotation was not queued");
+    assert.equal(choice.selector, "#q2-b");
+    assert.equal(choice.comment.length, 8000, "existing comment cap must still apply");
+  });
+
+  it("applies the same content-type and Origin gating to a choice", async () => {
+    const body = JSON.stringify({
+      kind: "choice", selector: "#q1-a", text: "A", comment: "Q1: option A",
+    });
+    const plain = await fetch(`${handle.url}api/annotations`, {
+      method: "POST", headers: { "content-type": "text/plain" }, body,
+    });
+    assert.equal(plain.status, 415, "a CORS-simple choice post must be refused");
+    const foreign = await fetch(`${handle.url}api/annotations`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://evil.example" },
+      body,
+    });
+    assert.equal(foreign.status, 403, "a foreign-origin choice must be refused");
+    const loopback = await fetch(`${handle.url}api/annotations`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: `http://127.0.0.1:${handle.port}`,
+      },
+      body,
+    });
+    assert.equal(loopback.status, 201);
+  });
+
+  it("keeps the SDK inert for artifacts without the choice marker", async () => {
+    const sdk = await rawGet(handle.port, "/__vr_sdk.js");
+    assert.match(sdk.body, /data-vr-choice/u);
+    // The marker is opt-in: the lookup returns null and the ordinary element
+    // path runs when no ancestor carries the attribute.
+    assert.match(sdk.body, /hasAttribute\("data-vr-choice"\)/u);
+    assert.match(sdk.body, /kind: "element"/u);
   });
 
   it("rejects malformed annotation payloads", async () => {

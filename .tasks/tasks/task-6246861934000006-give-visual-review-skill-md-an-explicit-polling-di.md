@@ -6,7 +6,7 @@ priority: p2
 tags: [area:tooling]
 blockedBy: []
 createdAt: "2026-08-12T00:41:14Z"
-updatedAt: "2026-08-12T01:13:27Z"
+updatedAt: "2026-08-12T01:13:48Z"
 ---
 
 <!-- task-tracker:description -->
@@ -93,3 +93,8 @@ Defect found by real use on 2026-08-11: the agent started the server, printed th
   output:
   | Shared skill content differs beyond harness paths: visual-review/scripts\visual-review.test.mjs
 - 2026-08-12T01:13:27Z — moved to done
+- 2026-08-12T01:13:45Z — note: correction: the exit-1 validate-foundry run recorded above was caused by the unmirrored visual-review.test.mjs belonging to in-progress task-6246861934000005, not by this task's change. The commit staged only SKILL.md in both trees plus scripts/validate-foundry.mjs, so HEAD is consistent. A green run on the committed content is recorded below.
+- 2026-08-12T01:13:48Z — run: node scripts/validate-foundry.mjs
+  started 2026-08-12T01:13:45Z, exit 0 in 2.9s
+  output:
+  | Agent Foundry structural validation: PASS
