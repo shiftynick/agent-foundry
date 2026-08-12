@@ -6,7 +6,7 @@ priority: p3
 tags: [area:tooling]
 blockedBy: []
 createdAt: "2026-08-12T00:41:14Z"
-updatedAt: "2026-08-12T01:23:01Z"
+updatedAt: "2026-08-12T01:24:17Z"
 ---
 
 <!-- task-tracker:description -->
@@ -337,3 +337,4 @@ Operator feedback from the first real visual-review session (2026-08-11): when a
   | }
 - 2026-08-12T01:23:01Z — note: cold review: rung 1, provider codex, 3 rounds. R1 STANDARDS high - the shell message handler auto-posted any message claiming kind 'choice' without checking its source, so any window reaching the page could forge operator decisions with no keystroke; this contradicted ADR-0004's own constraint that artifact markup cannot direct the agent. Fixed with an event.source === frame.contentWindow gate applied before the payload is inspected, covering every annotation kind. Stated honestly rather than overclaimed: the artifact frame is itself untrusted and can still self-report, because a parent cannot observe a click inside a sandboxed cross-origin frame; SKILL.md now says a choice proves the artifact reported a click, not that a human made one. R1 SPEC med - label truncated at 400 against an 8000 comment cap; now matches. R2: four evidence findings - choice-specific content-type/Origin gating, failed-choice-and-retry behavior, and test-bootstrap all now covered; the starter/-scan finding was discarded with citation because validate-foundry.mjs performs exactly that scan. R3: SPEC PASS, STANDARDS PASS.
 - 2026-08-12T01:23:01Z — moved to done
+- 2026-08-12T01:24:17Z — note: live browser confirmation on the final tree: one click on an option marked data-vr-choice produced exactly one queued annotation - kind choice, selector #yes, comment 'Yes - one click sent it' - with no typing and no Send press. An accidental click on the unmarked h1 in the same session set the selection but queued nothing, confirming the opt-in boundary end to end. This supersedes the earlier note that the browser check could not be completed.
