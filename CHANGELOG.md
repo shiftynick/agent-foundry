@@ -25,6 +25,24 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.31.0
+
+### Changed
+
+- Added the shared `browser-use` skill for evidence-driven testing and
+  debugging of local web apps through the browser-use CLI. It covers current
+  install and health checks, local or explicit-CDP browser connection,
+  cross-shell invocation, navigation and interaction helpers, screenshots,
+  bounded edit-test-retest loops, and browser-state safety boundaries.
+- The starter now installs and validates 16 synchronized shared skills per
+  harness.
+
+### Upgrade actions
+
+- Add `browser-use/SKILL.md` to both skill trees from the 0.31.0 starter.
+- If either target path already exists, reconcile the local copy with the
+  Foundry version; do not overwrite it silently.
+
 ## 0.30.4
 
 ### Changed
