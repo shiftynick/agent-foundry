@@ -20,7 +20,11 @@
 import { createServer } from "node:http";
 import { get as httpGet } from "node:http";
 import {
+  closeSync,
+  constants as fsConstants,
   existsSync,
+  fstatSync,
+  openSync,
   readFileSync,
   realpathSync,
   statSync,
@@ -105,7 +109,12 @@ export function hostAllowed(hostHeader, port) {
 // Returns the resolved path or null. Rejections are structural (traversal,
 // separators smuggled through encoding, null bytes) or link-aware (a symlink
 // that leaves the directory), so the check holds on Windows and POSIX alike.
-export function resolveStatic(artifactDir, urlPath) {
+//
+// artifactRoot MUST already be a real path, pinned once by the caller. An
+// earlier version resolved the root on every request, which defeated the whole
+// check: replacing the artifact directory itself with a link to somewhere else
+// moved the boundary along with the target, and every file "inside" it passed.
+export function resolveStatic(artifactRoot, urlPath) {
   if (typeof urlPath !== "string" || !urlPath.startsWith("/")) return null;
   let decoded;
   try {
@@ -116,22 +125,62 @@ export function resolveStatic(artifactDir, urlPath) {
   if (decoded.includes("\0") || decoded.includes("\\")) return null;
   const segments = decoded.split("/").filter((part) => part.length > 0);
   if (segments.some((part) => part === "." || part === "..")) return null;
-  const resolved = path.resolve(artifactDir, ...segments);
-  const rootPrefix = artifactDir.endsWith(path.sep)
-    ? artifactDir
-    : artifactDir + path.sep;
-  if (resolved !== artifactDir && !resolved.startsWith(rootPrefix)) return null;
+  const rootPrefix = artifactRoot.endsWith(path.sep)
+    ? artifactRoot
+    : artifactRoot + path.sep;
+  const resolved = path.resolve(artifactRoot, ...segments);
+  if (resolved !== artifactRoot && !resolved.startsWith(rootPrefix)) return null;
   let real;
   try {
     real = realpathSync(resolved);
   } catch {
     return null;
   }
-  const realRoot = realpathSync(artifactDir);
-  const realPrefix = realRoot.endsWith(path.sep) ? realRoot : realRoot + path.sep;
-  if (real !== realRoot && !real.startsWith(realPrefix)) return null;
-  if (!statSync(real).isFile()) return null;
+  // Compared against the pinned root, never a freshly resolved one.
+  if (real !== artifactRoot && !real.startsWith(rootPrefix)) return null;
+  try {
+    if (!statSync(real).isFile()) return null;
+  } catch {
+    return null;
+  }
   return real;
+}
+
+const DEFAULT_FILE_IO = { statSync, openSync, fstatSync, readFileSync, closeSync };
+
+// Read the primary artifact, or null if it does not resolve inside its own
+// directory. Validating a path and opening it are two lookups, so a swap can
+// land between them; Node exposes no openat, so this cannot be made atomic. It
+// is made *detectable* instead, in three layers:
+//   1. resolveStatic proves the path resolves inside the directory.
+//   2. O_NOFOLLOW refuses a final component that became a link (POSIX only;
+//      the flag is absent, and therefore 0, on Windows).
+//   3. The identity check compares what was validated against what was actually
+//      opened. This is the layer that covers an ancestor-directory swap and
+//      covers Windows; a mismatch refuses the request rather than serving it.
+// Residual, stated rather than hidden: a swap preserving device and inode is
+// undetectable, and the comparison is vacuous on filesystems reporting ino 0.
+// Anyone able to swap files in the artifact directory can already change what
+// the operator sees; this keeps that from becoming a read of a file outside it.
+// io is injectable so the mismatch branch is a real test gate.
+export function readConfinedArtifact(artifactRoot, artifactName, io = DEFAULT_FILE_IO) {
+  const resolved = resolveStatic(artifactRoot, `/${encodeURIComponent(artifactName)}`);
+  if (resolved === null) return null;
+  let validated;
+  let fd;
+  try {
+    validated = io.statSync(resolved);
+    fd = io.openSync(resolved, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+  } catch {
+    return null;
+  }
+  try {
+    const opened = io.fstatSync(fd);
+    if (opened.dev !== validated.dev || opened.ino !== validated.ino) return null;
+    return io.readFileSync(fd, "utf8");
+  } finally {
+    io.closeSync(fd);
+  }
 }
 
 function sendJson(res, status, payload) {
@@ -321,6 +370,12 @@ function shellPage(artifactName) {
   const sentEl = document.getElementById("sent");
   const frame = document.getElementById("artifact");
   let selection = null;
+  // The reload poll owns the connection status; a successful send must restore
+  // that message rather than assert "live" over a degraded watcher.
+  let reloadStatus = "connecting…";
+  // A send failure outranks the reload poll's status: without this the poll's
+  // next tick overwrites the failure message and the operator never sees it.
+  let sendFailed = false;
 
   window.addEventListener("message", (event) => {
     const data = event.data;
@@ -351,9 +406,11 @@ function shellPage(artifactName) {
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(String(response.status));
-      statusEl.textContent = "live";
+      sendFailed = false;
+      statusEl.textContent = reloadStatus;
       return true;
     } catch {
+      sendFailed = true;
       statusEl.textContent = "send failed — is the review server still running?";
       return false;
     }
@@ -398,15 +455,17 @@ function shellPage(artifactName) {
         });
         if (!response.ok) throw new Error(String(response.status));
         const data = await response.json();
-        statusEl.textContent = data.watching
+        reloadStatus = data.watching
           ? "live"
           : "live reload unavailable — refresh manually after edits";
+        if (!sendFailed) statusEl.textContent = reloadStatus;
         if (data.version > version) {
           if (version > 0) frame.src = "/artifact?v=" + data.version;
           version = data.version;
         }
       } catch {
-        statusEl.textContent = "server stopped";
+        reloadStatus = "server stopped";
+        if (!sendFailed) statusEl.textContent = reloadStatus;
         await new Promise((r) => setTimeout(r, 2000));
       }
     }
@@ -469,7 +528,10 @@ function createQueue() {
   return { push, wait, eventsAfter, close };
 }
 
-export function createReloadSignal(artifactDir) {
+// watchFactory is injectable so a test can drive the later-error path: a real
+// fs.watch cannot be made to emit "error" on demand, and an untestable
+// transition is one a refactor can silently delete.
+export function createReloadSignal(artifactDir, watchFactory = watch) {
   let version = 1;
   let watching = false;
   const waiters = new Set();
@@ -489,7 +551,7 @@ export function createReloadSignal(artifactDir) {
   // reaches /api/reload and the UI, which tells the operator to refresh
   // manually instead of claiming a live view.
   try {
-    watcher = watch(artifactDir, () => {
+    watcher = watchFactory(artifactDir, () => {
       // fs.watch fires in bursts per save; collapse them into one reload.
       clearTimeout(debounce);
       debounce = setTimeout(bump, 100);
@@ -540,22 +602,27 @@ export function startServer(options) {
   }
   const artifactDir = path.dirname(artifactPath);
   const artifactName = path.basename(artifactPath);
+  // Pin the real root ONCE. Every later containment decision is made against
+  // this value, so replacing the directory with a link afterwards moves the
+  // files out of bounds instead of moving the boundary with them.
+  const artifactRoot = realpathSync(artifactDir);
   // The artifact itself gets the same link-aware confinement as its assets: a
   // primary file that is (or later becomes) a symlink out of its directory
   // must not be followed.
   const confineArtifact = () =>
-    resolveStatic(artifactDir, `/${encodeURIComponent(artifactName)}`);
+    resolveStatic(artifactRoot, `/${encodeURIComponent(artifactName)}`);
   if (confineArtifact() === null) {
     throw new Error(
       `Artifact must be a regular file resolving inside its own directory; a link that leaves it is refused: ${options.artifactPath}`,
     );
   }
+  const readArtifactConfined = () => readConfinedArtifact(artifactRoot, artifactName);
   const defaultPollMs = clampTimeout(
     options.pollTimeoutMs,
     DEFAULT_POLL_TIMEOUT_MS,
   );
   const queue = createQueue();
-  const reload = createReloadSignal(artifactDir);
+  const reload = createReloadSignal(artifactRoot);
 
   const server = createServer(async (req, res) => {
     // address() is null once close() starts; refuse the racing request.
@@ -583,12 +650,12 @@ export function startServer(options) {
         return;
       }
       if (route === "GET /artifact") {
-        const artifactFile = confineArtifact();
-        if (artifactFile === null) {
+        const artifactHtml = readArtifactConfined();
+        if (artifactHtml === null) {
           sendJson(res, 403, { error: "artifact no longer resolves inside its directory" });
           return;
         }
-        sendHtml(res, 200, injectSdk(readFileSync(artifactFile, "utf8")));
+        sendHtml(res, 200, injectSdk(artifactHtml));
         return;
       }
       if (route === `GET ${SDK_ROUTE}`) {
@@ -670,7 +737,7 @@ export function startServer(options) {
         return;
       }
       if (req.method === "GET") {
-        const file = resolveStatic(artifactDir, url.pathname);
+        const file = resolveStatic(artifactRoot, url.pathname);
         if (!file) {
           sendJson(res, 404, { error: "not found" });
           return;

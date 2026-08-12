@@ -1,7 +1,15 @@
 import { after, before, describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
 import { request } from "node:http";
-import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -9,6 +17,7 @@ import {
   createReloadSignal,
   hostAllowed,
   injectSdk,
+  readConfinedArtifact,
   resolveStatic,
   startServer,
 } from "./visual-review.mjs";
@@ -107,7 +116,8 @@ describe("hostAllowed", () => {
 });
 
 describe("resolveStatic", () => {
-  const { root, artifactDir } = makeFixture();
+  const { root, artifactDir: rawDir } = makeFixture();
+  const artifactDir = realpathSync(rawDir);
   after(() => rmSync(root, { recursive: true, force: true }));
 
   it("serves a file inside the artifact directory", () => {
@@ -132,6 +142,188 @@ describe("resolveStatic", () => {
       return;
     }
     assert.equal(resolveStatic(artifactDir, "/escape.txt"), null);
+  });
+});
+
+describe("readConfinedArtifact", () => {
+  const { root, artifactDir: rawDir } = makeFixture();
+  const artifactDir = realpathSync(rawDir);
+  after(() => rmSync(root, { recursive: true, force: true }));
+
+  it("reads an artifact that resolves inside its directory", () => {
+    assert.match(readConfinedArtifact(artifactDir, "page.html"), /Hello/u);
+  });
+
+  it("returns null when the file swapped between validation and open", () => {
+    // The race cannot be produced deterministically against the real
+    // filesystem, so the io seam reports a different identity from the one
+    // that was validated — exactly what a mid-flight swap looks like.
+    let call = 0;
+    const io = {
+      statSync: () => ({ dev: 1, ino: 100 }),
+      openSync: () => 42,
+      fstatSync: () => ({ dev: 1, ino: 999 }),
+      readFileSync: () => { call += 1; return "SHOULD NOT BE READ"; },
+      closeSync: () => {},
+    };
+    assert.equal(readConfinedArtifact(artifactDir, "page.html", io), null);
+    assert.equal(call, 0);
+  });
+
+  it("closes the descriptor even when identity fails", () => {
+    let closed = 0;
+    const io = {
+      statSync: () => ({ dev: 1, ino: 100 }),
+      openSync: () => 42,
+      fstatSync: () => ({ dev: 2, ino: 100 }),
+      readFileSync: () => "x",
+      closeSync: () => { closed += 1; },
+    };
+    readConfinedArtifact(artifactDir, "page.html", io);
+    assert.equal(closed, 1);
+  });
+
+  it("returns null when the artifact leaves its directory", () => {
+    assert.equal(readConfinedArtifact(artifactDir, "../outside-secret.txt"), null);
+  });
+
+  it("refuses reads after the artifact directory itself becomes a link out", (t) => {
+    // The ancestor swap: replace the whole directory with a link elsewhere.
+    // A root resolved per request would follow it and call the outside file
+    // "inside"; a root pinned once puts that file out of bounds.
+    const swapRoot = mkdtempSync(join(tmpdir(), "vr-ancestor-"));
+    const realDir = join(swapRoot, "real");
+    const elsewhere = join(swapRoot, "elsewhere");
+    mkdirSync(realDir);
+    mkdirSync(elsewhere);
+    writeFileSync(join(realDir, "page.html"), ARTIFACT_HTML);
+    writeFileSync(join(elsewhere, "page.html"), "<h1>OUTSIDE THE BOUNDARY</h1>");
+    const pinned = realpathSync(realDir);
+    assert.match(readConfinedArtifact(pinned, "page.html"), /Hello/u);
+    rmSync(realDir, { recursive: true, force: true });
+    try {
+      symlinkSync(elsewhere, realDir, "junction");
+    } catch {
+      rmSync(swapRoot, { recursive: true, force: true });
+      t.skip("cannot create directory links here");
+      return;
+    }
+    try {
+      assert.equal(readConfinedArtifact(pinned, "page.html"), null);
+    } finally {
+      rmSync(swapRoot, { recursive: true, force: true });
+    }
+  });
+});
+
+// The shell page's behavior used to be asserted by searching its HTML for
+// strings, which passes even if the handlers never run. This shim is the
+// smallest thing that executes the real script: enough DOM to satisfy it,
+// built from node: built-ins only, with fetch under the test's control.
+function runShellScript(html, fetchImpl) {
+  const script = html.slice(
+    html.lastIndexOf("<script>") + "<script>".length,
+    html.lastIndexOf("</script>"),
+  );
+  const made = new Map();
+  const element = (id) => {
+    const node = {
+      id,
+      textContent: "",
+      value: "",
+      disabled: false,
+      children: [],
+      className: "",
+      handlers: {},
+      addEventListener(type, fn) { node.handlers[type] = fn; },
+      appendChild(child) { node.children.push(child); return child; },
+      prepend(child) { node.children.unshift(child); return child; },
+      focus() {},
+      setAttribute(name, value) { node[name] = value; },
+      getAttribute(name) { return node[name]; },
+    };
+    return node;
+  };
+  const document = {
+    getElementById(id) {
+      if (!made.has(id)) made.set(id, element(id));
+      return made.get(id);
+    },
+    createElement: () => element("created"),
+    createTextNode: (text) => ({ textContent: text }),
+    querySelectorAll: () => [],
+  };
+  const windowHandlers = {};
+  const win = {
+    addEventListener(type, fn) { windowHandlers[type] = fn; },
+  };
+  // Never fires: watchReload's retry sleep must not resume and overwrite state
+  // in the middle of an assertion.
+  const setTimeoutStub = () => 0;
+  // eslint-disable-next-line no-new-func
+  new Function("document", "window", "fetch", "setTimeout", script)(
+    document, win, fetchImpl, setTimeoutStub,
+  );
+  return { el: (id) => document.getElementById(id), windowHandlers };
+}
+
+describe("shell page behavior (executed, not pattern-matched)", () => {
+  let html;
+
+  before(async () => {
+    const fixture = makeFixture();
+    const handle = await startServer({ artifactPath: fixture.artifactPath });
+    html = (await (await fetch(handle.url)).text());
+    await handle.close();
+    rmSync(fixture.root, { recursive: true, force: true });
+  });
+
+  it("keeps the typed comment and shows the failure when a send fails", async () => {
+    const calls = [];
+    const dom = runShellScript(html, (url, init) => {
+      calls.push(String(url));
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      return Promise.reject(new Error("server gone"));
+    });
+    dom.windowHandlers.message({
+      data: { source: "visual-review", kind: "element", selector: "#x", text: "T" },
+    });
+    dom.el("comment").value = "must survive";
+    await dom.el("send").handlers.click();
+
+    assert.equal(dom.el("comment").value, "must survive", "typed comment was discarded");
+    assert.equal(dom.el("sent").children.length, 0, "a failed send was logged as sent");
+    assert.match(dom.el("status").textContent, /send failed/u);
+    assert.equal(dom.el("send").disabled, false, "selection was cleared on failure");
+    assert.ok(calls.some((u) => u.includes("/api/annotations")));
+  });
+
+  it("clears the comment and logs the entry when a send succeeds", async () => {
+    const dom = runShellScript(html, (url) => {
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
+    });
+    dom.windowHandlers.message({
+      data: { source: "visual-review", kind: "element", selector: "#x", text: "T" },
+    });
+    dom.el("comment").value = "applied";
+    await dom.el("send").handlers.click();
+
+    assert.equal(dom.el("comment").value, "");
+    assert.equal(dom.el("sent").children.length, 1);
+    assert.equal(dom.el("send").disabled, true);
+  });
+
+  it("does not send an empty comment", async () => {
+    let posted = false;
+    const dom = runShellScript(html, (url) => {
+      if (String(url).includes("/api/reload")) return new Promise(() => {});
+      posted = true;
+      return Promise.resolve({ ok: true, status: 201, json: async () => ({ seq: 1 }) });
+    });
+    dom.el("comment").value = "   ";
+    await dom.el("note").handlers.click();
+    assert.equal(posted, false);
   });
 });
 
@@ -317,6 +509,22 @@ describe("visual-review server", () => {
       assert.equal(await dead.wait(dead.current(), 50), dead.current());
     } finally {
       dead.close();
+    }
+  });
+
+  it("stops claiming to watch after the watcher errors", () => {
+    // A real fs.watch cannot be made to emit "error" on demand, so the watch
+    // factory is injected here; without this the transition is untestable and
+    // a refactor could delete it silently.
+    const fake = new EventEmitter();
+    fake.close = () => {};
+    const signal = createReloadSignal(fixture.artifactDir, () => fake);
+    try {
+      assert.equal(signal.watching(), true);
+      fake.emit("error", new Error("watch died"));
+      assert.equal(signal.watching(), false);
+    } finally {
+      signal.close();
     }
   });
 
