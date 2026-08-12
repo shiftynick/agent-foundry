@@ -1,13 +1,11 @@
 ---
 name: efficient-orchestration
 description: >-
-  Run the top-tier model as orchestrator — decomposition, architecture,
-  synthesis, judgment — while cheaper workhorse models do bounded token-heavy
-  research, coding, and testing slices. Use on "efficient mode", "efficient
-  orchestration", "save tokens on this big task", "use lesser models",
-  "liberal use of subagents", or any codebase-heavy work where cost matters.
-  Add "with <counterpart CLI>" to route work slices to the other model family
-  via `agent-headless`.
+  Use when the operator requests efficient mode, lower-cost models, liberal
+  subagent use, or token savings on codebase-heavy work that can be split into
+  bounded research, coding, or testing tasks. Also use when the operator asks
+  to coordinate multiple tasks through another model family. Use
+  agent-headless instead for one direct provider invocation.
 ---
 
 # Efficient Orchestration

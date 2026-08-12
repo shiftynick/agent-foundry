@@ -1,13 +1,9 @@
 ---
 name: visual-review
 description: >-
-  Run an operator feedback loop on a rendered HTML artifact: serve it on
-  loopback, let the operator click elements and select text to annotate in a
-  browser, and receive the annotations through a long-poll endpoint. Use when
-  the operator asks to "review this page/mockup/report visually", "let me
-  annotate the HTML", or when implementation of an HTML artifact needs live
-  human feedback. Not a review rung: cold review placement stays with
-  docs/SDLC.md and execute-task.
+  Use when the operator wants to review or annotate a rendered HTML artifact
+  in a browser, or when HTML implementation needs live human feedback. Do not
+  use it as a cold-review rung.
 ---
 
 # Visual Review

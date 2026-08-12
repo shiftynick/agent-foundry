@@ -1,10 +1,9 @@
 ---
 name: browser-use
 description: >-
-  Test and debug a locally running web app through the browser-use CLI: verify
-  the tool, connect a browser, navigate, inspect, click, type, wait, capture
-  screenshots, and repeat a bounded edit-test loop. Use when browser-use is
-  requested or is the available browser automation surface.
+  Use when the operator requests the browser-use CLI, or when it is the
+  selected browser automation surface for testing or debugging a locally
+  running web app.
 ---
 
 # Browser Use

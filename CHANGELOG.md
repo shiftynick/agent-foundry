@@ -21,9 +21,37 @@ Each release has:
 - **Breaking** — present only when an upgrade can fail or silently change
   behavior without action.
 
-Versioning is semantic with respect to *installed projects*: `major` when an
-upgrade requires manual reconciliation to stay correct, `minor` for new
-capability that lands cleanly, `patch` for fixes with no upgrade action.
+Versioning is semantic with respect to *installed projects*: `major` when a
+stock installed project needs a project-specific decision to upgrade
+correctly, `minor` for new capability or changed installed behavior with
+concrete upgrade actions, and `patch` for fixes that need no installed-payload
+reconciliation. Reconciling a locally customized mold does not by itself make
+an otherwise compatible release breaking.
+
+## 0.33.0
+
+### Changed
+
+- Reworked the frontmatter descriptions for all seventeen shared skills so selection
+  depends on operator requests and observable repository conditions. Removed
+  procedure, file-format, transport, and persistence details that did not help
+  an agent decide when to load a skill. Preserved exclusions where related
+  skills could otherwise overlap.
+- Clarified release classification so locally customized mold reconciliation
+  does not make an otherwise compatible installed-behavior change breaking.
+
+### Upgrade actions
+
+- Replace `SKILL.md` in both harness trees for `adr`,
+  `agent-foundry-feedback`, `agent-headless`, `attack-the-board`,
+  `browser-use`, `codebase-audit`, `diagnosing-bugs`,
+  `efficient-orchestration`, `execute-task`, `grill-me`, `handoff-writer`,
+  `plan-milestone`, `retrospective`, `task-tracker`, `the-fool`,
+  `upgrade-agent-foundry`, and `visual-review`. If a project changed one of
+  these files locally, reconcile only the frontmatter description and keep
+  the project's skill body.
+- Verify with `node .agent-foundry/check-skill-sync.mjs` and
+  `node .agent-foundry/run-checks.mjs`.
 
 ## 0.32.0
 
