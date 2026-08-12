@@ -335,7 +335,14 @@ export function validateFoundry() {
     path.join(agentSkillsRoot, "execute-task", "references", "cold-review.md"),
     "utf8",
   );
-  for (const required of ["git diff --binary HEAD", "git ls-files --others --exclude-standard"]) {
+  for (const required of [
+    "git --literal-pathspecs -c core.quotePath=false -c diff.noprefix=false -c diff.mnemonicPrefix=false -c diff.renames=true diff --binary",
+    "git -c core.quotePath=false -c status.renames=true status --short --untracked-files=all",
+    "versioned `scope.json`",
+    "scope.references",
+    "Never copy credentials",
+    "Use Git's `--output` option",
+  ]) {
     if (!coldReview.includes(required)) throw new Error(`Cold-review packet contract lost required command: ${required}`);
   }
   const operatorSkillContracts = [

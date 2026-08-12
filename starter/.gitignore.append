@@ -9,3 +9,4 @@
 .tasks/tasks/.*.bak
 .tasks/archive/.*.tmp
 .tasks/archive/.*.bak
+.tasks/review-packets/

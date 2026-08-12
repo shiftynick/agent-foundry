@@ -28,6 +28,77 @@ concrete upgrade actions, and `patch` for fixes that need no installed-payload
 reconciliation. Reconciling a locally customized mold does not by itself make
 an otherwise compatible release breaking.
 
+## 0.35.0
+
+### Breaking
+
+Existing cold-review packet directories do not pass the new schema and content
+gate. Reinitialize each active packet and rebuild its scope, manifest, diff,
+copies, and references with the 0.35.0 commands below.
+
+### Changed
+
+- `review-packet.mjs` now creates and requires schema-versioned `scope.json`.
+  The packet check classifies every dirty status path as included or explicitly
+  excluded before a cold-review provider runs and compares the recorded status
+  with a fresh Git capture. It rejects unknown schema keys
+  and ignores packet artifacts only under the active `.tasks/review-packets/`
+  directory.
+- Included tracked content must be byte-identical to a fresh scoped Git diff.
+  Included untracked files must have byte-identical copies under the packet's
+  `files/` directory; UTF-8 and base64-encoded binary content are supported.
+  Exclusions require a reason. The reviewer prompt carries every copied file
+  and exclusion reason. The redundant `untracked.txt` packet file is removed.
+- Packet manifests record an immutable task base revision, so committed task
+  work remains reviewable with `--base-ref <task-base-commit>`. Rename source
+  paths, unchanged byte-identical authority references, secret-safe exclusions,
+  deterministic Git prefix configuration, pre-first-commit projects, and a
+  1,000,000-byte pre-dispatch content limit are part of the checked contract.
+- Packet manifests are schema-versioned. Explicit base revision names resolve
+  to commit IDs at initialization, and the gate refuses any path changed from
+  that commit that is missing from the scope. Common secret-bearing path names
+  and forged packet-section markers are rejected or neutralized before dispatch.
+  Changed tracked paths may also carry a byte-identical UTF-8 `fullContentFile`
+  when the reviewer needs unchanged surrounding source context.
+- Base change enumeration uses NUL-delimited Git output, and rename detection is
+  forced for both enumeration and scoped export. This covers committed renames
+  and paths containing spaces without depending on repository configuration.
+- The gate compares `diff.patch` as raw bytes. Non-UTF-8 diffs are rendered as
+  base64 in reviewer prompts rather than being lossily decoded.
+- The checker refuses `baseRef: null` after a repository has `HEAD`, requires
+  untracked inclusions to use copied-file content, and refuses secret-bearing
+  rename sources before they can enter a diff prompt.
+
+### Upgrade actions
+
+- Replace `.agent-foundry/review-packet.mjs` and
+  `.agent-foundry/review-workflows.test.mjs` from the 0.35.0 starter. If either
+  file was locally modified, reconcile its behavior and record the result in
+  `.agent-foundry/LOCAL-CHANGES.md` instead of overwriting it.
+- Reconcile both `execute-task/references/cold-review.md` files. For every new
+  packet, capture full short status with untracked files, fill schema-versioned
+  `scope.json`, export a scoped tracked diff with the documented Git flags, and
+  copy included untracked files under the packet's `files/` directory. Use
+  base64 encoding for binary copies. Keep unrelated dirty paths as explicit
+  exclusions with reasons.
+- Merge `.tasks/review-packets/` into `.gitignore` so active and prior review
+  artifacts stay outside the dirty-work classification surface.
+- Build packets before committing task work. If work is already committed, pass
+  the task base commit with `--base-ref`. Add unchanged authorities through
+  `scope.references`; never copy secrets into packet files or prompts.
+- For a rename, export both its destination and Git-reported source path while
+  classifying only the destination in `scope.json`.
+- Existing packet builders must add `scope.json`; `review-packet.mjs init`
+  writes a version 1 empty stub and no longer writes `untracked.txt`. A packet
+  does not pass until every non-packet status path is classified exactly once.
+- Run `review-packet.mjs init` only on a fresh packet directory. It now refuses
+  to reuse any existing stub instead of silently retaining partial packet data.
+- Existing packet manifests must add `schemaVersion: 1` and retain only the
+  supported `taskId`, `round`, `baseRef`, and `createdBy` fields. Prefer a fresh
+  `review-packet.mjs init` directory over hand-migrating an older packet.
+- Verify with `node .agent-foundry/check-skill-sync.mjs` and
+  `node .agent-foundry/run-checks.mjs`.
+
 ## 0.34.0
 
 ### Changed
