@@ -25,6 +25,45 @@ Versioning is semantic with respect to *installed projects*: `major` when an
 upgrade requires manual reconciliation to stay correct, `minor` for new
 capability that lands cleanly, `patch` for fixes with no upgrade action.
 
+## 0.31.0
+
+### Changed
+
+- New sixteenth shared skill `visual-review` in both harness trees: a
+  zero-dependency loopback server (`scripts/visual-review.mjs`) that serves
+  one HTML artifact for operator annotation in a browser (element click and
+  text selection, page notes, a completion event) and delivers the feedback
+  to the agent through a long-poll endpoint, with `fs.watch` live reload and
+  a one-shot `poll` CLI. Decision record: the Foundry repository's ADR-0003
+  (in-house rebuild of the core loop; whiteboard/layout-audit out of scope).
+  It is an operator feedback loop during implementation and never
+  substitutes for any `docs/SDLC.md` cold-review rung.
+- Security boundaries enforced by the tool: binds `127.0.0.1` only,
+  Host-header validation, link-aware artifact-directory confinement
+  (including the primary artifact file), sandboxed iframe without
+  `allow-same-origin`, a Content-Security-Policy confining requests and
+  iframe navigation to the review server, JSON-plus-loopback-Origin
+  annotation acceptance, zero outbound network calls, and no browser
+  auto-open. Ships `visual-review.test.mjs` in the payload, so installed
+  projects' `run-checks.mjs` exercises those boundaries.
+- `scripts/validate-foundry.mjs` and `scripts/test-bootstrap.mjs` now expect
+  sixteen shared skills; prose counts and skill tables updated in
+  `CLAUDE.md`, `README.md`, `AGENTS.md`, `AGENTS.md.template`, and both
+  skill-tree `README.md` files.
+
+### Upgrade actions
+
+- Copy the new `visual-review` skill directory into both trees:
+  `.claude/skills/visual-review/` and `.agents/skills/visual-review/`
+  (`SKILL.md`, `scripts/visual-review.mjs`, `scripts/visual-review.test.mjs`).
+  These are mold files; if a project has created its own `visual-review`
+  skill, reconcile names before copying.
+- Add the `visual-review` row to both skill-tree `README.md` tables and to
+  the project-local skills table in the installed `AGENTS.md`, and update
+  its "fifteen shared workflows" sentence to sixteen.
+- Verify with `node .agent-foundry/check-skill-sync.mjs` (expect
+  `PASS (16 shared skills)`) and `node .agent-foundry/run-checks.mjs`.
+
 ## 0.30.3
 
 ### Changed

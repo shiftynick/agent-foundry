@@ -22,6 +22,7 @@ workflows installed by Agent Foundry.
 | `agent-headless` | Unified safe Claude, Codex, and operator-selected Cursor invocation. |
 | `upgrade-agent-foundry` | Guided in-place upgrade of the installed workflow kit. |
 | `agent-foundry-feedback` | Package kit defects and upstream-worthy fixes into feedback packets. |
+| `visual-review` | Loopback operator annotation loop on a rendered HTML artifact. |
 
 ## Rules
 

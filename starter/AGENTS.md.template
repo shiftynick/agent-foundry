@@ -135,8 +135,9 @@ Never report a planned or unavailable command as passing.
 | `agent-headless` | Unified safe Claude, Codex, and operator-selected Cursor invocation. |
 | `upgrade-agent-foundry` | Guided in-place upgrade of the installed workflow kit. |
 | `agent-foundry-feedback` | Package kit defects and upstream-worthy fixes into feedback packets. |
+| `visual-review` | Loopback operator annotation loop on a rendered HTML artifact. |
 
-The fifteen shared workflows are mirrored between `.agents/skills/` and
+The sixteen shared workflows are mirrored between `.agents/skills/` and
 `.claude/skills/`. Preserve their behavior while retaining harness-specific
 paths. Edit both copies in the same commit and verify
 with `node .agent-foundry/check-skill-sync.mjs`.
