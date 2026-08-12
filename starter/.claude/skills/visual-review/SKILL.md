@@ -30,19 +30,35 @@ substitutes for a SPEC or STANDARDS review; `docs/SDLC.md` owns that model.
 3. The operator clicks an element or selects text in the artifact, writes a
    comment, and sends it. "Send page note" attaches no target; "Finish
    review" sends a `complete` event.
-4. Poll for annotations. Each event has a monotonic `seq`; pass the highest
-   seq you have processed as `--after` so nothing is delivered twice:
+4. **Poll immediately, and keep polling.** Printing the URL is not the end of
+   your turn — it is the start of the loop. Each event has a monotonic `seq`;
+   pass the highest seq you have processed as `--after` so nothing is
+   delivered twice:
 
    ```bash
    node .claude/skills/visual-review/scripts/visual-review.mjs poll --url http://127.0.0.1:PORT --after 0
    ```
 
    The poll parks up to 25 seconds (`--timeout-ms` to change, max 60000) and
-   prints `{"events":[...]}`. An empty batch means no new feedback yet.
+   then returns whatever arrived. **An empty batch means the operator has not
+   finished looking yet — it never means the review is over.** Poll again.
+   The only signal that ends the loop is a `complete` event, or the operator
+   telling you to stop.
 5. Apply the feedback to the artifact. The server watches the artifact
    directory with `fs.watch` and the operator's page reloads automatically.
 6. Repeat poll → edit → reload until a `complete` event arrives, then stop
    the server by ending its process.
+
+Nothing pushes annotations to you. An operator who annotates while you are not
+polling is talking into a queue nobody reads, and they will reasonably assume
+you received it. Stopping after one empty batch is the failure this step
+exists to prevent.
+
+While parked on a poll, apply the feedback you already have rather than
+waiting idle. If you must hand the turn back to the operator before a
+`complete` event, say plainly that you are no longer polling and what they
+should do to resume you — do not leave the server running behind a silent
+agent.
 
 Annotation kinds: `element` (CSS selector plus visible text), `text`
 (selected text plus nearest selector), `note` (page-level), `complete`

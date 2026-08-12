@@ -139,6 +139,24 @@ export function validateFoundry() {
       }
     }
   }
+  // The polling discipline is the whole point of the skill's loop section: an
+  // agent that prints the URL and stops leaves the operator annotating into a
+  // queue nobody reads. Deleting these sentences must fail the build.
+  for (const tree of [".agents", ".claude"]) {
+    const visualReview = readFileSync(
+      path.join(starterRoot, tree, "skills", "visual-review", "SKILL.md"),
+      "utf8",
+    );
+    for (const anchor of [
+      "Poll immediately, and keep polling",
+      "never means the review is over",
+      "no longer polling",
+    ]) {
+      if (!visualReview.includes(anchor)) {
+        throw new Error(`${tree} visual-review lost its polling-discipline contract: ${anchor}`);
+      }
+    }
+  }
   requireFile(".agent-foundry/agent-headless/source/0001-feat-harden-unified-runner-for-Node-20-consumers.patch.b64");
   requireFile(".agent-foundry/agent-headless/source/0002-fix-tighten-least-privilege-and-cancellation-contrac.patch.b64");
   requireFile(".agents/skills/execute-task/references/cold-review.md");
