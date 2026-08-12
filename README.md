@@ -127,7 +127,7 @@ agent-foundry/
 ## Maintaining the foundry
 
 1. Edit the canonical files under `starter/`.
-2. Keep the seventeen shared workflow skills semantically synchronized between
+2. Keep the eighteen shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
 3. Provider mechanics belong in the shared `agent-headless` skill and bundled
    runner; do not reintroduce tree-exclusive provider aliases.

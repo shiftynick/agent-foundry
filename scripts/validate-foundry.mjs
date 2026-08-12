@@ -55,6 +55,27 @@ export function validateFoundry() {
       throw new Error(`Installed operator communication contract lost: ${required}`);
     }
   }
+  for (const redundant of [
+    "## Project-local skills",
+    "node .agent-foundry/project-status.mjs",
+    "node .agent-foundry/project-overview.mjs",
+  ]) {
+    if (installedAgents.includes(redundant)) {
+      throw new Error(`Installed AGENTS.md regained skill-owned guidance: ${redundant}`);
+    }
+  }
+  const installedClaude = readFileSync(
+    path.join(starterRoot, "CLAUDE.md.template"),
+    "utf8",
+  );
+  for (const redundant of [
+    "node .agent-foundry/project-status.mjs",
+    "node .agent-foundry/project-overview.mjs",
+  ]) {
+    if (installedClaude.includes(redundant)) {
+      throw new Error(`Installed CLAUDE.md regained skill-owned guidance: ${redundant}`);
+    }
+  }
 
   const maintainedRoots = [path.join(foundryRoot, "scripts"), starterRoot];
   const maintainedFiles = maintainedRoots.flatMap((root) => listFiles(root));
@@ -87,9 +108,9 @@ export function validateFoundry() {
     .filter((file) => path.basename(file) === "SKILL.md");
   const claudeSkillFiles = listFiles(claudeSkillsRoot)
     .filter((file) => path.basename(file) === "SKILL.md");
-  if (agentSkillFiles.length !== 17 || claudeSkillFiles.length !== 17) {
+  if (agentSkillFiles.length !== 18 || claudeSkillFiles.length !== 18) {
     throw new Error(
-      "Expected 17 shared skills per harness; "
+      "Expected 18 shared skills per harness; "
       + `found agents=${agentSkillFiles.length}, `
       + `claude=${claudeSkillFiles.length}.`,
     );
@@ -117,6 +138,9 @@ export function validateFoundry() {
   requireFile(".agent-foundry/project-status.test.mjs");
   requireFile(".agent-foundry/project-overview.mjs");
   requireFile(".agent-foundry/project-overview.test.mjs");
+  requireFile(".agent-foundry/README.md");
+  requireFile(".agents/skills/project-orientation/SKILL.md");
+  requireFile(".claude/skills/project-orientation/SKILL.md");
   requireFile(".agent-foundry/review-packet.mjs");
   requireFile(".agent-foundry/cold-review.mjs");
   requireFile(".agent-foundry/delegate-work.mjs");
@@ -184,12 +208,47 @@ export function validateFoundry() {
     "grill-me",
     "handoff-writer",
     "plan-milestone",
+    "project-orientation",
     "retrospective",
     "task-tracker",
     "the-fool",
     "upgrade-agent-foundry",
     "visual-review",
   ];
+
+  for (const tree of [".agents", ".claude"]) {
+    const projectOrientation = readFileSync(
+      path.join(starterRoot, tree, "skills", "project-orientation", "SKILL.md"),
+      "utf8",
+    );
+    for (const anchor of [
+      "node .agent-foundry/project-status.mjs",
+      "node .agent-foundry/project-status.mjs --json",
+      "node .agent-foundry/project-status.mjs --mark-seen",
+      "node .agent-foundry/project-overview.mjs",
+      "Use `--stdout`",
+      "Use task-tracker instead",
+      "Do not mark a cold-start",
+    ]) {
+      if (!projectOrientation.includes(anchor)) {
+        throw new Error(`${tree} project-orientation lost its selection or command contract: ${anchor}`);
+      }
+    }
+  }
+
+  const installedFoundryReadme = readFileSync(
+    path.join(starterRoot, ".agent-foundry", "README.md"),
+    "utf8",
+  );
+  for (const anchor of [
+    "## Project-status JSON contract",
+    "Presentation code should consume this projection",
+    "Use `--stdout`",
+  ]) {
+    if (!installedFoundryReadme.includes(anchor)) {
+      throw new Error(`Installed Foundry README lost project-orientation detail: ${anchor}`);
+    }
+  }
 
   const browserUseSkill = readFileSync(
     path.join(agentSkillsRoot, "browser-use", "SKILL.md"),

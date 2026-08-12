@@ -28,6 +28,38 @@ concrete upgrade actions, and `patch` for fixes that need no installed-payload
 reconciliation. Reconciling a locally customized mold does not by itself make
 an otherwise compatible release breaking.
 
+## 0.34.0
+
+### Changed
+
+- Added the shared `project-orientation` skill in both harness trees. It
+  selects current-status, since-last-look, generated-data, and visual-overview
+  requests and keeps the status projection separate from task-board mutation.
+- Removed project-status and project-overview command guidance from the
+  installed `AGENTS.md` and `CLAUDE.md` templates. The shared skill now owns
+  that guidance.
+- Removed the redundant project-local skill catalog from the installed
+  `AGENTS.md` template. Harnesses load skill names and descriptions directly;
+  the template retains only the dual-tree maintenance rule.
+- The starter now installs and validates eighteen synchronized shared skills
+  per harness.
+
+### Upgrade actions
+
+- Add `project-orientation/SKILL.md` to both `.agents/skills/` and
+  `.claude/skills/` from the 0.34.0 starter. If either path already exists,
+  reconcile its selection triggers and command guidance; do not overwrite a
+  local skill silently.
+- Remove the project-status/project-overview command block and the
+  project-local skill catalog from the installed `AGENTS.md`. Preserve all
+  project-specific orientation, sources of truth, invariants, quality gates,
+  and commit policy around those stock sections.
+- Remove the project-status/project-overview command block from the installed
+  `CLAUDE.md`; keep its harness-path and cross-family cold-review guidance.
+- Add the `project-orientation` row to both skill-tree `README.md` files.
+- Verify with `node .agent-foundry/check-skill-sync.mjs` (expect
+  `PASS (18 shared skills)`) and `node .agent-foundry/run-checks.mjs`.
+
 ## 0.33.0
 
 ### Changed
