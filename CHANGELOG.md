@@ -28,6 +28,34 @@ concrete upgrade actions, and `patch` for fixes that need no installed-payload
 reconciliation. Reconciling a locally customized mold does not by itself make
 an otherwise compatible release breaking.
 
+## 0.36.0
+
+### Breaking
+
+Cursor runs that name `cursor-grok-4.5-*` now fail the allowlist. Calls that
+omit `--model` now default to `cursor-grok-4.6-medium` instead of
+`cursor-grok-4.5-medium`.
+
+### Changed
+
+- The Cursor Grok allowlist and default in bundled `agent-headless` now use
+  Grok 4.6: `cursor-grok-4.6-low`, `cursor-grok-4.6-medium` (default), and
+  `cursor-grok-4.6-high`. Grok `*-fast` variants remain refused. Composer IDs
+  are unchanged.
+- Both trees' `agent-headless/references/models.md` name the 4.6 IDs.
+
+### Upgrade actions
+
+- Replace `.agent-foundry/agent-headless/cli.js`, `index.js`, `cli.test.mjs`,
+  and `PROVENANCE.md` with the 0.36.0 copies.
+- Replace both trees' `agent-headless/references/models.md`.
+- Replace `.agent-foundry/review-workflows.test.mjs` if it still names a
+  Grok 4.5 fixture.
+- Change any local command, script, or note that still passes
+  `cursor-grok-4.5-*` to the matching `cursor-grok-4.6-*` ID.
+- If any copy was locally modified, merge by meaning and update
+  `.agent-foundry/LOCAL-CHANGES.md`.
+
 ## 0.35.0
 
 ### Breaking

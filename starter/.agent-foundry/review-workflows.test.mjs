@@ -1047,7 +1047,7 @@ describe("cold-review argv", () => {
     const args = buildRunnerArgs({
       runner: "cli.js",
       provider: "cursor",
-      model: "cursor-grok-4.5-medium",
+      model: "cursor-grok-4.6-medium",
       cwd: "/repo",
       promptFile: "/tmp/spec.md",
       timeoutMs: 1200000,

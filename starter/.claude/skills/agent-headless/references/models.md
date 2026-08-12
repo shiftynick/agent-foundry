@@ -37,9 +37,9 @@ are Codex-only.
 
 | Exact `--model` | Notes |
 | --- | --- |
-| `cursor-grok-4.5-medium` | **Default** when `--model` is omitted (`modelDefaulted`) |
-| `cursor-grok-4.5-low` | |
-| `cursor-grok-4.5-high` | |
+| `cursor-grok-4.6-medium` | **Default** when `--model` is omitted (`modelDefaulted`) |
+| `cursor-grok-4.6-low` | |
+| `cursor-grok-4.6-high` | |
 | `composer-2.5` | |
 | `composer-2.5-fast` | Composer only |
 
@@ -50,7 +50,7 @@ catalog IDs; Foundry does not allow them.
 
 | Said | Provider | Pass |
 | --- | --- | --- |
-| Cursor / Grok | cursor | `cursor-grok-4.5-medium` (or `-high` / `-low` if named) |
+| Cursor / Grok | cursor | `cursor-grok-4.6-medium` (or `-high` / `-low` if named) |
 | Composer | cursor | `composer-2.5` |
 | Codex Sol / Terra / Luna | codex | `gpt-5.6-sol` / `gpt-5.6-terra` / `gpt-5.6-luna` |
 | Claude Fable / Opus / Sonnet | claude | `claude-fable-5` / `claude-opus-5` / `claude-sonnet-5` |

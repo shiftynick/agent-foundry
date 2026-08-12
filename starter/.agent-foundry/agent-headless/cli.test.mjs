@@ -61,7 +61,7 @@ test("default invocations are answer-only and exclude dangerous bypass flags", a
   for (const provider of ["claude", "codex", "cursor"]) {
     let captured;
     const result = await runAgent(
-      { provider, prompt: "review", cwd: root, ...(provider === "cursor" ? { model: "cursor-grok-4.5-medium" } : {}) },
+      { provider, prompt: "review", cwd: root, ...(provider === "cursor" ? { model: "cursor-grok-4.6-medium" } : {}) },
       { execute: async (invocation) => {
         captured = invocation;
         return { stdout: providerOutput(provider), stderr: "", exitCode: 0, durationMs: 1, timedOut: false, cancelled: false };
@@ -81,7 +81,7 @@ test("default invocations are answer-only and exclude dangerous bypass flags", a
 test("Cursor isolated writes do not claim sandboxing on Windows", async () => {
   let captured;
   await runAgent(
-    { provider: "cursor", prompt: "edit", cwd: root, model: "cursor-grok-4.5-medium", access: "edit-isolated" },
+    { provider: "cursor", prompt: "edit", cwd: root, model: "cursor-grok-4.6-medium", access: "edit-isolated" },
     { execute: async (invocation) => {
       captured = invocation;
       return { stdout: providerOutput("cursor"), stderr: "", exitCode: 0, durationMs: 1, timedOut: false, cancelled: false };
@@ -110,7 +110,7 @@ const cursorEvents = { provider: "cursor", prompt: "x", cwd: ".", output: "event
 
 test("a banner line before the stream does not fail an otherwise successful run", async () => {
   const result = await runAgent(
-    { ...cursorEvents, model: "cursor-grok-4.5-medium" },
+    { ...cursorEvents, model: "cursor-grok-4.6-medium" },
     stub(`Cursor Agent starting\n${providerOutput("cursor")}`),
   );
   assert.equal(result.status, "succeeded", "an unparseable leading line must not discard the stream");
@@ -119,7 +119,7 @@ test("a banner line before the stream does not fail an otherwise successful run"
 });
 
 test("output that cannot be read is unparsed, not failed", async () => {
-  const result = await runAgent({ ...cursorEvents, model: "cursor-grok-4.5-medium" }, stub("banner one\nbanner two"));
+  const result = await runAgent({ ...cursorEvents, model: "cursor-grok-4.6-medium" }, stub("banner one\nbanner two"));
   assert.equal(result.status, "unparsed", "a clean exit with unreadable output is not a provider failure");
   assert.equal(result.exitCode, 0);
 });
@@ -128,16 +128,16 @@ test("the last terminal marker decides the verdict, in both directions", async (
   const success = JSON.stringify({ type: "result", subtype: "success", is_error: false, result: "OK" });
   const error = JSON.stringify({ type: "error", message: "quota exhausted" });
 
-  const afterSuccess = await runAgent({ ...cursorEvents, model: "cursor-grok-4.5-medium" }, stub(`${success}\n${error}`));
+  const afterSuccess = await runAgent({ ...cursorEvents, model: "cursor-grok-4.6-medium" }, stub(`${success}\n${error}`));
   assert.equal(afterSuccess.status, "failed", "an error after a success must not be swallowed");
 
-  const retried = await runAgent({ ...cursorEvents, model: "cursor-grok-4.5-medium" }, stub(`${error}\n${success}`));
+  const retried = await runAgent({ ...cursorEvents, model: "cursor-grok-4.6-medium" }, stub(`${error}\n${success}`));
   assert.equal(retried.status, "succeeded", "a success after an earlier error is a recovered run");
   assert.equal(retried.finalText, "OK");
 });
 
 test("a non-zero exit is still a plain failure", async () => {
-  const result = await runAgent({ ...cursorEvents, model: "cursor-grok-4.5-medium" }, stub("", { exitCode: 1 }));
+  const result = await runAgent({ ...cursorEvents, model: "cursor-grok-4.6-medium" }, stub("", { exitCode: 1 }));
   assert.equal(result.status, "failed");
 });
 
@@ -150,10 +150,10 @@ test("Cursor defaults its model and says so", async () => {
   const defaulted = await runAgent({ ...cursorEvents }, withCapture);
   const index = captured.args.indexOf("--model");
   assert.notEqual(index, -1, "a model must be passed even when the caller named none");
-  assert.equal(captured.args[index + 1], "cursor-grok-4.5-medium");
+  assert.equal(captured.args[index + 1], "cursor-grok-4.6-medium");
   assert.equal(defaulted.modelDefaulted, true);
 
-  const explicit = await runAgent({ ...cursorEvents, model: "cursor-grok-4.5-medium" }, withCapture);
+  const explicit = await runAgent({ ...cursorEvents, model: "cursor-grok-4.6-medium" }, withCapture);
   assert.notEqual(explicit.modelDefaulted, true,
     "a caller naming the default model chose it; modelDefaulted must reflect intent, not string equality");
 });
@@ -163,7 +163,7 @@ test("supported models lists are curated per provider", async () => {
   assert.deepEqual(await listModels("claude"), [...SUPPORTED_MODELS.claude]);
   assert.deepEqual(await listModels("codex"), [...SUPPORTED_MODELS.codex]);
   assert.deepEqual(await listModels("cursor"), [...SUPPORTED_MODELS.cursor]);
-  assert.equal(SUPPORTED_MODELS.cursor.includes("cursor-grok-4.5-medium-fast"), false);
+  assert.equal(SUPPORTED_MODELS.cursor.includes("cursor-grok-4.6-medium-fast"), false);
   const cliClaude = run(["models", "claude"]);
   assert.equal(cliClaude.status, 0, cliClaude.stderr);
   assert.equal(cliClaude.stdout.trim(), SUPPORTED_MODELS.claude.join("\n"));
@@ -198,7 +198,7 @@ test("off-allowlist and Grok-fast Cursor models fail closed", async () => {
     /supported list/u,
   );
   await assert.rejects(
-    () => runAgent({ provider: "cursor", prompt: "x", cwd: root, model: "cursor-grok-4.5-high-fast" }, stub(providerOutput("cursor"))),
+    () => runAgent({ provider: "cursor", prompt: "x", cwd: root, model: "cursor-grok-4.6-high-fast" }, stub(providerOutput("cursor"))),
     /fast variants are not allowed/u,
   );
   await assert.rejects(
