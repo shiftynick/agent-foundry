@@ -28,6 +28,18 @@ concrete upgrade actions, and `patch` for fixes that need no installed-payload
 reconciliation. Reconciling a locally customized mold does not by itself make
 an otherwise compatible release breaking.
 
+## 0.37.1
+
+### Changed
+
+- `architecture-overview.test.mjs` no longer requires `docs/architecture/architecture.json`
+  to stay the empty seed. Filling that project-owned source made
+  `run-checks` fail.
+
+### Upgrade actions
+
+- Replace `.agent-foundry/architecture-overview.test.mjs` with the 0.37.1 copy.
+
 ## 0.37.0
 
 ### Changed

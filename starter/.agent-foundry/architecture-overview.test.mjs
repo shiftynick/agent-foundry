@@ -28,7 +28,6 @@ import {
 } from "./architecture-overview.mjs";
 
 const SCRIPT = fileURLToPath(new URL("./architecture-overview.mjs", import.meta.url));
-const SEED = fileURLToPath(new URL("../docs/architecture/architecture.json", import.meta.url));
 
 function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8" });
@@ -121,8 +120,8 @@ function structurePatch(overrides = {}) {
 }
 
 describe("architecture source schema", () => {
-  it("accepts the installed empty seed and round-trips it", () => {
-    const text = readFileSync(SEED, "utf8");
+  it("round-trips the empty source without reading the project architecture file", () => {
+    const text = serializeSource(emptySource());
     const parsed = parseSource(text);
     assert.deepEqual(parsed, emptySource());
     assert.equal(serializeSource(parsed), text);
