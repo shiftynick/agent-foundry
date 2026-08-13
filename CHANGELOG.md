@@ -28,6 +28,22 @@ concrete upgrade actions, and `patch` for fixes that need no installed-payload
 reconciliation. Reconciling a locally customized mold does not by itself make
 an otherwise compatible release breaking.
 
+## 0.38.0
+
+### Changed
+
+- `execute-task` now requires filesystem path-confinement and fail-closed
+  traversal checks in the task rubric before editing, for any task that
+  enumerates or writes paths. The same bullet is in both harness copies.
+
+### Upgrade actions
+
+- Replace `.claude/skills/execute-task/SKILL.md` and
+  `.agents/skills/execute-task/SKILL.md` with the 0.38.0 copies. If a local
+  copy already has this Implement bullet and nothing else, drop that
+  `LOCAL-CHANGES.md` entry. If it has other deltas, keep those on top of the
+  new stock file.
+
 ## 0.37.1
 
 ### Changed

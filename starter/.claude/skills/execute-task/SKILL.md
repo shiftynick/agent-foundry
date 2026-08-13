@@ -48,6 +48,10 @@ claimable task. Inspect `board` and blockers. Do not invent work.
   `docs/ENGINEERING-STANDARDS.md` sections. Later tasks in the same session
   reuse that read unless those docs or the task's standards surface changed.
   Meet the STANDARDS axis at the source instead of discovering it as findings.
+- For any task that enumerates or writes filesystem paths, copy the
+  path-confinement and fail-closed traversal lenses into the task rubric
+  before editing; enumerate ancestor links, redirected entries, and
+  unreadable subtrees as negative cases.
 - Keep the diff task-scoped. File out-of-scope discoveries as separate tasks.
 - When the task creates a new interface, public signature set, or module
   boundary, outline the types and signatures first — no bodies. Log the
