@@ -315,6 +315,9 @@ try {
     ".agent-foundry/project-status.test.mjs",
     ".agent-foundry/project-overview.mjs",
     ".agent-foundry/project-overview.test.mjs",
+    ".agent-foundry/architecture-overview.mjs",
+    ".agent-foundry/architecture-overview.test.mjs",
+    "docs/architecture/architecture.json",
   ];
   for (const relative of required) {
     assert(
@@ -330,7 +333,7 @@ try {
     [path.join(testRoot, ".agent-foundry", "check-skill-sync.mjs")],
     { cwd: testRoot, label: "installed skill-sync check" },
   ).stdout;
-  assert.match(syncOutput, /skill-sync: PASS \(18 shared skills\)/u);
+  assert.match(syncOutput, /skill-sync: PASS \(19 shared skills\)/u);
 
   const projectStatus = JSON.parse(run(
     process.execPath,
@@ -357,6 +360,22 @@ try {
   assert.match(projectOverview, /Current approved direction/u);
   assert.match(projectOverview, /Work flow/u);
 
+  run(
+    process.execPath,
+    [path.join(testRoot, ".agent-foundry", "architecture-overview.mjs"), "show"],
+    { cwd: testRoot, label: "installed architecture overview" },
+  );
+  const architectureOverviewPath = path.join(
+    testRoot,
+    ".agent-foundry",
+    "architecture-overview.html",
+  );
+  assert.equal(existsSync(architectureOverviewPath), true);
+  const architectureOverview = readFileSync(architectureOverviewPath, "utf8");
+  assert.match(architectureOverview, /System in its world/u);
+  assert.match(architectureOverview, /Runtime pieces/u);
+  assert.match(architectureOverview, /Main flows/u);
+
   const runnerVersion = run(
     process.execPath,
     [path.join(testRoot, ".agent-foundry", "agent-headless", "cli.js"), "--version"],
@@ -379,6 +398,10 @@ try {
   assert.ok(
     runChecksMentionsSuite(installedChecks, "project overview"),
     "installed run-checks did not discover project-overview.test.mjs",
+  );
+  assert.ok(
+    runChecksMentionsSuite(installedChecks, "architecture source schema"),
+    "installed run-checks did not discover architecture-overview.test.mjs",
   );
 
   const agents = readFileSync(path.join(testRoot, "AGENTS.md"), "utf8");
@@ -410,6 +433,14 @@ try {
   );
   assert.equal(installManifest.foundryVersion, foundryVersion);
   assert.equal(installManifest.files["AGENTS.md"].tier, "seed");
+  assert.equal(
+    installManifest.files["docs/architecture/architecture.json"].tier,
+    "seed",
+  );
+  assert.equal(
+    installManifest.files[".agent-foundry/architecture-overview.mjs"].tier,
+    "mold",
+  );
   assert.equal(
     installManifest.files["PLANNING-JOURNAL.md"].preserveIfExists,
     true,
@@ -545,6 +576,12 @@ try {
   assert.equal(
     ignore.split(/\r?\n/u).filter((line) => (
       line === ".agent-foundry/project-overview.html"
+    )).length,
+    1,
+  );
+  assert.equal(
+    ignore.split(/\r?\n/u).filter((line) => (
+      line === ".agent-foundry/architecture-overview.html"
     )).length,
     1,
   );

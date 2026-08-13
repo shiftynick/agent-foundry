@@ -46,6 +46,7 @@ const SEED_FILES = new Set([
   "docs/ENGINEERING-STANDARDS.md",
   "docs/REVIEW-STANDARDS.md",
   "docs/adr/README.md",
+  "docs/architecture/architecture.json",
   "docs/out-of-scope/README.md",
 ]);
 

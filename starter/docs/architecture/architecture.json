@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": null,
+  "system": {
+    "id": "this-system",
+    "name": "",
+    "actors": [],
+    "externals": [],
+    "intent": {
+      "summary": "",
+      "adrIds": []
+    }
+  },
+  "containers": [],
+  "flows": [],
+  "conflicts": []
+}

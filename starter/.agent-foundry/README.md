@@ -9,6 +9,7 @@ product code and it is not the task board.
 | `run-checks.mjs` | Runs the skill-sync gate plus every test suite the kit owns. |
 | `project-status.mjs` | Derives a short operator status and stable JSON from the board, planning journal, recorded checks, and Git. |
 | `project-overview.mjs` | Refreshes the Git-ignored, self-contained `project-overview.html` visual from project-status schema v1. |
+| `architecture-overview.mjs` | Shows or refreshes the architecture reading surface from the committed `docs/architecture/architecture.json` source. |
 | `agent-headless/` | Unified provider runner, library test seam, compatibility matrix, license, provenance, and reconstructable source patches. |
 | `review-packet.mjs` | Init/check a schema-versioned cold-review packet, including scoped diffs, copied files, unchanged references, and explicit exclusions, before any provider call. |
 | `cold-review.mjs` | Dual-axis cold-review preset: packet check, SPEC+STANDARDS prompts, concurrent `agent-headless` dispatch with `--json`. |
@@ -55,6 +56,25 @@ The generated timestamp makes staleness visible. Regenerate on demand; the
 HTML is a local read-only snapshot, not another maintained project document.
 Use `--stdout` when another local tool needs the complete HTML without writing
 the default snapshot file.
+
+## Architecture source contract
+
+`docs/architecture/architecture.json` is the committed architecture source.
+The project owns it after install (seed). Schema version 1 splits **structure**
+(ids, names, kinds, talks-to, entry files, flow steps) from **intent**
+(`summary` plus `adrIds`). Generated
+`.agent-foundry/architecture-overview.html` is a reading surface, not a
+second source.
+
+```text
+node .agent-foundry/architecture-overview.mjs show
+node .agent-foundry/architecture-overview.mjs refresh --patch <patch.json>
+```
+
+`show` renders HTML and does not write the JSON. `refresh --patch` replaces
+structure from the patch, keeps intent on matching ids, and records omitted
+intent-bearing nodes as open conflicts. A patch that includes `intent` is
+rejected. Use `--stdout` to print HTML without writing the default snapshot.
 
 ## The installed workflow is yours to evolve
 

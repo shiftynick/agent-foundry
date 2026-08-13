@@ -28,6 +28,39 @@ concrete upgrade actions, and `patch` for fixes that need no installed-payload
 reconciliation. Reconciling a locally customized mold does not by itself make
 an otherwise compatible release breaking.
 
+## 0.37.0
+
+### Changed
+
+- New shared skill `architecture-overview` in both harness trees. It renders a
+  high-to-low HTML architecture reading surface from a committed,
+  project-owned `docs/architecture/architecture.json` source.
+- New `.agent-foundry/architecture-overview.mjs` implements `show` (render
+  only) and `refresh --patch` (replace structure, preserve intent, record
+  conflicts). Generated `.agent-foundry/architecture-overview.html` is local
+  and Git-ignored.
+- Installed projects receive an empty-but-valid architecture source as a seed.
+  `project-orientation` stays the work-status skill.
+
+### Upgrade actions
+
+- Add `architecture-overview/SKILL.md` to both `.agents/skills/` and
+  `.claude/skills/`. If a local copy exists, merge by meaning and record the
+  divergence in `.agent-foundry/LOCAL-CHANGES.md`.
+- Add `architecture-overview` to both skill-tree `README.md` tables.
+- Replace `.agent-foundry/architecture-overview.mjs` and
+  `.agent-foundry/architecture-overview.test.mjs` with the 0.37.0 copies.
+- Replace `.agent-foundry/README.md` if it lacks the architecture source
+  contract. If it was locally modified, merge by meaning and update
+  `LOCAL-CHANGES.md`.
+- If `docs/architecture/architecture.json` is missing, copy the 0.37.0 seed.
+  If it already exists, keep the project copy; do not overwrite it.
+- Merge `.agent-foundry/architecture-overview.html` into `.gitignore`. Do not
+  commit generated HTML.
+- Expect `node .agent-foundry/check-skill-sync.mjs` to report
+  `PASS (19 shared skills)` and `node .agent-foundry/run-checks.mjs` to
+  discover the architecture-overview suite.
+
 ## 0.36.0
 
 ### Breaking

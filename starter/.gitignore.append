@@ -3,6 +3,7 @@
 .agent-foundry/feedback/
 .agent-foundry/project-status-seen.json
 .agent-foundry/project-overview.html
+.agent-foundry/architecture-overview.html
 .tasks/board.html
 .tasks/.write-lock
 .tasks/tasks/.*.tmp

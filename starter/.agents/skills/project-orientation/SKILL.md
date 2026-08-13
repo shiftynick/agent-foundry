@@ -71,4 +71,5 @@ tool consumes it.
 - `task-tracker` - individual board records and board mutations
 - `plan-milestone` - approved direction and task-front creation
 - `handoff-writer` - durable restart-from-cold session handoff
+- `architecture-overview` - system shape HTML; not a status view
 - `.agent-foundry/README.md` - project-status schema and installed tool details
