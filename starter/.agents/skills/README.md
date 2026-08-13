@@ -25,6 +25,7 @@ agent workflows installed by Agent Foundry.
 | `visual-review` | Loopback operator annotation loop on a rendered HTML artifact. |
 | `browser-use` | Evidence-driven testing of a local web app through the browser-use CLI. |
 | `project-orientation` | Current project status, since-last-look comparison, and visual overview. |
+| `architecture-overview` | High-to-low architecture HTML from a committed source the skill can refresh. |
 
 ## Rules
 

@@ -51,6 +51,10 @@ even with `--force`.
   derived from the real board, planning journal, recorded checks, and Git.
 - `.agent-foundry/project-overview.mjs`: a one-screen, self-contained visual
   generated from the status JSON; its local HTML output is Git-ignored.
+- `.agent-foundry/architecture-overview.mjs`: show or refresh a high-to-low
+  architecture HTML view from the committed `docs/architecture/architecture.json`
+  seed; generated HTML is Git-ignored.
+- `docs/architecture/`: project-owned architecture source seeded empty-but-valid.
 - `.tasks/`: Git-backed kanban state.
 - `docs/adr/`: ADR process and template.
 - `docs/SDLC.md`: task lifecycle and two-axis cold review.
@@ -65,8 +69,8 @@ even with `--force`.
 - `CONTRIBUTING.md`, `HANDOFF.md`, and planning/blocker journals.
 - `.agent-foundry.json`: commit-friendly installation provenance and version.
 - `.agent-foundry/`: install manifest, the skill-sync and drift checks, the
-  project-status and operator-overview views, local-evolution guide, and the
-  `LOCAL-CHANGES.md` divergence log.
+  project-status, operator-overview, and architecture-overview views,
+  local-evolution guide, and the `LOCAL-CHANGES.md` divergence log.
 
 Product architecture, stack choices, build commands, deployment rules, and
 domain invariants are deliberately not supplied. The first bootstrap task
@@ -87,7 +91,8 @@ project's recorded version and applies them in order.
 The install manifest records a tier and hash for every managed file:
 
 - **`seed`** — installed once, then owned by the project (`AGENTS.md`, the
-  standards documents, journals). Upgrades must not overwrite these.
+  standards documents, journals, architecture source). Upgrades must not
+  overwrite these.
 - **`mold`** — owned by the Foundry (skills, `docs/SDLC.md`, the checks).
   Upgrades replace these, and local divergence is surfaced rather than lost.
 
@@ -127,7 +132,7 @@ agent-foundry/
 ## Maintaining the foundry
 
 1. Edit the canonical files under `starter/`.
-2. Keep the eighteen shared workflow skills semantically synchronized between
+2. Keep the nineteen shared workflow skills semantically synchronized between
    `.agents` and `.claude`; preserve only intentional harness-specific paths.
 3. Provider mechanics belong in the shared `agent-headless` skill and bundled
    runner; do not reintroduce tree-exclusive provider aliases.
