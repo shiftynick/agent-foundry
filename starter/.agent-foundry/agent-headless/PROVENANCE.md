@@ -8,6 +8,7 @@
 - Library SHA-256: `0f3e63581704e197646b97d9b12319dc0a1d6c04a57e212eed86ad59681e2a68`
 - Public base commit: `0bacff0ec2ea63dc5dd4930824966bcc6d2ca8ce`
 - Source commit: `c0586780227e6dd17e071cca7ce5215a970bf5ef`
+- Public overlay ref: `foundry-vendor-0.5.2-cursor-grok-4.6-overlay`
 - Source patches:
   - `source/0013-fix-discover-standard-windows-agy-install.patch.b64`: `411ad85361491e8a36daa6235d521473e334384679bef260d04adf0de4b01539`
   - `source/0014-fix-pass-through-antigravity-live-catalog-models.patch.b64`: `cc77afad4f8862f15481d98379e49523b758b33dd0fa35368fd21848a6571e34`
@@ -24,7 +25,8 @@ Validate the source chain with `node scripts/verify-vendor-reconstruction.mjs
 <path-to-agent-headless-clone>`. To reproduce from the public base, clone
 `https://github.com/shiftynick/agent-headless`, which contains
 [`0bacff0`](https://github.com/shiftynick/agent-headless/commit/0bacff0ec2ea63dc5dd4930824966bcc6d2ca8ce),
-then pass that clone to the reconstruction command.
+then fetch the `foundry-vendor-0.5.2-cursor-grok-4.6-overlay` tag and pass
+that clone to the reconstruction command.
 
 The source commit need not already be published: base64-decode and apply the
 listed patches in order to the public base commit to reconstruct it. Foundry validation verifies
