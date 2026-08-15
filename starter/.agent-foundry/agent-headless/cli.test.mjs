@@ -54,11 +54,17 @@ function providerOutput(provider) {
       JSON.stringify({ type: "turn.completed" }),
     ].join("\n");
   }
+  if (provider === "antigravity") {
+    return [
+      JSON.stringify({ event: "init", init: { model: "agy-test-model" }, conversation_id: "test" }),
+      JSON.stringify({ event: "result", result: { status: "SUCCESS", response: "OK", conversation_id: "test" } }),
+    ].join("\n");
+  }
   return `${JSON.stringify({ type: "result", subtype: "success", is_error: false, result: "OK" })}\n`;
 }
 
 test("default invocations are answer-only and exclude dangerous bypass flags", async () => {
-  for (const provider of ["claude", "codex", "cursor"]) {
+  for (const provider of ["claude", "codex", "cursor", "antigravity"]) {
     let captured;
     const result = await runAgent(
       { provider, prompt: "review", cwd: root, ...(provider === "cursor" ? { model: "cursor-grok-4.6-medium" } : {}) },
@@ -75,7 +81,34 @@ test("default invocations are answer-only and exclude dangerous bypass flags", a
     if (provider === "claude") assert.equal(captured.args.includes("--tools="), true);
     if (provider === "codex") assert.equal(captured.args.includes("read-only"), true);
     if (provider === "cursor") assert.deepEqual(captured.args.slice(-2), ["--mode", "ask"]);
+    if (provider === "antigravity") {
+      assert.deepEqual(captured.args.slice(-2), ["--mode", "plan"]);
+      assert.equal(captured.args.includes("--dangerously-skip-permissions"), false);
+    }
   }
+});
+
+test("Antigravity accepts an exact live-catalog model and rejects unsupported modes", async () => {
+  let captured;
+  const result = await runAgent(
+    { provider: "antigravity", prompt: "review", cwd: root, model: "gemini-3.7-flash-high" },
+    { execute: async (invocation) => {
+      captured = invocation;
+      return { stdout: providerOutput("antigravity"), stderr: "", exitCode: 0, durationMs: 1, timedOut: false, cancelled: false };
+    } },
+  );
+  assert.equal(result.status, "succeeded");
+  assert.deepEqual(captured.args.slice(captured.args.indexOf("--model"), captured.args.indexOf("--model") + 2), [
+    "--model", "gemini-3.7-flash-high",
+  ]);
+  await assert.rejects(
+    () => runAgent({ provider: "antigravity", prompt: "edit", cwd: root, access: "edit-isolated" }, { execute: async () => ({}) }),
+    /access/u,
+  );
+  await assert.rejects(
+    () => runAgent({ provider: "antigravity", prompt: "review", cwd: root, session: { mode: "ephemeral" } }, { execute: async () => ({}) }),
+    /session/u,
+  );
 });
 
 test("Cursor isolated writes do not claim sandboxing on Windows", async () => {

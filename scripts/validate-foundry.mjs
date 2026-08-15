@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -135,6 +135,7 @@ export function validateFoundry() {
   requireFile(".agent-foundry/agent-headless/PROVENANCE.md");
   requireFile(".agent-foundry/agent-headless/LICENSE");
   requireFile(".agent-foundry/agent-headless/cli.test.mjs");
+  requireFile(".agent-foundry/preset.test.mjs");
   requireFile(".agent-foundry/agent-headless/COMPATIBILITY.md");
   requireFile(".agent-foundry/project-status.mjs");
   requireFile(".agent-foundry/project-status.test.mjs");
@@ -188,8 +189,7 @@ export function validateFoundry() {
       }
     }
   }
-  requireFile(".agent-foundry/agent-headless/source/0001-feat-harden-unified-runner-for-Node-20-consumers.patch.b64");
-  requireFile(".agent-foundry/agent-headless/source/0002-fix-tighten-least-privilege-and-cancellation-contrac.patch.b64");
+  requireFile(".agent-foundry/agent-headless/source/0013-fix-discover-standard-windows-agy-install.patch.b64");
   requireFile(".agents/skills/execute-task/references/cold-review.md");
   requireFile(".claude/skills/execute-task/references/cold-review.md");
   for (const retired of ["claude-in-codex", "codex-in-claude", "cursor-cli"]) {
@@ -329,6 +329,12 @@ export function validateFoundry() {
     const fullPath = path.join(starterRoot, ".agent-foundry", "agent-headless", ...match[1].split("/"));
     const actual = createHash("sha256").update(readFileSync(fullPath)).digest("hex");
     if (actual !== match[2].toLowerCase()) throw new Error(`Bundled source patch hash mismatch: ${match[1]}`);
+  }
+  const listedPatchPaths = new Set(sourcePatches.map((match) => match[1].replace(/^source\//u, "")));
+  const sourceDir = path.join(starterRoot, ".agent-foundry", "agent-headless", "source");
+  const shippedPatchPaths = new Set(readdirSync(sourceDir).filter((name) => name.endsWith(".patch.b64")));
+  if (listedPatchPaths.size !== shippedPatchPaths.size || [...shippedPatchPaths].some((name) => !listedPatchPaths.has(name))) {
+    throw new Error("Bundled agent-headless provenance must list every shipped source patch.");
   }
   if (!/^- Source commit: `[0-9a-f]{40}`$/mu.test(provenance)) {
     throw new Error("Bundled agent-headless provenance has no full source commit.");

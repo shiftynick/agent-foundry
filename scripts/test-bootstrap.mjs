@@ -310,6 +310,7 @@ try {
     ".agent-foundry/agent-headless/PROVENANCE.md",
     ".agent-foundry/agent-headless/LICENSE",
     ".agent-foundry/agent-headless/cli.test.mjs",
+    ".agent-foundry/preset.test.mjs",
     ".agent-foundry/agent-headless/COMPATIBILITY.md",
     ".agent-foundry/project-status.mjs",
     ".agent-foundry/project-status.test.mjs",

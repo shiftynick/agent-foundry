@@ -263,9 +263,12 @@ used** in the task log — an unrecorded rung is treated as rung 4.
    `node .agent-foundry/cold-review.mjs` (packet check + concurrent SPEC and
    STANDARDS via `agent-headless`). Codex normally selects provider `claude`;
    Claude Code normally selects provider `codex`. An
-   operator-selected neutral router such as Cursor also qualifies only when
+   operator-selected neutral provider such as Cursor or Antigravity also qualifies only when
    the operator explicitly selected its exact model and that model's family
-   differs from the implementer. Log the transport, model ID, and family.
+   differs from the implementer. Antigravity plan mode is not runner-enforced
+   read-only isolation: use it only when the operator also accepts AGY's
+   configured command permissions for the named workspace. Log the transport,
+   model ID, family, and that acceptance.
    Each axis is a separate read-only call supplied with the complete packet.
 2. **Fresh subagent, same model family.** A subagent that receives only the
    review packet — no conversation history — one per axis.

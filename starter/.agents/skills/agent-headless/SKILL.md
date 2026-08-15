@@ -2,8 +2,8 @@
 name: agent-headless
 description: >-
   Use when a cold review, second opinion, research task, or bounded delegated
-  task needs direct invocation of Claude Code, Codex CLI, or an
-  operator-selected Cursor model. Use efficient-orchestration instead to plan
+  task needs direct invocation of Claude Code, Codex CLI, Cursor Agent, or
+  Antigravity CLI. Use efficient-orchestration instead to plan
   and coordinate multiple delegated tasks for cost or token efficiency.
 ---
 
@@ -48,19 +48,23 @@ Probe the selected provider before constructing a costly call:
 node .agent-foundry/agent-headless/cli.js capabilities claude
 node .agent-foundry/agent-headless/cli.js capabilities codex
 node .agent-foundry/agent-headless/cli.js capabilities cursor
+node .agent-foundry/agent-headless/cli.js capabilities antigravity
 node .agent-foundry/agent-headless/cli.js models claude
 node .agent-foundry/agent-headless/cli.js models codex
 node .agent-foundry/agent-headless/cli.js models cursor
+node .agent-foundry/agent-headless/cli.js models antigravity
 ```
 
-`models` prints the Foundry allowlist for that provider — not the full Cursor
+`models` prints the Foundry allowlist for Claude, Codex, and Cursor — not the
+full Cursor catalog. `models antigravity` prints AGY's authenticated live
 catalog. Exact IDs, defaults (Cursor Grok medium; Claude Fable effort low), and
 shorthand mapping live in `references/models.md`. Do not invent IDs or cross
 provider spellings.
 
 Require `availability: "available"`. Report a `missing` or `unusable` reason.
-Do not silently substitute another model. Set `CLAUDE_BIN`, `CODEX_BIN`, or
-`CURSOR_AGENT_BIN` for nonstandard installs. Windows `.cmd` shims work.
+Do not silently substitute another model. Set `CLAUDE_BIN`, `CODEX_BIN`,
+`CURSOR_AGENT_BIN`, or `AGY_BIN` for nonstandard installs. Antigravity also
+finds its standard Windows per-user install path. Windows `.cmd` shims work.
 
 ## Provider selection
 
@@ -86,6 +90,7 @@ Put non-trivial prompts and complete packets in UTF-8 files. Prefer
 node .agent-foundry/agent-headless/cli.js run --provider claude --cwd <repo> --access answer-only --session ephemeral --prompt-file <review.md> --timeout-ms 1200000 --max-budget-usd 3 --json
 node .agent-foundry/agent-headless/cli.js run --provider codex --cwd <repo> --access answer-only --session ephemeral --prompt-file <review.md> --timeout-ms 1200000 --json
 node .agent-foundry/agent-headless/cli.js run --provider cursor --cwd <repo> --model <exact-id> --access answer-only --prompt-file <review.md> --timeout-ms 1200000 --trust-workspace --json
+node .agent-foundry/agent-headless/cli.js run --provider antigravity --cwd <repo> --model <exact-agy-id> --access answer-only --prompt-file <review.md> --timeout-ms 1200000 --json
 ```
 
 For cold review, follow `../execute-task/references/cold-review.md` and
@@ -107,7 +112,12 @@ For bounded implementation, request write access explicitly:
 node .agent-foundry/agent-headless/cli.js run --provider claude --cwd <repo> --access edit-isolated --prompt-file <task.md>
 node .agent-foundry/agent-headless/cli.js run --provider codex --cwd <repo> --access edit-workspace --prompt-file <task.md>
 node .agent-foundry/agent-headless/cli.js run --provider cursor --cwd <repo> --access edit-isolated --prompt-file <task.md> --trust-workspace
+node .agent-foundry/agent-headless/cli.js run --provider antigravity --cwd <repo> --access edit-workspace --prompt-file <task.md>
 ```
+
+Antigravity has no isolated-worktree mode and its plan mode is not a filesystem
+sandbox. Use `edit-workspace` only with explicit operator approval for the
+named working tree.
 
 The Cursor write call omits `--model`. The runner then picks one and reports
 `modelDefaulted`. Name a model when `docs/SDLC.md` requires an operator-chosen
@@ -156,8 +166,8 @@ unacceptable. Never compensate for a failure with dangerous bypass flags.
 
 ## Sessions and output
 
-- Claude and Codex default to ephemeral sessions. Cursor persists because its
-  CLI has no ephemeral mode.
+- Claude and Codex default to ephemeral sessions. Cursor and Antigravity
+  persist because their CLIs have no ephemeral mode.
 - Resume only when requested. Codex resume must use `--access inherit-session`.
 - Add `--json` for the normalized result. Library events preserve raw provider
   data and add stable lifecycle kinds.

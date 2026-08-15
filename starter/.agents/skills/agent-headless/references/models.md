@@ -8,6 +8,7 @@ provider's spelling into another.
 node .agent-foundry/agent-headless/cli.js models claude
 node .agent-foundry/agent-headless/cli.js models codex
 node .agent-foundry/agent-headless/cli.js models cursor
+node .agent-foundry/agent-headless/cli.js models antigravity
 ```
 
 ## Claude (`--provider claude`)
@@ -54,3 +55,10 @@ catalog IDs; Foundry does not allow them.
 | Composer | cursor | `composer-2.5` |
 | Codex Sol / Terra / Luna | codex | `gpt-5.6-sol` / `gpt-5.6-terra` / `gpt-5.6-luna` |
 | Claude Fable / Opus / Sonnet | claude | `claude-fable-5` / `claude-opus-5` / `claude-sonnet-5` |
+
+## Antigravity (`--provider antigravity`)
+
+Antigravity lists the authenticated AGY catalog at run time. It has no Foundry
+model allowlist. Run `models antigravity`, select an exact ID, and record it in
+the task log. An Antigravity cold review requires an operator-selected model
+from a different model family than the implementer.

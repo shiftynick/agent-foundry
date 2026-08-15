@@ -44,7 +44,7 @@ even with `--force`.
 
 - `.agents/skills/` and `.claude/skills/`: matching workflows, including the
   shared `agent-headless` entry point for Claude, Codex, and operator-selected
-  Cursor calls.
+  Cursor or Antigravity calls.
 - `.agent-foundry/agent-headless/`: one bundled Node 20 runner used by both
   harnesses.
 - `.agent-foundry/project-status.mjs`: a short operator briefing and stable JSON

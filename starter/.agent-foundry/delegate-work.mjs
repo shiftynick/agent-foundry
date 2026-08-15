@@ -6,7 +6,7 @@
 // memory pointers the parent already paid to discover).
 //
 //   node .agent-foundry/delegate-work.mjs \
-//     --provider claude|codex|cursor \
+//     --provider claude|codex|cursor|antigravity \
 //     --prompt-file <path> \
 //     [--model <id>] [--cwd <repo>] [--timeout-ms 1200000] \
 //     [--access edit-isolated|edit-workspace] \
@@ -27,16 +27,17 @@ const ACCESS_BY_PROVIDER = {
   claude: "edit-isolated",
   cursor: "edit-isolated",
   codex: "edit-workspace",
+  antigravity: "inspect",
 };
 
 function usage() {
   return [
-    "usage: node .agent-foundry/delegate-work.mjs --provider <claude|codex|cursor> --prompt-file <path> [options]",
+    "usage: node .agent-foundry/delegate-work.mjs --provider <claude|codex|cursor|antigravity> --prompt-file <path> [options]",
     "options:",
     "  --model <id>",
     "  --cwd <path>",
     "  --timeout-ms <n>        Default 1200000",
-    "  --access <mode>         Default: edit-isolated (claude/cursor), edit-workspace (codex)",
+    "  --access <mode>         Default: edit-isolated (claude/cursor), edit-workspace (codex), inspect (antigravity)",
     "  --trust-workspace       Cursor only",
     "  --max-budget-usd <n>    Claude only",
     "  --runner <path>",
@@ -160,7 +161,7 @@ export function buildDelegateArgs(options) {
     String(options.timeoutMs),
     "--json",
   ];
-  if (options.provider !== "cursor") {
+  if (!["cursor", "antigravity"].includes(options.provider)) {
     args.splice(args.indexOf("--prompt-file"), 0, "--session", "ephemeral");
   }
   if (options.model) args.push("--model", options.model);
@@ -174,8 +175,11 @@ function runHeadless(runnerArgs, timeoutMs, graceMs = PROVIDER_GRACE_MS) {
 }
 
 export async function runDelegate(options) {
-  if (!["claude", "codex", "cursor"].includes(options.provider)) {
+  if (!["claude", "codex", "cursor", "antigravity"].includes(options.provider)) {
     return { ok: false, problems: [`unsupported provider: ${options.provider}`] };
+  }
+  if (options.trustWorkspace && options.provider !== "cursor") {
+    return { ok: false, problems: ["--trust-workspace is supported only for Cursor"] };
   }
   let promptText;
   try {

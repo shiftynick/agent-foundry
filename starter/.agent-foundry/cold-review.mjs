@@ -6,7 +6,7 @@
 // ephemeral runs. Returns one JSON object with both axis results.
 //
 //   node .agent-foundry/cold-review.mjs \
-//     --provider claude|codex|cursor \
+//     --provider claude|codex|cursor|antigravity \
 //     --packet <dir> \
 //     [--model <id>] [--cwd <repo>] [--timeout-ms 1200000] \
 //     [--max-budget-usd 3] [--trust-workspace] [--axis both|SPEC|STANDARDS] \
@@ -34,9 +34,9 @@ const PROVIDER_GRACE_MS = 5_000;
 
 function usage() {
   return [
-    "usage: node .agent-foundry/cold-review.mjs --provider <claude|codex|cursor> --packet <dir> [options]",
+    "usage: node .agent-foundry/cold-review.mjs --provider <claude|codex|cursor|antigravity> --packet <dir> [options]",
     "options:",
-    "  --model <id>            Exact allowlisted model (required for Cursor cold review)",
+    "  --model <id>            Exact model (required for Cursor and Antigravity cold review)",
     "  --cwd <path>            Repository root (default: process cwd)",
     "  --timeout-ms <n>        Per-axis timeout (default: 1200000)",
     "  --max-budget-usd <n>    Claude only",
@@ -149,8 +149,8 @@ export function buildRunnerArgs({
     String(timeoutMs),
     "--json",
   ];
-  // Cursor has no ephemeral session mode; Claude/Codex default to ephemeral.
-  if (provider !== "cursor") {
+  // Cursor and Antigravity have no ephemeral session mode.
+  if (!["cursor", "antigravity"].includes(provider)) {
     args.splice(args.indexOf("--prompt-file"), 0, "--session", "ephemeral");
   }
   if (model) args.push("--model", model);
@@ -159,7 +159,22 @@ export function buildRunnerArgs({
   return args;
 }
 
+export function validateColdReviewOptions(options) {
+  if (!["claude", "codex", "cursor", "antigravity"].includes(options.provider)) {
+    return [`unsupported provider: ${options.provider}`];
+  }
+  if (["cursor", "antigravity"].includes(options.provider) && !options.model) {
+    return [`${options.provider} cold review requires an explicit --model (operator-chosen)`];
+  }
+  if (options.trustWorkspace && options.provider !== "cursor") {
+    return ["--trust-workspace is supported only for Cursor"];
+  }
+  return [];
+}
+
 export async function runColdReview(options) {
+  const optionProblems = validateColdReviewOptions(options);
+  if (optionProblems.length) return { ok: false, problems: optionProblems, axes: {} };
   const checked = checkPacket(options.packet, { repoRoot: options.cwd });
   if (!checked.ok) {
     return {
@@ -169,21 +184,6 @@ export async function runColdReview(options) {
     };
   }
   const packet = checked.packet;
-  if (options.provider === "cursor" && !options.model) {
-    return {
-      ok: false,
-      problems: ["Cursor cold review requires an explicit --model (operator-chosen)"],
-      axes: {},
-    };
-  }
-  if (!["claude", "codex", "cursor"].includes(options.provider)) {
-    return {
-      ok: false,
-      problems: [`unsupported provider: ${options.provider}`],
-      axes: {},
-    };
-  }
-
   const axes =
     options.axis === "both"
       ? ["SPEC", "STANDARDS"]

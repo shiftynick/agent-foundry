@@ -6,14 +6,15 @@
 
 ## Context and problem statement
 
-Foundry has three provider-specific skill surfaces and duplicated wrappers.
+Foundry has provider-specific skill surfaces and duplicated wrappers.
 The reusable `agent-headless` project supplies one safe Node 20 interface, but
 requiring a global or network install would break dependency-free bootstrap.
 
 ## Decision drivers
 
 - Fresh installs work offline after acquiring the Foundry source.
-- Claude, Codex, and Cursor mechanics have one tested implementation.
+- Claude, Codex, Cursor, and Antigravity mechanics have one tested implementation.
+- Antigravity review confinement is governed by ADR 0006.
 - Both harnesses share behavior without duplicating a generated bundle.
 - Provider routing and review policy remain in `starter/docs/SDLC.md`.
 

@@ -111,15 +111,18 @@ node .agent-foundry/review-packet.mjs init .tasks/review-packets/task-NNN-r1 --t
 # Round 2+: fill fix-verification.md (check refuses empty/'none').
 node .agent-foundry/review-packet.mjs check .tasks/review-packets/task-NNN-r1
 node .claude/skills/task-tracker/scripts/task.mjs run task-NNN -- \
-  node .agent-foundry/cold-review.mjs --provider <claude|codex|cursor> \
+  node .agent-foundry/cold-review.mjs --provider <claude|codex|cursor|antigravity> \
   --packet .tasks/review-packets/task-NNN-r1 --cwd . --model <exact-id> \
-  [--max-budget-usd 3] [--trust-workspace]
+  [--max-budget-usd 3] [--trust-workspace (Cursor only)]
 ```
 
 `review-packet.mjs check` refuses an incomplete packet before any provider
 runs. `cold-review.mjs` builds the SPEC and STANDARDS prompts, runs both axes
 concurrently with `--json` baked in, and prints one combined JSON result.
 Keep that JSON — it carries provider and model metadata for the task log.
+
+For Antigravity review confinement, operator acceptance, and task-log
+requirements, follow the rung-1 rule in `docs/SDLC.md`. It is authoritative.
 
 For a delta check after confirmed low-severity fixes, pass `--axis SPEC` or
 `--axis STANDARDS` with a packet that names only those fixes. For the

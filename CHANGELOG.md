@@ -28,6 +28,33 @@ concrete upgrade actions, and `patch` for fixes that need no installed-payload
 reconciliation. Reconciling a locally customized mold does not by itself make
 an otherwise compatible release breaking.
 
+## 0.39.0
+
+### Changed
+
+- Vendored `agent-headless` is now 0.5.2. It supports the operator-selected
+  Antigravity CLI provider through `agy`, including the standard Windows
+  install-path fallback when `agy` is absent from PATH.
+- The `cold-review.mjs` and `delegate-work.mjs` presets accept Antigravity.
+  They use persistent sessions. Antigravity delegation defaults to inspection;
+  workspace edits require explicit access. Cold review requires an exact
+  operator-selected model.
+- Shared provider guidance and the compatibility matrix define Antigravity's
+  live model catalog, lack of isolated worktrees, and plan-mode security limit.
+  Claude/Codex remain the default cross-family cold-review pair.
+
+### Upgrade actions
+
+- Replace `.agent-foundry/agent-headless/`, `.agent-foundry/cold-review.mjs`,
+  and `.agent-foundry/delegate-work.mjs`. Preserve only documented local
+  runner overlays, then verify with `node .agent-foundry/agent-headless/cli.js
+  capabilities antigravity`.
+- Replace both `agent-headless` skill directories and both
+  `execute-task/references/cold-review.md` files. Merge local changes by
+  meaning and record retained divergence in `.agent-foundry/LOCAL-CHANGES.md`.
+- Replace `docs/SDLC.md` when it has no project policy changes. If it is local,
+  retain its project rules and add the Antigravity operator-selection rule.
+
 ## 0.38.0
 
 ### Changed
