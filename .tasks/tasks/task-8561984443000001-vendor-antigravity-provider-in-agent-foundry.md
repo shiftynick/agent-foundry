@@ -6,7 +6,7 @@ priority: p1
 tags: [area:agent-headless, phase:release]
 blockedBy: []
 createdAt: "2026-08-15T13:42:36Z"
-updatedAt: "2026-08-15T14:42:58Z"
+updatedAt: "2026-08-15T14:45:17Z"
 ---
 
 <!-- task-tracker:description -->
@@ -381,3 +381,44 @@ Vendor agent-headless 0.5.2 and expose Antigravity CLI as an operator-selected F
   | }
 - 2026-08-15T14:42:54Z — note: Round 3 findings fixed: compatibility guidance now distinguishes AGY live catalog; cold-review detail defers to SDLC as single authority; ADR 0006 records only the confinement decision; provenance names a public clone path. The review protocol caps this task at three rounds, so no fourth cold-review dispatch was made. Focused self-adjudication found the three fixes complete; final sync, validation, reconstruction, bootstrap, and AGY capability probe are recorded above.
 - 2026-08-15T14:42:58Z — moved to done
+- 2026-08-15T14:43:42Z — run: node scripts/validate-foundry.mjs
+  started 2026-08-15T14:43:39Z, exit 0 in 2.8s
+  output:
+  | Agent Foundry structural validation: PASS
+- 2026-08-15T14:43:42Z — run: node scripts/verify-vendor-reconstruction.mjs N:\agent-headless
+  started 2026-08-15T14:43:42Z, exit 0 in 0.6s
+  output:
+  | vendor-reconstruction: PASS (3 patches, base 0bacff0 -> source c058678, tree fef643a8dbfb)
+- 2026-08-15T14:45:17Z — run: node scripts/test-bootstrap.mjs
+  started 2026-08-15T14:43:46Z, exit 0 in 91.9s
+  output tail (truncated to last 30 lines):
+  | ....................
+  | ....................
+  | ....................
+  | ....................
+  | ..........
+  | task-001 → in_progress
+  | task-001 noted
+  | Agent Foundry 0.39.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\clean-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\clean-project\.agent-foundry-backups\20260815T144513076Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | The target board already has active tasks; no bootstrap task was created.
+  | Agent Foundry 0.39.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\clean-project
+  | Agent Foundry 0.39.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\seed-upgrade-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\seed-upgrade-project\.agent-foundry-backups\20260815T144515304Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.39.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\seed-upgrade-project
+  | Agent Foundry 0.39.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\task-branch-project
+  | Previous managed files were backed up to C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\clean-project\.agent-foundry-backups\20260815T144517418Z
+  | Preserved existing project logs (not overwritten):
+  |   .agent-foundry\LOCAL-CHANGES.md
+  |   BLOCKED-JOURNAL.md
+  |   PLANNING-JOURNAL.md
+  | Agent Foundry 0.39.0 installed successfully at C:\Users\shift\AppData\Local\Temp\agent-foundry-tests-IycV1F\clean-project
+  | Agent Foundry clean-project bootstrap: PASS

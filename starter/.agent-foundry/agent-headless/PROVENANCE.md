@@ -9,7 +9,7 @@
 - Public base commit: `0bacff0ec2ea63dc5dd4930824966bcc6d2ca8ce`
 - Source commit: `c0586780227e6dd17e071cca7ce5215a970bf5ef`
 - Source patches:
-  - `source/0013-fix-discover-standard-windows-agy-install.patch.b64`: `2766599a5b5bc90e7071d09d79aa7cfac97a227ecddf05dc1ba2f19a94f179fb`
+  - `source/0013-fix-discover-standard-windows-agy-install.patch.b64`: `411ad85361491e8a36daa6235d521473e334384679bef260d04adf0de4b01539`
   - `source/0014-fix-pass-through-antigravity-live-catalog-models.patch.b64`: `cc77afad4f8862f15481d98379e49523b758b33dd0fa35368fd21848a6571e34`
   - `source/0015-overlay-cursor-grok-4.6-for-foundry.patch.b64`: `dd28dc4fb2486682ab61661f8800bf14ac084f34802d221644a535c31210bf4e`
 - License: `MIT` (see adjacent `LICENSE`)
